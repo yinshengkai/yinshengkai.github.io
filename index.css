@@ -51,7 +51,7 @@
   align-items: center;
   border-radius: var(--dl-radius-radius-radius8);
   flex-direction: column;
-  background-color: #efefef;
+  background-color: #ffffff;
   border-top-left-radius: var(--dl-radius-radius-radius8);
   border-top-right-radius: var(--dl-radius-radius-radius8);
   border-bottom-left-radius: var(--dl-radius-radius-radius8);
@@ -87,7 +87,7 @@
   align-items: center;
   flex-direction: column;
 }
-.index-top-container {
+.index-home {
   width: 100%;
   height: 700px;
   display: flex;
@@ -97,9 +97,13 @@
   background-color: #903333;
 }
 .index-navbar {
+  top: auto;
   width: 100%;
+  height: 70px;
   display: flex;
   padding: var(--dl-space-space-doubleunit);
+  z-index: 100;
+  position: fixed;
   box-shadow: 5px 5px 20px 2px rgba(0, 0, 0, 0.32);
   align-items: center;
   border-color: var(--dl-color-gray-black);
@@ -108,11 +112,16 @@
   border-radius: 0px;
   flex-direction: row;
   justify-content: space-between;
-  background-color: rgba(0, 0, 0, 0.44);
+  background-color: rgba(0, 0, 0, 0.52);
+}
+.index-link {
+  display: contents;
 }
 .index-logo {
   color: #ffffff;
+  cursor: pointer;
   padding-left: var(--dl-space-space-doubleunit);
+  text-decoration: none;
 }
 .index-right-side {
   display: flex;
@@ -127,13 +136,13 @@
   flex-direction: row;
   justify-content: space-between;
 }
-.index-link {
+.index-link1 {
   color: #ffffff;
   cursor: pointer;
   margin-right: var(--dl-space-space-doubleunit);
   text-decoration: none;
 }
-.index-link1 {
+.index-link2 {
   display: contents;
 }
 .index-hero {
@@ -141,13 +150,12 @@
   width: 100%;
   display: flex;
   max-width: 1000px;
-  align-items: center;
   padding-top: var(--dl-space-space-tripleunit);
   padding-left: var(--dl-space-space-doubleunit);
   padding-right: var(--dl-space-space-doubleunit);
-  flex-direction: row;
+  flex-direction: column;
   padding-bottom: var(--dl-space-space-tripleunit);
-  justify-content: space-between;
+  justify-content: center;
 }
 .index-content-container {
   display: flex;
@@ -156,6 +164,12 @@
 }
 .index-text {
   color: #ffffff;
+  font-size: 4rem;
+  font-family: Poppins;
+  font-weight: 700;
+  line-height: 1.55;
+  text-transform: none;
+  text-decoration: none;
 }
 .index-subheading {
   color: var(--dl-color-gray-white);
@@ -167,7 +181,7 @@
 }
 .index-about {
   width: 100%;
-  height: 400px;
+  height: 500px;
   display: flex;
   position: relative;
   align-items: center;
@@ -178,6 +192,7 @@
 .index-text07 {
   color: #ffffff;
   align-self: center;
+  margin-bottom: var(--dl-space-space-halfunit);
 }
 .index-text08 {
   color: #989898;
@@ -190,13 +205,18 @@
 .index-portfolio {
   width: 100%;
   display: flex;
+  margin-top: 0px;
   align-items: center;
-  padding-top: var(--dl-space-space-quadruple);
+  padding-top: 150px;
   padding-left: var(--dl-space-space-doubleunit);
+  margin-bottom: 0px;
   padding-right: var(--dl-space-space-doubleunit);
   flex-direction: column;
-  padding-bottom: var(--dl-space-space-quadruple);
+  padding-bottom: 150px;
   justify-content: flex-start;
+}
+.index-text14 {
+  margin-bottom: var(--dl-space-space-halfunit);
 }
 .index-text15 {
   color: var(--dl-color-gray-500);
@@ -236,7 +256,7 @@
   color: var(--dl-color-gray-white);
   width: 100%;
   display: flex;
-  padding: var(--dl-space-space-tripleunit);
+  padding: var(--dl-space-space-doubleunit);
   align-items: center;
   flex-direction: row;
   justify-content: center;
@@ -263,30 +283,15 @@
 .index-icons-container {
   width: 100px;
   display: flex;
+  align-self: center;
   align-items: flex-start;
   flex-direction: row;
-  justify-content: space-between;
-}
-.index-link2 {
-  display: contents;
-}
-.index-icon {
-  fill: var(--dl-color-gray-white);
-  width: 24px;
-  height: 24px;
+  justify-content: center;
 }
 .index-link3 {
   display: contents;
 }
-.index-icon2 {
-  fill: var(--dl-color-gray-white);
-  width: 24px;
-  height: 24px;
-}
-.index-link4 {
-  display: contents;
-}
-.index-icon4 {
+.index-icon {
   fill: var(--dl-color-gray-white);
   width: 24px;
   height: 24px;
@@ -319,6 +324,9 @@
   .index-portfolio {
     padding-left: var(--dl-space-space-unit);
     padding-right: var(--dl-space-space-unit);
+  }
+  .index-text14 {
+    text-align: center;
   }
   .index-menu {
     flex-direction: column;
