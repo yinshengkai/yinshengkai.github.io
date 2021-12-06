@@ -1,179 +1,208 @@
 <!DOCTYPE html>
+
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="" />
-        <meta name="author" content="" />
-        <title>YSK</title>
-        <!-- Favicon-->
-        <!--link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
-        <!-- Bootstrap Icons-->
-        <!--link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
-        <!-- Google fonts-->
-        <link href="https://fonts.googleapis.com/css?family=Merriweather+Sans:400,700" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic" rel="stylesheet" type="text/css" />
-        <!-- SimpleLightbox plugin CSS-->
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/SimpleLightbox/2.1.0/simpleLightbox.min.css" rel="stylesheet" />
-        <!-- Core theme CSS (includes Bootstrap)-->
-        <link href="css/styles.css" rel="stylesheet" />
-    </head>
-    <body id="page-top">
-        <!-- Navigation-->
-        <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" id="mainNav">
-            <div class="container px-4 px-lg-5">
-                <a class="navbar-brand" href="#page-top">YSK</a>
-                <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-                <div class="collapse navbar-collapse" id="navbarResponsive">
-                    <ul class="navbar-nav ms-auto my-2 my-lg-0">
-                        <li class="nav-item"><a class="nav-link" href="#about">about</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#something">something</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#portfolio">portfolio</a></li>
-                    </ul>
+  <head>
+    <title>ysk</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta property="twitter:card" content="summary_large_image" />
+    <style>
+      html {  line-height: 1.15;}body {  margin: 0;}* {  box-sizing: border-box;  border-width: 0;  border-style: solid;}p,li,ul,pre,div,h1,h2,h3,h4,h5,h6 {  margin: 0;  padding: 0;}button,input,optgroup,select,textarea {  font-family: inherit;  font-size: 100%;  line-height: 1.15;  margin: 0;}button,select {  text-transform: none;}button,[type="button"],[type="reset"],[type="submit"] {  -webkit-appearance: button;}button::-moz-focus-inner,[type="button"]::-moz-focus-inner,[type="reset"]::-moz-focus-inner,[type="submit"]::-moz-focus-inner {  border-style: none;  padding: 0;}button:-moz-focus,[type="button"]:-moz-focus,[type="reset"]:-moz-focus,[type="submit"]:-moz-focus {  outline: 1px dotted ButtonText;}a {  color: inherit;  text-decoration: inherit;}input {  padding: 2px 4px;}img {  display: block;}
+    </style>
+    <style>
+      html {
+        font-family: Poppins;
+        font-size: 16px;
+      }
+
+      body {
+        font-weight: 400;
+        font-style:normal;
+        text-decoration: none;
+        text-transform: none;
+        letter-spacing: normal;
+        line-height: 1.55;
+        color: var(--dl-color-gray-black);
+        background-color: var(--dl-color-gray-white);
+
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div>
+      <link href="./index.css" rel="stylesheet" />
+      <title>ysk</title>
+      <meta property="og:title" content="ysk" />
+      <div class="index-container">
+        <div class="index-top-container">
+          <nav class="index-navbar">
+            <h1 class="index-logo">YSK</h1>
+            <div class="index-right-side">
+              <div class="index-links-container">
+                <a href="#about" class="index-link">About</a>
+              </div>
+              <a href="#portfolio" class="index-link1">
+                <div class="solid-button-container">
+                  <button id="buttonstyle1" class="solid-button-button button">
+                    <span>Portfolio</span>
+                  </button>
                 </div>
+              </a>
             </div>
-        </nav>
-        <!-- Masthead-->
-        <header class="masthead">
-            <div class="container px-4 px-lg-5 h-100">
-                <div class="row gx-4 gx-lg-5 h-100 align-items-center justify-content-center text-center">
-                    <div class="col-lg-8 align-self-end">
-                        <h1 class="text-white font-weight-bold">CONGRATULATIONS u found my website</h1>
-                        <hr class="divider" />
-                    </div>
-                    <div class="col-lg-8 align-self-baseline">
-                        <p class="text-white-75 mb-5">everything is still kinda under development rn sooooo i guess u just wasted ur time finding this ahahahahhahahahahah</p>
-                        <a class="btn btn-primary btn-xl" href="#about">see deez nuts</a>
-                    </div>
-                </div>
+            <svg viewBox="0 0 1024 1024" class="index-burger-menu">
+              <path
+                d="M810.667 725.333h-597.333c-47.061 0-85.333 38.272-85.333 85.333s38.272 85.333 85.333 85.333h597.333c47.061 0 85.333-38.272 85.333-85.333s-38.272-85.333-85.333-85.333z"
+              ></path>
+              <path
+                d="M810.667 426.667h-597.333c-47.061 0-85.333 38.272-85.333 85.333s38.272 85.333 85.333 85.333h597.333c47.061 0 85.333-38.272 85.333-85.333s-38.272-85.333-85.333-85.333z"
+              ></path>
+              <path
+                d="M810.667 128h-597.333c-47.061 0-85.333 38.272-85.333 85.333s38.272 85.333 85.333 85.333h597.333c47.061 0 85.333-38.272 85.333-85.333s-38.272-85.333-85.333-85.333z"
+              ></path>
+            </svg>
+          </nav>
+          <div class="index-hero">
+            <div class="index-content-container">
+              <h1 class="index-text heading">Hi there!</h1>
+              <h2 class="index-subheading subheading">
+                Welcome to my secret website
+              </h2>
+              <span class="index-text01">
+                <span>but uhhhh u know everything is</span>
+                <span>still</span>
+                <span>kinda in development</span>
+                <br />
+                <span>
+                  rn soooo i guess u just wasted ur time ahahahahahhaaha
+                </span>
+              </span>
             </div>
-        </header>
-        <!-- About-->
-        <section class="page-section bg-primary" id="about">
-            <div class="container px-4 px-lg-5">
-                <div class="row gx-4 gx-lg-5 justify-content-center">
-                    <div class="col-lg-8 text-center">
-                        <h2 class="text-white mt-0">ur mom gay</h2>
-                        <hr class="divider divider-light" />
-                        <p class="text-white-75 mb-4">ok so i need to put an intro here but uhhhhhhh wgt</p>
-                        <a class="btn btn-light btn-xl" href="#portfolio">show me  ur work pls</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!-- Services-->
-        <section class="page-section" id="something">
-            <div class="container px-4 px-lg-5">
-                <h2 class="text-center mt-0">note to self: insert something impressive and gay at the same time</h2>
-                <hr class="divider" />
-                <div class="row gx-4 gx-lg-5">
-                    <div class="col-lg-3 col-md-6 text-center">
-                        <div class="mt-5">
-                            <div class="mb-2"><i class="bi-gem fs-1 text-primary"></i></div>
-                            <h3 class="h4 mb-2">really good at measuring</h3>
-                            <p class="text-muted mb-0">measuring how long i sleep with a ruler that is</p>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 text-center">
-                        <div class="mt-5">
-                            <div class="mb-2"><i class="bi-laptop fs-1 text-primary"></i></div>
-                            <h3 class="h4 mb-2">something 2</h3>
-                            <p class="text-muted mb-0">something 2</p>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 text-center">
-                        <div class="mt-5">
-                            <div class="mb-2"><i class="bi-globe fs-1 text-primary"></i></div>
-                            <h3 class="h4 mb-2">something 3</h3>
-                            <p class="text-muted mb-0">something 3</p>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 text-center">
-                        <div class="mt-5">
-                            <div class="mb-2"><i class="bi-heart fs-1 text-primary"></i></div>
-                            <h3 class="h4 mb-2">something 4</h3>
-                            <p class="text-muted mb-0">something 4</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!-- Portfolio-->
-        <div id="portfolio">
-            <div class="container-fluid p-0">
-                <div class="row g-0">
-                    <div class="col-lg-4 col-sm-6">
-                        <a class="portfolio-box" href="assets/Images/Portfolio.png" title="Project 1">
-                            <img class="img-fluid" src="assets/Images/Portfolio.png" alt="..." />
-                            <div class="portfolio-box-caption">
-                                <div class="project-category text-white-50">Category</div>
-                                <div class="project-name">Project 1</div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-4 col-sm-6">
-                        <a class="portfolio-box" href="assets/Images/Portfolio.png" title="Project 2">
-                            <img class="img-fluid" src="assets/Images/Portfolio.png" alt="..." />
-                            <div class="portfolio-box-caption">
-                                <div class="project-category text-white-50">Category</div>
-                                <div class="project-name">Project 2</div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-4 col-sm-6">
-                        <a class="portfolio-box" href="assets/Images/Portfolio.png" title="Project 3">
-                            <img class="img-fluid" src="assets/Images/Portfolio.png" alt="..." />
-                            <div class="portfolio-box-caption">
-                                <div class="project-category text-white-50">Category</div>
-                                <div class="project-name">Project 3</div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-4 col-sm-6">
-                        <a class="portfolio-box" href="assets/Images/Portfolio.png" title="Project 4">
-                            <img class="img-fluid" src="assets/Images/Portfolio.png" alt="..." />
-                            <div class="portfolio-box-caption">
-                                <div class="project-category text-white-50">Category</div>
-                                <div class="project-name">Project 4</div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-4 col-sm-6">
-                        <a class="portfolio-box" href="assets/Images/Portfolio.png" title="Project 5">
-                            <img class="img-fluid" src="assets/Images/Portfolio.png" alt="..." />
-                            <div class="portfolio-box-caption">
-                                <div class="project-category text-white-50">Category</div>
-                                <div class="project-name">Project 5</div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-4 col-sm-6">
-                        <a class="portfolio-box" href="assets/Images/Portfolio.png" title="Project 6">
-                            <img class="img-fluid" src="assets/Images/Portfolio.png" alt="..." />
-                            <div class="portfolio-box-caption p-3">
-                                <div class="project-category text-white-50">Category</div>
-                                <div class="project-name">Project 6</div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-        <!-- Call to action-->
-        <section class="page-section bg-dark text-white">
-            <div class="container px-4 px-lg-5 text-center">
-                <h2 class="mb-4">click here for my github i guess</h2>
-                <a class="btn btn-light btn-xl" href="https://github.com/yinshengkai">free virus</a>
+        <div id="about" class="index-about">
+          <h1 class="index-text07">about me i guess</h1>
+          <span class="index-text08">
+            <span>
+              ok so im supposed 2 write something cool about myself here
+            </span>
+            <br />
+            <span></span>
+            <span class="index-text12"></span>
+            <span>but obv im not gna do that cuz uhhhhh wgtttt</span>
+          </span>
+        </div>
+        <div id="portfolio" class="index-portfolio">
+          <h1>absolutely garbage projects of mine</h1>
+          <span class="index-text15">i hope they make ur eyes bleed</span>
+          <div class="index-cards-container">
+            <div class="place-card-container">
+              <img
+                src="https://play.teleporthq.io/static/svg/default-img.svg"
+                class="place-card-image"
+              />
+              <div class="place-card-container1">
+                <span class="place-card-text"><span>Project</span></span>
+                <span class="place-card-text1">
+                  <span>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+                    do eiusmod tempor incididunt ut labore et dolore magna.
+                  </span>
+                </span>
+                <div class="outline-button-container">
+                  <button class="outline-button-button button">Browse</button>
+                </div>
+              </div>
             </div>
-        </section>
-        <!-- Footer-->
-        <footer class="bg-light py-5">
-            <div class="container px-4 px-lg-5"><div class="small text-center text-muted">Copyright &copy; 2021 - Yin Shengkai</div></div>
-        </footer>
-        <!-- Bootstrap core JS-->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-        <!-- SimpleLightbox plugin JS-->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/SimpleLightbox/2.1.0/simpleLightbox.min.js"></script>
-        <script src="js/scripts.js"></script>
-    </body>
+            <div class="place-card-container">
+              <img
+                src="https://play.teleporthq.io/static/svg/default-img.svg"
+                class="place-card-image"
+              />
+              <div class="place-card-container1">
+                <span class="place-card-text"><span>Project</span></span>
+                <span class="place-card-text1">
+                  <span>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+                    do eiusmod tempor incididunt ut labore et dolore magna.
+                  </span>
+                </span>
+                <div class="outline-button-container">
+                  <button class="outline-button-button button">Browse</button>
+                </div>
+              </div>
+            </div>
+            <div class="place-card-container">
+              <img
+                src="https://play.teleporthq.io/static/svg/default-img.svg"
+                class="place-card-image"
+              />
+              <div class="place-card-container1">
+                <span class="place-card-text"><span>Project</span></span>
+                <span class="place-card-text1">
+                  <span>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+                    do eiusmod tempor incididunt ut labore et dolore magna.
+                  </span>
+                </span>
+                <div class="outline-button-container">
+                  <button class="outline-button-button button">Browse</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="index-footer">
+          <div class="index-menu">
+            <span>© 2021 - Yin Shengkai. All rights reserved.</span>
+            <div class="index-follow-container">
+              <span class="index-text17">Find me at</span>
+              <div class="index-icons-container">
+                <a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  class="index-link2"
+                >
+                  <svg viewBox="0 0 877.7142857142857 1024" class="index-icon3">
+                    <path
+                      d="M585.143 512c0-80.571-65.714-146.286-146.286-146.286s-146.286 65.714-146.286 146.286 65.714 146.286 146.286 146.286 146.286-65.714 146.286-146.286zM664 512c0 124.571-100.571 225.143-225.143 225.143s-225.143-100.571-225.143-225.143 100.571-225.143 225.143-225.143 225.143 100.571 225.143 225.143zM725.714 277.714c0 29.143-23.429 52.571-52.571 52.571s-52.571-23.429-52.571-52.571 23.429-52.571 52.571-52.571 52.571 23.429 52.571 52.571zM438.857 152c-64 0-201.143-5.143-258.857 17.714-20 8-34.857 17.714-50.286 33.143s-25.143 30.286-33.143 50.286c-22.857 57.714-17.714 194.857-17.714 258.857s-5.143 201.143 17.714 258.857c8 20 17.714 34.857 33.143 50.286s30.286 25.143 50.286 33.143c57.714 22.857 194.857 17.714 258.857 17.714s201.143 5.143 258.857-17.714c20-8 34.857-17.714 50.286-33.143s25.143-30.286 33.143-50.286c22.857-57.714 17.714-194.857 17.714-258.857s5.143-201.143-17.714-258.857c-8-20-17.714-34.857-33.143-50.286s-30.286-25.143-50.286-33.143c-57.714-22.857-194.857-17.714-258.857-17.714zM877.714 512c0 60.571 0.571 120.571-2.857 181.143-3.429 70.286-19.429 132.571-70.857 184s-113.714 67.429-184 70.857c-60.571 3.429-120.571 2.857-181.143 2.857s-120.571 0.571-181.143-2.857c-70.286-3.429-132.571-19.429-184-70.857s-67.429-113.714-70.857-184c-3.429-60.571-2.857-120.571-2.857-181.143s-0.571-120.571 2.857-181.143c3.429-70.286 19.429-132.571 70.857-184s113.714-67.429 184-70.857c60.571-3.429 120.571-2.857 181.143-2.857s120.571-0.571 181.143 2.857c70.286 3.429 132.571 19.429 184 70.857s67.429 113.714 70.857 184c3.429 60.571 2.857 120.571 2.857 181.143z"
+                    ></path>
+                  </svg>
+                </a>
+                <a
+                  href="https://facebook.com"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  class="index-link3"
+                >
+                  <svg viewBox="0 0 602.2582857142856 1024" class="index-icon5">
+                    <path
+                      d="M548 6.857v150.857h-89.714c-70.286 0-83.429 33.714-83.429 82.286v108h167.429l-22.286 169.143h-145.143v433.714h-174.857v-433.714h-145.714v-169.143h145.714v-124.571c0-144.571 88.571-223.429 217.714-223.429 61.714 0 114.857 4.571 130.286 6.857z"
+                    ></path>
+                  </svg>
+                </a>
+                <a
+                  href="https://twitter.com"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  class="index-link4"
+                >
+                  <svg viewBox="0 0 950.8571428571428 1024" class="index-icon7">
+                    <path
+                      d="M925.714 233.143c-25.143 36.571-56.571 69.143-92.571 95.429 0.571 8 0.571 16 0.571 24 0 244-185.714 525.143-525.143 525.143-104.571 0-201.714-30.286-283.429-82.857 14.857 1.714 29.143 2.286 44.571 2.286 86.286 0 165.714-29.143 229.143-78.857-81.143-1.714-149.143-54.857-172.571-128 11.429 1.714 22.857 2.857 34.857 2.857 16.571 0 33.143-2.286 48.571-6.286-84.571-17.143-148-91.429-148-181.143v-2.286c24.571 13.714 53.143 22.286 83.429 23.429-49.714-33.143-82.286-89.714-82.286-153.714 0-34.286 9.143-65.714 25.143-93.143 90.857 112 227.429 185.143 380.571 193.143-2.857-13.714-4.571-28-4.571-42.286 0-101.714 82.286-184.571 184.571-184.571 53.143 0 101.143 22.286 134.857 58.286 41.714-8 81.714-23.429 117.143-44.571-13.714 42.857-42.857 78.857-81.143 101.714 37.143-4 73.143-14.286 106.286-28.571z"
+                    ></path>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>
