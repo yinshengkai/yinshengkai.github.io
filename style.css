@@ -21,6 +21,9 @@
   --dl-space-space-doubleunit: 2em;
   --dl-space-space-tripleunit: 3em;
 }
+html {
+  scroll-behavior: smooth;
+}
 .button {
   font-size: 14px;
   font-family: Poppins;
@@ -56,7 +59,7 @@
   text-decoration: none;
 }
 .heading {
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-family: Poppins;
   font-weight: 700;
   line-height: 1.55;
