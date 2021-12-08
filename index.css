@@ -286,21 +286,13 @@
   fill: #ffffff;
   width: var(--dl-size-size-doubleunit);
   height: var(--dl-size-size-doubleunit);
+  margin-left: var(--dl-space-space-doubleunit);
+  text-decoration: none;
 }
 .index-link4 {
   display: contents;
 }
 .index-icon2 {
-  fill: #ffffff;
-  width: var(--dl-size-size-doubleunit);
-  height: var(--dl-size-size-doubleunit);
-  margin-left: var(--dl-space-space-doubleunit);
-  text-decoration: none;
-}
-.index-link5 {
-  display: contents;
-}
-.index-icon4 {
   fill: #ffffff;
   width: var(--dl-size-size-doubleunit);
   height: var(--dl-size-size-doubleunit);
