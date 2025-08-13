@@ -2,6 +2,13 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
+// Reveal-on-scroll helper (must exist before usage)
+const supportsIO = typeof window !== 'undefined' && 'IntersectionObserver' in window;
+const observer = supportsIO ? new IntersectionObserver((entries) => {
+  entries.forEach((entry) => { if (entry.isIntersecting) entry.target.classList.add('in'); });
+}, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 }) : null;
+const reveal = (el) => { if (!el) return; if (observer) observer.observe(el); else el.classList.add('in'); };
+
 // Sample data + placeholder media generator
 function placeholderImage(title, accent = "#6bb6ff", bg = "#0b0f14") {
   const svg = `<?xml version='1.0' encoding='UTF-8'?>
@@ -30,84 +37,124 @@ function placeholderImage(title, accent = "#6bb6ff", bg = "#0b0f14") {
 
 const projects = [
   {
-    id: "realtime-dashboard",
-    title: "Realtime Analytics Dashboard",
-    period: { start: "2023-03", end: "2024-02" },
-    summary: "A fluid, low-latency dashboard for metrics with WebSocket streaming and GPU-accelerated charts.",
-    tags: ["TypeScript", "WebGL", "WebSocket", "DX"],
+    id: "qt-backtester",
+    title: "Quantitative Trading & Backtesting System (Python)",
+    period: { start: "2025-05", end: "present" },
+    summary: "Personal system for data pipelines, strategy prototyping, and configurable backtesting.",
+    tags: ["Python", "Backtesting", "Pandas", "NumPy", "ML"],
     media: [
-      { type: "image", src: placeholderImage("Realtime Dashboard"), alt: "Realtime dashboard overview", caption: "Overview — KPIs and live streams" },
-      { type: "image", src: placeholderImage("Chart Zoom", "#18c3a1"), alt: "Zoomable charts", caption: "GPU zoom and brushing" },
-      { type: "image", src: placeholderImage("Alerting", "#8d7bff"), alt: "Alerting UI", caption: "Anomaly detection alerts" },
+      { type: "image", src: placeholderImage("Backtesting System", "#6bb6ff"), alt: "Backtesting dashboard", caption: "Pipelines, strategies, and metrics" },
+      { type: "image", src: placeholderImage("Feature Pipeline", "#18c3a1"), alt: "Feature generation", caption: "Feature generation and preprocessing" },
+      { type: "image", src: placeholderImage("Strategy Engine", "#8d7bff"), alt: "Strategy engine", caption: "Extensible strategy engine" },
     ],
-    description: "Designed a high-performance monitoring surface with liquid-glass UI. Built stream processing, progressive rendering, and tactile interactions for operators.",
+    description: "Orchestrated robust data acquisition, transformation, and caching. Architected an extensible strategy engine for classical and ML-driven models. Built a highly configurable backtesting environment with granular controls over sourcing, feature engineering, portfolio rules, and execution parameters.",
   },
   {
-    id: "vision-mobile",
-    title: "On-device Vision App",
-    period: { start: "2022-05", end: "2023-01" },
-    summary: "Hybrid iOS/Android app for real-time classification and overlays with offline models.",
-    tags: ["Swift", "Kotlin", "ML", "UX"],
-    media: [
-      { type: "image", src: placeholderImage("Vision App", "#8d7bff"), alt: "On-device vision", caption: "Live overlays and capture" },
-      { type: "image", src: placeholderImage("Model Tuning", "#6bb6ff"), alt: "Model tuning", caption: "Model selection and tuning" },
-    ],
-    description: "Implemented a native-first experience with elegant transitions, robust offline support, and a focus on clarity under motion.",
-  },
-  {
-    id: "infra-platform",
-    title: "Internal Dev Platform",
-    period: { start: "2021-01", end: "present" },
-    summary: "Self-serve previews, CI insights, and golden-path templates for engineers.",
-    tags: ["Platform", "DX", "Kubernetes", "CI"],
-    media: [
-      { type: "image", src: placeholderImage("Dev Platform", "#18c3a1"), alt: "Platform dashboard", caption: "Golden paths and insights" },
-      { type: "image", src: placeholderImage("Preview Envs", "#6bb6ff"), alt: "Preview environments", caption: "Per-PR ephemeral previews" },
-      { type: "image", src: placeholderImage("Insights", "#8d7bff"), alt: "Build insights", caption: "Hotspots and flake tracking" },
-    ],
-    description: "Led a cross-functional effort to unify tooling, reduce toil, and improve developer joy through crisp interfaces.",
-  },
-  {
-    id: "gesture-studio",
-    title: "Gesture Studio (iOS)",
-    period: { start: "2024-05", end: "2024-11" },
-    summary: "An iOS-inspired sandbox for fluid, haptic gestures and glassmorphism components.",
-    tags: ["SwiftUI", "Core Animation", "Haptics"],
-    media: [
-      { type: "image", src: placeholderImage("Gesture Studio", "#6bb6ff"), alt: "Gesture studio prototypes", caption: "Springy cards and liquid blur" },
-      { type: "image", src: placeholderImage("Glass Widgets", "#18c3a1"), alt: "Glass widgets", caption: "Widgets with layered translucency" },
-    ],
-    description: "Prototyped a suite of reusable motion patterns with spring physics, layered blurs, and tactile feedback for iOS-like experiences.",
-  },
-  {
-    id: "liquid-ui-web",
-    title: "Liquid UI Web Kit",
+    id: "vulkan-engine",
+    title: "Custom 3D Game Engine (C++ & Vulkan)",
     period: { start: "2023-09", end: "2024-03" },
-    summary: "A small React/TS component kit for liquid-glass UIs with tokens and theming.",
-    tags: ["React", "TypeScript", "Design System"],
+    summary: "Year 3 project — scalable Vulkan-based engine with editor, assets, and ECS.",
+    tags: ["C++", "Vulkan", "ImGui", "ECS", "RTTR", "Assimp", "Multithreading"],
     media: [
-      { type: "image", src: placeholderImage("Liquid UI", "#8d7bff"), alt: "Liquid UI kit", caption: "Glass cards, sheets, and sliders" },
-      { type: "image", src: placeholderImage("Token System", "#6bb6ff"), alt: "Token system", caption: "Design tokens and theming" },
+      { type: "image", src: placeholderImage("Engine Editor", "#6bb6ff"), alt: "Editor UI", caption: "ImGui editor with reflection" },
+      { type: "image", src: placeholderImage("Assets", "#18c3a1"), alt: "Asset pipeline", caption: "Binary asset compilation via Assimp" },
+      { type: "image", src: placeholderImage("ECS", "#8d7bff"), alt: "ECS", caption: "Sparse set ECS and multithreading" },
     ],
-    description: "Built accessible, themeable components mirroring iOS visuals with dark-first tokens, motion primitives, and strong focus handling.",
+    description: "Led a 10-programmer team building a modular engine with a reflection-driven editor (RTTR) for native and Mono scripts, a binary asset pipeline via Assimp, prefab overrides/propagation, hierarchical transforms with quaternions, and a performant sparse-set ECS.",
+  },
+  {
+    id: "blast-off",
+    title: "Blast Off Far Away (C++)",
+    period: { start: "2022-01", end: "2022-04" },
+    summary: "Year 1 project on Steam — component-based game with custom UI/graphics.",
+    tags: ["C++", "Alpha Engine", "UI", "Graphics", "Gameplay"],
+    media: [
+      { type: "image", src: placeholderImage("Blast Off", "#6bb6ff"), alt: "Game UI", caption: "Architecture and UI programming" },
+      { type: "image", src: placeholderImage("Gameplay", "#18c3a1"), alt: "Gameplay", caption: "Graphics and gameplay tuning" },
+    ],
+    descriptionHTML: "Architected a component system around DigiPen's Alpha Engine with transform hierarchies, led graphics programming and UI, and collaborated closely on gameplay. Available on Steam: <a href='http://s.team/a/2010150' target='_blank' rel='noopener'>http://s.team/a/2010150</a>",
   },
 ];
 
 const experience = [
-  { role: "Senior Software Engineer", org: "Acme Corp", period: "2023 — Present", details: "Web performance, design systems, and realtime interfaces." },
-  { role: "Software Engineer", org: "Beta Labs", period: "2020 — 2023", details: "Built native and web features across the stack." },
-  { role: "iOS Engineer (Intern)", org: "Startup X", period: "2019", details: "Prototyped camera/vision features and data viz." },
-  { role: "Freelance Developer", org: "Self-Employed", period: "2017 — 2020", details: "Delivered portfolio sites, MVPs, and interactive prototypes." },
+  {
+    role: "GenAI Software Engineer",
+    org: "HCLTech — Full-time (Hybrid, Singapore)",
+    period: "Jul 2025 — Present",
+    details: "Applied GenAI to real-world workflows; building ML-powered product features.",
+    logo: { text: "HCL", bg: "linear-gradient(180deg, #b5f, #68f)", color: "#4A8CFF" },
+  },
+  {
+    role: "Software QA Engineer",
+    org: "Razer Inc. — Internship (On-site, Singapore)",
+    period: "Sep 2024 — Apr 2025",
+    details: "Automated hundreds of TestRail cases via Selenium + Robot Framework. Built an ML-based self-healing framework using NLP to repair broken locators from DOM changes, significantly reducing test maintenance.",
+    logo: { text: "RZ", bg: "linear-gradient(180deg, #8f8, #4e8)", color: "#00FF70" },
+  },
+  {
+    role: "Teaching Assistant",
+    org: "DigiPen Institute of Technology Singapore — Contract",
+    period: "Sep 2022 — Aug 2024",
+    details: "TA/grader for Linear Algebra & Geometry, High-Level Programming 1 & 2, Game Implementation Techniques, Calculus and Analytic Geometry 1, Software Engineering Project 2, Computer Graphics.",
+    logo: { text: "DP", bg: "linear-gradient(180deg, #ffb, #fd8)", color: "#F5C542" },
+  },
+  {
+    role: "Operations & Planning Assistant",
+    org: "Singapore Armed Forces (SAF) — Full-time",
+    period: "Jul 2019 — Jul 2021",
+    details: "Led a team building automation for HR ops across 2 units (VBA, RPA). Built admin dashboards, trained NSFs, and received multiple awards (NSF of the Year 2021, PERSCOM Admin Specialist & ASA Award 2021).",
+    logo: { text: "SAF", bg: "linear-gradient(180deg, #faa, #f66)", color: "#FF6B6B" },
+  },
+  {
+    role: "Software Engineer",
+    org: "A*STAR — Internship",
+    period: "Oct 2018 — Jun 2019",
+    details: "Developed mobile games for cognitive psychology studies with MSSQL sync; built AR to project 3D molecular structures onto papers; created FTP-based DLC for AR model downloads; localized academic papers; received distinction and full marks.",
+    logo: { text: "A*", bg: "linear-gradient(180deg, #acf, #86f)", color: "#7A6BFF" },
+  },
 ];
 
-// Footer year
-$("#year").textContent = new Date().getFullYear();
+// Footer year (guarded)
+const yearEl = $("#year"); if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+// Typewriter animation for profile title/subtitle/bio
+(function typewriter() {
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) return; // respect
+  // Only type subtitle and bio to avoid jumpy title
+  const items = [
+    { sel: '.subtitle', speed: 12, start: 150 },
+    { sel: '.bio', speed: 8, start: 500 },
+  ];
+  items.forEach(({ sel, speed, start }) => {
+    const el = document.querySelector(sel);
+    if (!el) return;
+    const full = el.textContent;
+    // Lock height to avoid layout jump
+    const h = el.getBoundingClientRect().height;
+    el.style.minHeight = h + 'px';
+    el.textContent = '';
+    setTimeout(() => {
+      let i = 0;
+      const id = setInterval(() => {
+        el.textContent = full.slice(0, ++i);
+        if (i >= full.length) { clearInterval(id); el.style.minHeight = ''; }
+      }, speed);
+    }, start);
+  });
+})();
+
+// Observe any static reveal elements now
+$$('.reveal').forEach(el => reveal(el));
+
+// Observe existing reveal elements and all sections
+$$('.reveal, section.container.section').forEach(el => reveal(el));
 
 // Render projects grid
 const grid = $("#projects-grid");
 projects.forEach((p, i) => {
   const card = document.createElement("article");
-  card.className = "project-card glass card-enter";
+  card.className = "project-card glass card-enter reveal";
   card.style.animationDelay = `${90 + i * 30}ms`;
   card.setAttribute("tabindex", "0");
   card.setAttribute("role", "button");
@@ -157,6 +204,7 @@ projects.forEach((p, i) => {
 
   card.append(cover, title, desc, tl, meta);
   grid.append(card);
+  reveal(card);
 
   const open = () => openSheet(p);
   card.addEventListener("click", open);
@@ -167,13 +215,75 @@ projects.forEach((p, i) => {
 const expEl = $("#experience-timeline");
 experience.forEach((e) => {
   const item = document.createElement("div");
-  item.className = "timeline-item";
+  item.className = "timeline-item reveal";
   const card = document.createElement("div");
   card.className = "timeline-card glass";
-  const role = document.createElement("p"); role.className = "timeline-role"; role.textContent = `${e.role} • ${e.period}`;
-  const org = document.createElement("p"); org.className = "timeline-org"; org.textContent = `${e.org} — ${e.details}`;
-  card.append(role, org); item.append(card); expEl.append(item);
+  const logo = document.createElement("div"); logo.className = "logo-badge"; logo.textContent = (e.logo && e.logo.text) || initials(e.org);
+  if (e.logo && e.logo.bg) logo.style.background = e.logo.bg;
+  if (e.logo && e.logo.color) card.style.setProperty('--logo-color', e.logo.color);
+  const wrap = document.createElement("div");
+  const role = document.createElement("p"); role.className = "timeline-role"; role.textContent = `${e.role}`;
+  const org = document.createElement("p"); org.className = "timeline-org"; org.textContent = `${e.org}`;
+  const note = document.createElement("p"); note.className = "timeline-note"; note.textContent = `${e.details}`;
+  wrap.append(role, org, note);
+  const date = createDateBadge(e.period, (e.logo && e.logo.color));
+  card.append(logo, wrap, date); item.append(card); expEl.append(item);
+  reveal(item);
 });
+
+// Render education timeline
+const eduEl = document.getElementById('education-timeline');
+const education = [
+  { school: 'Singapore Institute of Technology', degree: 'BSc in Computer Science in Real-Time Interactive Simulation', period: 'Sep 2021 — Apr 2025', details: 'GPA 4.77/5.00 • Provost\'s List AY2022/2023, AY2023/2024', logo: { text: 'SIT', color: '#0E7FFF' } },
+  { school: 'Temasek Polytechnic', degree: 'Diploma in Game Design & Development', period: 'Apr 2016 — Apr 2019', details: 'Director\'s List AY2017/2018', logo: { text: 'TP', color: '#E74C3C' } },
+];
+if (eduEl) {
+  education.forEach((e) => {
+    const item = document.createElement('div');
+    item.className = 'timeline-item reveal';
+    const card = document.createElement('div'); card.className = 'timeline-card glass';
+    const logo = document.createElement('div'); logo.className = 'logo-badge'; logo.textContent = (e.logo && e.logo.text) || initials(e.school);
+    if (e.logo && e.logo.color) card.style.setProperty('--logo-color', e.logo.color);
+    const wrap = document.createElement('div');
+    const role = document.createElement('p'); role.className = 'timeline-role'; role.textContent = e.degree;
+    const school = document.createElement('p'); school.className = 'timeline-org'; school.textContent = e.school;
+    const detail = document.createElement('p'); detail.className = 'timeline-note'; detail.textContent = e.details;
+    wrap.append(role, school, detail);
+    const date = createDateBadge(e.period, (e.logo && e.logo.color));
+    card.append(logo, wrap, date); item.append(card); eduEl.append(item);
+    reveal(item);
+  });
+}
+
+function createDateBadge(period, color) {
+  const date = document.createElement('div');
+  date.className = 'timeline-date';
+  if (color) date.style.setProperty('--logo-color', color);
+  const { start, end } = parsePeriod(period);
+  const inner = document.createElement('div'); inner.className = 'date-inner';
+  const s = document.createElement('div'); s.className = 'date-line'; s.innerHTML = `<span class="m">${start.m}</span> <span class="y">${start.y}</span>`;
+  const dash = document.createElement('div'); dash.className = 'date-dash'; dash.textContent = '–';
+  const e = document.createElement('div'); e.className = 'date-line'; e.innerHTML = `<span class="m">${end.m}</span> <span class="y">${end.y}</span>`;
+  inner.append(s, dash, e); date.append(inner);
+  return date;
+}
+
+
+function parsePeriod(period = '') {
+  const cleaned = period.replace(/\s+/g, ' ').trim();
+  const parts = cleaned.split(/—|–|-/).map(s => s.trim());
+  const start = toMY(parts[0]);
+  const end = toMY(parts[1] || 'Present');
+  return { start, end };
+}
+
+function toMY(s = '') {
+  const m = /([A-Za-z]{3,})\s+(\d{4})/i.exec(s);
+  if (!m) return { m: s || 'Present', y: '' };
+  const mo = m[1].slice(0,3);
+  const y = m[2];
+  return { m: mo, y };
+}
 
 // Sheet + slider logic
 const sheet = $("#project-sheet");
@@ -202,6 +312,8 @@ let sliderState = {
   paused: false,
 };
 
+// (reveal observer defined earlier)
+
 function formatPeriod(period) {
   const start = parseYM(period?.start);
   const end = period?.end && period.end.toLowerCase() !== "present" ? parseYM(period.end) : new Date();
@@ -226,7 +338,11 @@ function openSheet(project) {
   activeProject = project;
   lastTrigger = document.activeElement;
   sheetTitle.textContent = project.title;
-  sheetDesc.textContent = project.description || project.summary || "";
+  if (project.descriptionHTML) {
+    sheetDesc.innerHTML = project.descriptionHTML;
+  } else {
+    sheetDesc.textContent = project.description || project.summary || "";
+  }
   const { display } = formatPeriod(project.period || {});
   sheetRange.textContent = display;
   sheetTags.innerHTML = "";
@@ -448,3 +564,94 @@ window.addEventListener('touchmove', onPointerMove, { passive: true });
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 requestAnimationFrame(animateBackground);
+
+// loader removed
+
+// Timeline progress effect
+function updateTimelineProgress() {
+  const vH = window.innerHeight || document.documentElement.clientHeight;
+  document.querySelectorAll('.timeline').forEach(tl => {
+    const rect = tl.getBoundingClientRect();
+    const center = vH * 0.5;
+    const ratio = Math.max(0, Math.min(1, (center - rect.top) / (rect.height || 1)));
+    tl.style.setProperty('--progressRatio', ratio.toFixed(3));
+  });
+}
+window.addEventListener('scroll', updateTimelineProgress, { passive: true });
+window.addEventListener('resize', updateTimelineProgress);
+updateTimelineProgress();
+
+// Nav active section highlight
+const navMap = new Map([
+  ['#profile-card', document.querySelector('.shortcut-link[href="#profile-card"]')],
+  ['#education', document.querySelector('.shortcut-link[href="#education"]')],
+  ['#experience', document.querySelector('.shortcut-link[href="#experience"]')],
+  ['#projects', document.querySelector('.shortcut-link[href="#projects"]')],
+]);
+function setActiveNav(sel) {
+  navMap.forEach((link, key) => { if (link) link.classList.toggle('active', key === sel); });
+}
+const sectionObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = '#' + entry.target.id;
+      if (navMap.has(id)) setActiveNav(id);
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px', threshold: 0.1 });
+['#profile-card', '#education', '#experience', '#projects'].forEach(sel => {
+  const el = document.querySelector(sel);
+  if (el) sectionObserver.observe(el);
+});
+
+// Scroll indicator
+const scrollInd = document.getElementById('scroll-indicator');
+function updateScrollIndicator() {
+  if (!scrollInd) return;
+  const remaining = $$('.reveal:not(.in)');
+  const atBottom = (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 4);
+  scrollInd.classList.toggle('show', remaining.length > 0 && !atBottom);
+}
+updateScrollIndicator();
+window.addEventListener('scroll', updateScrollIndicator, { passive: true });
+window.addEventListener('resize', updateScrollIndicator);
+
+// Try to retrieve LinkedIn profile image (best-effort, with fallback)
+(async function hydrateAvatar() {
+  const avatarEl = document.querySelector('.avatar');
+  if (!avatarEl) return;
+  const fallback = null; // set to 'assets/img/profile.jpg' if you add a local image
+  try {
+    const url = 'https://r.jina.ai/http://www.linkedin.com/in/yinshengkai/';
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('fetch failed');
+    const text = await res.text();
+    const m = text.match(/property=\"og:image\" content=\"([^\"]+)/i);
+    const img = m && m[1];
+    if (img) {
+      const imgEl = document.createElement('img');
+      imgEl.className = 'avatar-img';
+      imgEl.src = img;
+      imgEl.setAttribute('referrerpolicy', 'no-referrer');
+      imgEl.alt = 'Profile picture';
+      avatarEl.innerHTML = '';
+      avatarEl.appendChild(imgEl);
+      return;
+    }
+  } catch (e) { /* ignore */ }
+  if (fallback) {
+    const imgEl = document.createElement('img');
+    imgEl.className = 'avatar-img';
+    imgEl.src = fallback;
+    imgEl.alt = 'Profile picture';
+    avatarEl.innerHTML = '';
+    avatarEl.appendChild(imgEl);
+  }
+})();
+
+// Utility: initials from org
+function initials(name = '') {
+  const parts = name.replace(/\(.+?\)/g, '').split(/[\s—-]+/).filter(Boolean);
+  const letters = parts.slice(0,3).map(p => p[0].toUpperCase()).join('');
+  return letters || '•';
+}

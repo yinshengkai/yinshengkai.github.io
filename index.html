@@ -16,6 +16,18 @@
     <link rel="stylesheet" href="assets/css/style.css" />
   </head>
   <body>
+    <!-- Top shortcuts -->
+    <nav class="top-shortcuts" aria-label="Quick navigation">
+      <div class="shortcuts-wrap">
+        <div class="brand" aria-label="YSK brand">YSK</div>
+        <div class="shortcut-links">
+          <a class="shortcut-link" href="#profile-card">Profile</a>
+          <a class="shortcut-link" href="#education">Education</a>
+          <a class="shortcut-link" href="#experience">Experience</a>
+          <a class="shortcut-link" href="#projects">Projects</a>
+        </div>
+      </div>
+    </nav>
     <!-- Animated background: liquid gradient blobs + subtle noise -->
     <div class="bg">
       <div class="blob b1"></div>
@@ -27,9 +39,9 @@
     </div>
 
     <header class="site-header container">
-      <div class="profile glass card-enter" id="profile-card">
+      <div class="profile glass card-enter reveal" id="profile-card">
         <div class="avatar" role="img" aria-label="Profile avatar"></div>
-        <div class="profile-body">
+        <div class="profile-body" id="profile">
           <h1 class="title" id="site-title">Yin Shengkai</h1>
           <p class="subtitle">Software Engineer • UI/UX • Systems</p>
           <p class="bio">
@@ -37,8 +49,6 @@
             Exploring delightful interactions, robust systems, and elegant visuals.
           </p>
           <div class="links">
-            <a class="btn primary" href="#projects">View Projects</a>
-            <a class="btn" href="#experience">Experience</a>
             <a class="icon-link" aria-label="Email" href="mailto:yinshengkai98@gmail.com" title="Email">
               <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 4-8 5L4 8V6l8 5 8-5z"/></svg>
             </a>
@@ -54,20 +64,25 @@
     </header>
 
     <main>
-      <section id="projects" class="container section">
-        <div class="section-head">
-          <h2 class="section-title">Projects</h2>
-          <p class="section-sub">A curated grid with timelines. Click to explore.</p>
+      <section id="education" class="container section reveal">
+        <div class="section-head reveal">
+          <h2 class="section-title">Education</h2>
         </div>
-        <div class="projects-grid" id="projects-grid" aria-live="polite"></div>
+        <div class="timeline" id="education-timeline" aria-live="polite"></div>
       </section>
 
-      <section id="experience" class="container section">
-        <div class="section-head">
+      <section id="experience" class="container section reveal">
+        <div class="section-head reveal">
           <h2 class="section-title">Experience</h2>
-          <p class="section-sub">Selected roles and highlights.</p>
         </div>
         <div class="timeline" id="experience-timeline" aria-live="polite"></div>
+      </section>
+
+      <section id="projects" class="container section reveal">
+        <div class="section-head reveal">
+          <h2 class="section-title">Projects</h2>
+        </div>
+        <div class="projects-grid" id="projects-grid" aria-live="polite"></div>
       </section>
     </main>
 
@@ -105,10 +120,14 @@
     </div>
 
     <footer class="container site-footer">
-      <div class="glass micro">
-        <small>© <span id="year"></span> Yin Shengkai. Built with care.</small>
-      </div>
+      <small class="footer-copy">© Yin Shengkai</small>
     </footer>
+
+    <!-- Global scroll indicator -->
+    <div id="scroll-indicator" class="scroll-indicator" aria-hidden="true">
+      <span class="si-dot"></span>
+      <span class="si-arrow">▼</span>
+    </div>
 
     <script src="assets/js/main.js"></script>
   </body>
