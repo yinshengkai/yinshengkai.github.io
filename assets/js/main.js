@@ -152,13 +152,22 @@ $$('.reveal, section.container.section').forEach(el => reveal(el));
 
 // Render projects grid
 const grid = $("#projects-grid");
+function displayTitle(title) {
+  return String(title).replace(/\s*\([^)]*\)\s*$/,'');
+}
+
+function isPresent(period) {
+  const end = (period && period.end) || '';
+  return String(end).toLowerCase() === 'present';
+}
+
 projects.forEach((p, i) => {
   const card = document.createElement("article");
   card.className = "project-card glass card-enter reveal";
   card.style.animationDelay = `${90 + i * 30}ms`;
   card.setAttribute("tabindex", "0");
   card.setAttribute("role", "button");
-  card.setAttribute("aria-label", `${p.title} — open details`);
+  card.setAttribute("aria-label", `${displayTitle(p.title)} — open details`);
 
   const cover = document.createElement("div");
   cover.className = "cover";
@@ -170,7 +179,7 @@ projects.forEach((p, i) => {
 
   const title = document.createElement("h3");
   title.className = "project-title";
-  title.textContent = p.title;
+  title.textContent = displayTitle(p.title);
 
   const desc = document.createElement("p");
   desc.className = "project-desc";
@@ -191,6 +200,14 @@ projects.forEach((p, i) => {
     tag.textContent = t;
     tags.append(tag);
   });
+  // mark ongoing
+  if (isPresent(p.period)) {
+    card.classList.add('ongoing');
+    const ongoing = document.createElement('span');
+    ongoing.className = 'chip ongoing';
+    ongoing.textContent = 'Ongoing';
+    tags.prepend(ongoing);
+  }
   meta.append(range, tags);
 
   // timeline bar
@@ -225,6 +242,12 @@ experience.forEach((e) => {
   const role = document.createElement("p"); role.className = "timeline-role"; role.textContent = `${e.role}`;
   const org = document.createElement("p"); org.className = "timeline-org"; org.textContent = `${e.org}`;
   const note = document.createElement("p"); note.className = "timeline-note"; note.textContent = `${e.details}`;
+  // ongoing highlight
+  if (/present/i.test(e.period)) {
+    card.classList.add('ongoing');
+    const pill = document.createElement('span'); pill.className = 'ongoing-pill'; pill.textContent = 'Present';
+    role.appendChild(pill);
+  }
   wrap.append(role, org, note);
   const date = createDateBadge(e.period, (e.logo && e.logo.color));
   card.append(logo, wrap, date); item.append(card); expEl.append(item);
@@ -337,7 +360,7 @@ function formatYM(d) {
 function openSheet(project) {
   activeProject = project;
   lastTrigger = document.activeElement;
-  sheetTitle.textContent = project.title;
+  sheetTitle.textContent = displayTitle(project.title);
   if (project.descriptionHTML) {
     sheetDesc.innerHTML = project.descriptionHTML;
   } else {
@@ -584,9 +607,9 @@ updateTimelineProgress();
 // Nav active section highlight
 const navMap = new Map([
   ['#profile-card', document.querySelector('.shortcut-link[href="#profile-card"]')],
-  ['#education', document.querySelector('.shortcut-link[href="#education"]')],
   ['#experience', document.querySelector('.shortcut-link[href="#experience"]')],
   ['#projects', document.querySelector('.shortcut-link[href="#projects"]')],
+  ['#education', document.querySelector('.shortcut-link[href="#education"]')],
 ]);
 function setActiveNav(sel) {
   navMap.forEach((link, key) => { if (link) link.classList.toggle('active', key === sel); });
@@ -599,7 +622,7 @@ const sectionObserver = new IntersectionObserver((entries) => {
     }
   });
 }, { rootMargin: '-30% 0px -60% 0px', threshold: 0.1 });
-['#profile-card', '#education', '#experience', '#projects'].forEach(sel => {
+['#profile-card', '#experience', '#projects', '#education'].forEach(sel => {
   const el = document.querySelector(sel);
   if (el) sectionObserver.observe(el);
 });
@@ -608,13 +631,26 @@ const sectionObserver = new IntersectionObserver((entries) => {
 const scrollInd = document.getElementById('scroll-indicator');
 function updateScrollIndicator() {
   if (!scrollInd) return;
-  const remaining = $$('.reveal:not(.in)');
-  const atBottom = (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 4);
-  scrollInd.classList.toggle('show', remaining.length > 0 && !atBottom);
+  const atBottom = (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 2);
+  const remaining = $$('.reveal:not(.in)').length;
+  const shouldShow = !atBottom && remaining > 0;
+  scrollInd.classList.toggle('show', shouldShow);
 }
 updateScrollIndicator();
 window.addEventListener('scroll', updateScrollIndicator, { passive: true });
 window.addEventListener('resize', updateScrollIndicator);
+
+// Back-to-top visibility + behavior
+const backTop = document.getElementById('back-to-top');
+function updateBackTop() {
+  if (!backTop) return;
+  const show = window.scrollY > (window.innerHeight * 0.35);
+  backTop.classList.toggle('show', show);
+}
+updateBackTop();
+window.addEventListener('scroll', updateBackTop, { passive: true });
+window.addEventListener('resize', updateBackTop);
+if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
 // Try to retrieve LinkedIn profile image (best-effort, with fallback)
 (async function hydrateAvatar() {

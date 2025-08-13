@@ -22,9 +22,9 @@
         <div class="brand" aria-label="YSK brand">YSK</div>
         <div class="shortcut-links">
           <a class="shortcut-link" href="#profile-card">Profile</a>
-          <a class="shortcut-link" href="#education">Education</a>
           <a class="shortcut-link" href="#experience">Experience</a>
           <a class="shortcut-link" href="#projects">Projects</a>
+          <a class="shortcut-link" href="#education">Education</a>
         </div>
       </div>
     </nav>
@@ -64,13 +64,6 @@
     </header>
 
     <main>
-      <section id="education" class="container section reveal">
-        <div class="section-head reveal">
-          <h2 class="section-title">Education</h2>
-        </div>
-        <div class="timeline" id="education-timeline" aria-live="polite"></div>
-      </section>
-
       <section id="experience" class="container section reveal">
         <div class="section-head reveal">
           <h2 class="section-title">Experience</h2>
@@ -83,6 +76,13 @@
           <h2 class="section-title">Projects</h2>
         </div>
         <div class="projects-grid" id="projects-grid" aria-live="polite"></div>
+      </section>
+
+      <section id="education" class="container section reveal">
+        <div class="section-head reveal">
+          <h2 class="section-title">Education</h2>
+        </div>
+        <div class="timeline" id="education-timeline" aria-live="polite"></div>
       </section>
     </main>
 
@@ -125,9 +125,11 @@
 
     <!-- Global scroll indicator -->
     <div id="scroll-indicator" class="scroll-indicator" aria-hidden="true">
-      <span class="si-dot"></span>
       <span class="si-arrow">▼</span>
     </div>
+
+    <!-- Back to top -->
+    <button id="back-to-top" class="back-to-top" aria-label="Back to top" title="Back to top">▲</button>
 
     <script src="assets/js/main.js"></script>
   </body>
