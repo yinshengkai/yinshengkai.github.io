@@ -150,6 +150,12 @@ $$('.reveal').forEach(el => reveal(el));
 // Observe existing reveal elements and all sections
 $$('.reveal, section.container.section').forEach(el => reveal(el));
 
+// Safety: if reveal observer fails (e.g., platform quirks), force show after a tick
+setTimeout(() => {
+  const pending = $$('.reveal:not(.in)');
+  if (pending.length > 0) pending.forEach(el => el.classList.add('in'));
+}, 400);
+
 // Render projects grid
 const grid = $("#projects-grid");
 function displayTitle(title) {
@@ -187,11 +193,6 @@ projects.forEach((p, i) => {
 
   const meta = document.createElement("div");
   meta.className = "project-meta";
-  const range = document.createElement("span");
-  range.className = "chip";
-  const rangeLabel = formatPeriod(p.period);
-  range.textContent = rangeLabel.display;
-
   const tags = document.createElement("div");
   tags.className = "tags";
   (p.tags || []).slice(0, 3).forEach(t => {
@@ -208,18 +209,21 @@ projects.forEach((p, i) => {
     ongoing.textContent = 'Ongoing';
     tags.prepend(ongoing);
   }
-  meta.append(range, tags);
+  meta.append(tags);
 
   // timeline bar
   const tl = document.createElement("div");
   tl.className = "timeline-bar";
   const fill = document.createElement("div");
   fill.className = "fill";
-  const pct = rangeLabel.progressPct;
+  const per = formatPeriod(p.period || {});
+  const pct = per.progressPct;
   fill.style.setProperty("--p", `${pct}%`);
   tl.append(fill);
 
-  card.append(cover, title, desc, tl, meta);
+  // project date footer (console-styled, no pill)
+  const pdate = createProjectDate(p.period || {});
+  card.append(cover, title, desc, tl, meta, pdate);
   grid.append(card);
   reveal(card);
 
@@ -245,7 +249,7 @@ experience.forEach((e) => {
   // ongoing highlight
   if (/present/i.test(e.period)) {
     card.classList.add('ongoing');
-    const pill = document.createElement('span'); pill.className = 'ongoing-pill'; pill.textContent = 'Present';
+    const pill = document.createElement('span'); pill.className = 'chip ongoing'; pill.textContent = 'Ongoing';
     role.appendChild(pill);
   }
   wrap.append(role, org, note);
@@ -290,6 +294,27 @@ function createDateBadge(period, color) {
   inner.append(s, dash, e); date.append(inner);
   return date;
 }
+
+function createProjectDate(periodObj) {
+  const date = document.createElement('div');
+  date.className = 'project-date';
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  let s = new Date();
+  try { s = parseYM(periodObj.start || ''); } catch {}
+  const sM = months[s.getMonth()];
+  const sY = s.getFullYear();
+  let eText = 'Present';
+  if (periodObj.end && String(periodObj.end).toLowerCase() !== 'present') {
+    const e = parseYM(periodObj.end);
+    eText = `${months[e.getMonth()]} ${e.getFullYear()}`;
+  }
+  const text = document.createElement('span');
+  text.className = 'pd-text';
+  text.innerHTML = `<span class=\"m\">${sM}</span> <span class=\"y\">${sY}</span> <span class=\"date-dash\">–</span> ${eText}`;
+  date.append(text);
+  return date;
+}
+
 
 
 function parsePeriod(period = '') {
@@ -614,17 +639,33 @@ const navMap = new Map([
 function setActiveNav(sel) {
   navMap.forEach((link, key) => { if (link) link.classList.toggle('active', key === sel); });
 }
-const sectionObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const id = '#' + entry.target.id;
-      if (navMap.has(id)) setActiveNav(id);
-    }
+const navSections = ['#profile-card', '#experience', '#projects', '#education'];
+function updateActiveNavByAnchor() {
+  const nav = document.querySelector('.shortcuts-wrap');
+  const navH = nav ? nav.getBoundingClientRect().height : 0;
+  const anchorY = window.scrollY + navH + 12; // account for fixed nav height and margin
+  let chosen = navSections[0];
+  navSections.forEach(sel => {
+    const el = document.querySelector(sel);
+    if (!el) return;
+    const topY = window.scrollY + el.getBoundingClientRect().top;
+    if (topY <= anchorY + 1) chosen = sel;
   });
-}, { rootMargin: '-30% 0px -60% 0px', threshold: 0.1 });
-['#profile-card', '#experience', '#projects', '#education'].forEach(sel => {
-  const el = document.querySelector(sel);
-  if (el) sectionObserver.observe(el);
+  if (chosen && navMap.has(chosen)) setActiveNav(chosen);
+}
+window.addEventListener('scroll', updateActiveNavByAnchor, { passive: true });
+window.addEventListener('resize', updateActiveNavByAnchor);
+updateActiveNavByAnchor();
+// Also reflect clicks and hash changes immediately
+document.querySelectorAll('.shortcut-link').forEach(a => {
+  a.addEventListener('click', () => {
+    const href = a.getAttribute('href');
+    if (href && navMap.has(href)) setActiveNav(href);
+  });
+});
+window.addEventListener('hashchange', () => {
+  const h = location.hash;
+  if (h && navMap.has(h)) setActiveNav(h);
 });
 
 // Scroll indicator
@@ -651,6 +692,8 @@ updateBackTop();
 window.addEventListener('scroll', updateBackTop, { passive: true });
 window.addEventListener('resize', updateBackTop);
 if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+// Center-based scrollspy handles edges; no extra edge hack needed
 
 // Try to retrieve LinkedIn profile image (best-effort, with fallback)
 (async function hydrateAvatar() {

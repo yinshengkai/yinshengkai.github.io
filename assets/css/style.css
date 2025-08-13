@@ -84,10 +84,13 @@ body {
 /* Top shortcuts */
 .top-shortcuts { position: fixed; top: 8px; left: 0; right: 0; z-index: 60; pointer-events: none; }
 .shortcuts-wrap { max-width: 1100px; margin: 0 auto; padding: 14px 20px; min-height: 56px; display: flex; align-items: center; gap: 16px; justify-content: space-between; background: rgba(8,12,18,0.5); border: 1px solid var(--border); border-radius: 14px; backdrop-filter: blur(16px) saturate(120%); -webkit-backdrop-filter: blur(16px) saturate(120%); box-shadow: 0 10px 28px rgba(0,0,0,0.38), inset 0 1px rgba(255,255,255,0.06); pointer-events: auto; }
-.brand { color: #fff; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-weight: 800; letter-spacing: 1px; opacity: 0.95; }
-.shortcut-links { display: flex; gap: 16px; }
-.shortcut-link { pointer-events: auto; color: #fff; text-decoration: none; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 14px; opacity: 0.9; transition: opacity var(--speed), background var(--speed); border-radius: 8px; padding: 4px 6px; }
-.shortcut-link.active { opacity: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); text-decoration: none; }
+.brand { color: #fff; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-weight: 900; letter-spacing: 1.2px; opacity: 0.95; font-size: 20px; }
+.shortcut-links { display: flex; gap: 10px; }
+.shortcut-link { pointer-events: auto; color: #fff; text-decoration: none; opacity: 0.9; transition: opacity var(--speed), background var(--speed), transform var(--speed), box-shadow var(--speed); border-radius: 12px; }
+.shortcut-link.icon { position: relative; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: rgba(8,12,18,0.35); box-shadow: inset 0 1px rgba(255,255,255,0.08); }
+.shortcut-link.icon:hover { opacity: 1; transform: translateY(-1px); background: rgba(8,12,18,0.45); }
+.shortcut-link.active { opacity: 1; color: #fff; transform: translateY(-1px) scale(1.02); background: linear-gradient(180deg, rgba(107,182,255,0.28), rgba(107,182,255,0.12)); border-color: rgba(107,182,255,0.7); box-shadow: 0 8px 24px rgba(107,182,255,0.35), 0 8px 24px rgba(0,0,0,0.4), inset 0 1px rgba(255,255,255,0.18); }
+/* removed accent dot under active icon for a cleaner look */
 .shortcut-link:hover { opacity: 1; text-decoration: underline; }
 
 /* Glass utility */
@@ -148,10 +151,18 @@ body {
 .project-card:hover .cover .media { transform: scale(1.08); }
 .project-title { margin: 0; font-size: 16px; letter-spacing: 0.2px; }
 .project-desc { margin: 0; color: var(--muted); font-size: 13px; }
-.project-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.project-meta { display: flex; align-items: center; justify-content: flex-start; gap: 8px; }
+.project-meta .range { margin-left: auto; white-space: nowrap; }
 .chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: #cfe6ff; font-size: 12px; }
 .tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .tag { font-size: 11px; color: #cfe6ff; opacity: 0.9; border: 1px solid var(--border); background: var(--surface); padding: 4px 8px; border-radius: 999px; }
+
+/* Project date footer (console style) */
+.project-date { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: flex-end; align-items: center; }
+.project-date .pd-text { color: #fff; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; white-space: nowrap; }
+.project-date .m { font-variant: all-small-caps; letter-spacing: 1px; opacity: .95; }
+.project-date .y { font-weight: 700; }
+.project-date .date-dash { opacity: .9; }
 
 /* Mini timeline bar on cards */
 .timeline-bar { position: relative; height: 4px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; }
@@ -162,15 +173,19 @@ body {
 .timeline::before { content: none; }
 .timeline-item { position: relative; margin: 14px 0 18px; }
 .timeline-item::before { content: none; }
-.timeline-card { padding: 12px 14px; display: grid; grid-template-columns: 36px 1fr auto; gap: 10px; align-items: stretch; }
+.timeline-card { padding: 12px 14px; display: grid; grid-template-columns: 36px 1fr auto; gap: 10px; align-items: center; transition: box-shadow var(--speed-slow), border-color var(--speed); }
 .timeline-date { align-self: center; }
 .logo-badge { width: 36px; height: 36px; border-radius: 999px; display: grid; place-items: center; font-size: 12px; font-weight: 700; color: #0b0f14; background: linear-gradient(180deg, #cfe6ff, #8dc6ff); border: 1px solid rgba(255,255,255,0.5); }
 .timeline-role { margin: 0 0 4px; font-weight: 600; }
 .timeline-org { margin: 0; color: var(--muted); font-size: 13px; }
 .timeline-note { margin: 2px 0 0; color: #cfe6ff; opacity: .9; font-size: 12px; }
+.timeline-role .chip.ongoing { margin-left: 8px; vertical-align: middle; }
 .ongoing-pill { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; margin-left: 8px; border-radius: 999px; font-size: 11px; color: #0b0f14; background: linear-gradient(180deg, #b7ffcf, #7dffb0); border: 1px solid rgba(255,255,255,0.5); }
-.timeline-card.ongoing { box-shadow: 0 0 0 2px rgba(24,195,161,0.35), 0 10px 26px rgba(0,0,0,0.35); }
-.project-card.ongoing { box-shadow: 0 0 0 2px rgba(24,195,161,0.35), 0 14px 36px rgba(0,0,0,0.45); }
+.timeline-card.ongoing,
+.project-card.ongoing { 
+  border-color: rgba(107,182,255,0.7);
+  box-shadow: 0 8px 24px rgba(107,182,255,0.35), 0 10px 26px rgba(0,0,0,0.4), inset 0 1px rgba(255,255,255,0.18);
+}
 .chip.ongoing { background: linear-gradient(180deg, rgba(24,195,161,0.35), rgba(24,195,161,0.18)); border-color: rgba(24,195,161,0.55); color: #eafff8; }
 
 /* Sliding sheet */
@@ -240,7 +255,7 @@ body {
 
 /* Enhancements: hover expansion, reveal animations, loader, icons, timeline logos */
 .project-card { transition: transform var(--speed-slow), box-shadow var(--speed), border-color var(--speed); will-change: transform; transform-origin: center; }
-.project-card:hover, .project-card:focus-visible { transform: translateY(-4px) scale(1.04); box-shadow: 0 18px 44px rgba(0,0,0,0.55); }
+.project-card:hover, .project-card:focus-visible { transform: translateY(-4px) scale(1.04); }
 
 .reveal { opacity: 0; transform: translateY(20px) scale(0.985); }
 .reveal.in { opacity: 1; transform: translateY(0) scale(1); transition: transform 700ms cubic-bezier(.2,.8,.2,1), opacity 600ms ease; }
