@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b0f14" />
+    <title>Yin Shengkai — Portfolio</title>
+    <meta name="description" content="A sleek, dark, liquid-glass portfolio with project timelines and an animated, auto-playing detail slider." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- System font stack for performance and native feel -->
+    <style>
+      :root { font-synthesis-weight: none; }
+      html { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+    </style>
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+    <!-- Animated background: liquid gradient blobs + subtle noise -->
+    <div class="bg">
+      <div class="blob b1"></div>
+      <div class="blob b2"></div>
+      <div class="blob b3"></div>
+      <canvas class="dots" id="bg-dots" aria-hidden="true"></canvas>
+      <div class="noise" aria-hidden="true"></div>
+      <div class="vignette" aria-hidden="true"></div>
+    </div>
+
+    <header class="site-header container">
+      <div class="profile glass card-enter" id="profile-card">
+        <div class="avatar" role="img" aria-label="Profile avatar"></div>
+        <div class="profile-body">
+          <h1 class="title" id="site-title">Yin Shengkai</h1>
+          <p class="subtitle">Software Engineer • UI/UX • Systems</p>
+          <p class="bio">
+            I design and build thoughtful, high-performance experiences across web and native.
+            Exploring delightful interactions, robust systems, and elegant visuals.
+          </p>
+          <div class="links">
+            <a class="btn primary" href="#projects">View Projects</a>
+            <a class="btn" href="#experience">Experience</a>
+            <a class="icon-link" aria-label="Email" href="mailto:yinshengkai98@gmail.com" title="Email">
+              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 4-8 5L4 8V6l8 5 8-5z"/></svg>
+            </a>
+            <a class="icon-link" aria-label="GitHub" href="https://github.com/yinshengkai" title="GitHub">
+              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.17-3.37-1.17-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.52 1.02 1.52 1.02.9 1.52 2.36 1.08 2.94.83.09-.66.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.02-2.67-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.63.69 1.02 1.58 1.02 2.67 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.86v2.76c0 .27.18.58.69.48A10 10 0 0 0 12 2"/></svg>
+            </a>
+            <a class="icon-link" aria-label="LinkedIn" href="https://www.linkedin.com/in/yinshengkai/" title="LinkedIn">
+              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M19 3a2.94 2.94 0 0 1 3 3v12a2.94 2.94 0 0 1-3 3H5a2.94 2.94 0 0 1-3-3V6a2.94 2.94 0 0 1 3-3h14M8.34 18.34v-8H5.67v8h2.67m-1.33-9.09c.88 0 1.6-.73 1.6-1.61s-.72-1.61-1.6-1.61-1.6.73-1.6 1.61.72 1.61 1.6 1.61m12 9.09v-4.31c0-2.23-1.19-3.27-2.78-3.27-1.28 0-1.85.71-2.18 1.21v-1.04h-2.66c.04.69 0 8 0 8h2.66v-4.47c0-.24.02-.48.09-.65.19-.48.63-.98 1.37-.98.97 0 1.36.74 1.36 1.83v4.27z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="projects" class="container section">
+        <div class="section-head">
+          <h2 class="section-title">Projects</h2>
+          <p class="section-sub">A curated grid with timelines. Click to explore.</p>
+        </div>
+        <div class="projects-grid" id="projects-grid" aria-live="polite"></div>
+      </section>
+
+      <section id="experience" class="container section">
+        <div class="section-head">
+          <h2 class="section-title">Experience</h2>
+          <p class="section-sub">Selected roles and highlights.</p>
+        </div>
+        <div class="timeline" id="experience-timeline" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <!-- Sliding project detail sheet -->
+    <div class="sheet" id="project-sheet" aria-hidden="true" aria-labelledby="sheet-title" role="dialog">
+      <div class="sheet-backdrop" data-close></div>
+      <div class="sheet-panel glass" role="document">
+        <header class="sheet-header">
+          <h3 id="sheet-title">Project</h3>
+          <button class="icon close" data-close aria-label="Close details">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          </button>
+        </header>
+        <div class="sheet-body">
+          <div class="sheet-meta">
+            <span class="chip" id="sheet-range"></span>
+            <div id="sheet-tags" class="tags"></div>
+          </div>
+          <p id="sheet-desc" class="sheet-desc"></p>
+          <div class="slider" id="sheet-slider">
+            <div class="slider-rail">
+              <div class="slider-track" id="slider-track"></div>
+            </div>
+            <div class="slider-progress" id="slider-progress"></div>
+            <button class="icon prev" id="slider-prev" aria-label="Previous">
+              <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            <button class="icon next" id="slider-next" aria-label="Next">
+              <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M8.59 16.59 10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+            </button>
+            <div class="slider-dots" id="slider-dots" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="container site-footer">
+      <div class="glass micro">
+        <small>© <span id="year"></span> Yin Shengkai. Built with care.</small>
+      </div>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+  </body>
+  </html>
