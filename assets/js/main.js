@@ -45,7 +45,7 @@ const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   };
 
   // Update on load to ensure we respect min 1s
-  window.addEventListener('load', () => { loaded = true; });
+  window.addEventListener('load', () => { loaded = true; }, { once: true });
   // Failsafe: if load stalls, still finish at FAILSAFE_MS minimum
   setTimeout(() => { loaded = true; target = Math.max(target, FAILSAFE_MS); }, FAILSAFE_MS);
 
@@ -237,9 +237,6 @@ const yearEl = $("#year"); if (yearEl) yearEl.textContent = new Date().getFullYe
     }, start);
   });
 })();
-
-// Observe any static reveal elements now (only items, not whole sections)
-$$('.reveal').forEach(el => reveal(el));
 
 // Observe existing reveal elements (items only)
 $$('.reveal').forEach(el => reveal(el));
@@ -774,6 +771,9 @@ function animateBackground(ts) {
   lastTs = ts;
   mouse.t += dt * 0.001;
 
+  // If tab is hidden, skip heavy work but keep the loop alive
+  if (document.hidden) { requestAnimationFrame(animateBackground); return; }
+
   // Parallax for blobs with subtle oscillation
   blobEls.forEach((el, i) => {
     const ax = (i + 1) * 1.8; // amplitude scale
@@ -801,7 +801,13 @@ function onPointerMove(e) {
 
 window.addEventListener('mousemove', onPointerMove, { passive: true });
 window.addEventListener('touchmove', onPointerMove, { passive: true });
-window.addEventListener('resize', resizeCanvas);
+// Throttle expensive resizes to animation frames
+let resizeRaf = 0;
+function onResizeThrottled() {
+  if (resizeRaf) return;
+  resizeRaf = requestAnimationFrame(() => { resizeRaf = 0; resizeCanvas(); });
+}
+window.addEventListener('resize', onResizeThrottled);
 resizeCanvas();
 requestAnimationFrame(animateBackground);
 
@@ -921,6 +927,7 @@ if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, b
       const imgEl = document.createElement('img');
       imgEl.className = 'avatar-img';
       imgEl.src = img;
+      imgEl.decoding = 'async';
       imgEl.setAttribute('referrerpolicy', 'no-referrer');
       imgEl.alt = 'Profile picture';
       avatarEl.innerHTML = '';
@@ -933,6 +940,7 @@ if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, b
     imgEl.className = 'avatar-img';
     imgEl.src = fallback;
     imgEl.alt = 'Profile picture';
+    imgEl.decoding = 'async';
     avatarEl.innerHTML = '';
     avatarEl.appendChild(imgEl);
   }

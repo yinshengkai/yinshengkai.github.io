@@ -50,7 +50,7 @@ body {
 
 /* Background animation */
 .bg { position: fixed; inset: 0; overflow: hidden; z-index: -2; }
-.blob { position: absolute; filter: blur(40px); opacity: 0.45; mix-blend-mode: screen; }
+.blob { position: absolute; filter: blur(40px); opacity: 0.45; mix-blend-mode: screen; will-change: transform; }
 .blob.b1 {
   width: 44vw; height: 44vw; top: -10vw; left: -10vw;
   background: radial-gradient(40% 40% at 50% 50%, #1f68ff, transparent 60%),
@@ -247,7 +247,7 @@ body {
 .slider { position: relative; border: none; border-radius: var(--radius); overflow: hidden; background: rgba(20,24,32,0.5); }
 .slider { touch-action: pan-y; }
 .slider-rail { overflow: hidden; position: relative; }
-.slider-track { display: grid; grid-auto-flow: column; grid-auto-columns: 100%; transition: transform 600ms ease; }
+.slider-track { display: grid; grid-auto-flow: column; grid-auto-columns: 100%; transition: transform 600ms ease; will-change: transform; }
 .slide { position: relative; aspect-ratio: 16/9; background: #0e1218; display: grid; place-items: center; }
 .slide img, .slide video { width: 100%; height: 100%; object-fit: cover; display: block; border: 0; outline: none; box-shadow: none; background: transparent; }
 /* Slider caption: centered text with gradient + blur backdrop for contrast */
