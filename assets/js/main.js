@@ -2,12 +2,82 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-// Reveal-on-scroll helper (must exist before usage)
+// Loader: fade out on window load with fallback
+(function initLoader() {
+  const loader = document.getElementById('loader');
+  const pctEl = document.getElementById('loader-percent');
+  if (!loader) return;
+
+  const MIN_MS = 500; // minimum visible time
+  const FAILSAFE_MS = 3000; // force-finish safety
+  const start = (window.performance && performance.now) ? performance.now() : Date.now();
+  let loaded = document.readyState === 'complete';
+  let finished = false;
+  let target = MIN_MS;
+  let rafId = 0;
+
+  const setPct = (v) => {
+    const pct = Math.max(0, Math.min(100, Math.round(v)));
+    if (pctEl) pctEl.textContent = pct + '%';
+  };
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    if (rafId) cancelAnimationFrame(rafId);
+    setPct(100);
+    loader.classList.add('hide');
+    document.documentElement.classList.remove('loading');
+    document.body.classList.remove('loading');
+    // notify others that loader is done (for reveal timing)
+    try { window.dispatchEvent(new Event('loader:done')); } catch {}
+    setTimeout(() => loader.parentNode && loader.parentNode.removeChild(loader), 700);
+  };
+
+  const nowTS = () => (window.performance && performance.now) ? performance.now() : Date.now();
+  const tick = () => {
+    const elapsed = nowTS() - start;
+    if (loaded) target = Math.max(target, elapsed);
+    let p = Math.min(1, elapsed / target);
+    if (!loaded) p = Math.min(p, 0.99); // avoid hitting 100% before load
+    setPct(p * 100);
+    if (loaded && elapsed >= target) finish();
+    else rafId = requestAnimationFrame(tick);
+  };
+
+  // Update on load to ensure we respect min 1s
+  window.addEventListener('load', () => { loaded = true; });
+  // Failsafe: if load stalls, still finish at FAILSAFE_MS minimum
+  setTimeout(() => { loaded = true; target = Math.max(target, FAILSAFE_MS); }, FAILSAFE_MS);
+
+  // If page is already loaded, still honor the 1s minimum
+  rafId = requestAnimationFrame(tick);
+})();
+
+// Reveal-on-scroll helper (defers "in" until loader completes)
 const supportsIO = typeof window !== 'undefined' && 'IntersectionObserver' in window;
+const revealQueue = [];
+const isLoading = () => document.documentElement.classList.contains('loading');
 const observer = supportsIO ? new IntersectionObserver((entries) => {
-  entries.forEach((entry) => { if (entry.isIntersecting) entry.target.classList.add('in'); });
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      if (isLoading()) {
+        revealQueue.push(entry.target);
+      } else {
+        entry.target.classList.add('in');
+      }
+    }
+  });
 }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 }) : null;
 const reveal = (el) => { if (!el) return; if (observer) observer.observe(el); else el.classList.add('in'); };
+window.addEventListener('loader:done', () => {
+  const DELAY = 150; // tiny delay after loader fade begins
+  if (revealQueue.length) {
+    setTimeout(() => {
+      revealQueue.forEach(el => el.classList.add('in'));
+      revealQueue.length = 0;
+    }, DELAY);
+  }
+});
 
 // Sample data + placeholder media generator
 function placeholderImage(title, accent = "#6bb6ff", bg = "#0b0f14") {
@@ -150,11 +220,13 @@ $$('.reveal').forEach(el => reveal(el));
 // Observe existing reveal elements and all sections
 $$('.reveal, section.container.section').forEach(el => reveal(el));
 
-// Safety: if reveal observer fails (e.g., platform quirks), force show after a tick
-setTimeout(() => {
+// Safety: if reveal observer fails, force show shortly after loader completes
+function revealFallback() {
   const pending = $$('.reveal:not(.in)');
   if (pending.length > 0) pending.forEach(el => el.classList.add('in'));
-}, 400);
+}
+if (isLoading()) window.addEventListener('loader:done', () => setTimeout(revealFallback, 180));
+else setTimeout(revealFallback, 400);
 
 // Render projects grid
 const grid = $("#projects-grid");

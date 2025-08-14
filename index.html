@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="loading">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -15,7 +15,15 @@
     </style>
     <link rel="stylesheet" href="assets/css/style.css" />
   </head>
-  <body>
+  <body class="loading">
+    <!-- Full-screen loader -->
+    <div id="loader" class="loader-overlay" aria-hidden="false" role="status" aria-live="polite">
+      <div class="loader-inner">
+        <div class="loader-spinner" aria-hidden="true"></div>
+        <div class="loader-brand" aria-label="Loading Yin Shengkai portfolio">YSK</div>
+        <div id="loader-percent" class="loader-percent" aria-label="Loading progress">0%</div>
+      </div>
+    </div>
     <!-- Top shortcuts -->
     <nav class="top-shortcuts" aria-label="Quick navigation">
       <div class="shortcuts-wrap">
