@@ -1,6 +1,8 @@
 // Self-contained script (no ES module import) for broader compatibility
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+// Global: reduced motion preference (use early and often)
+const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Loader: fade out on window load with fallback
 (function initLoader() {
@@ -262,10 +264,9 @@ const experience = [
 // Footer year (guarded)
 const yearEl = $("#year"); if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-// Typewriter animation for profile title/subtitle/bio
+// Typewriter animation for profile subtitle/bio (skip if reduced motion)
 (function typewriter() {
-  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (prefersReduced) return; // respect
+  if (prefersReducedMotion) return; // respect
   // Only type subtitle and bio to avoid jumpy title
   const items = [
     { sel: '.subtitle', speed: 12, start: 150 },
@@ -764,12 +765,11 @@ document.addEventListener("visibilitychange", () => {
 });
 
 // Respect prefers-reduced-motion
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Cursor-reactive parallax blobs + drifting dots
 const blobEls = $$(".blob");
 const dotsCanvas = $("#bg-dots");
-const ctx = dotsCanvas.getContext ? dotsCanvas.getContext("2d") : null;
+const ctx = (dotsCanvas && dotsCanvas.getContext) ? dotsCanvas.getContext("2d") : null;
 let dots = [];
 let mouse = { x: 0.5, y: 0.5, vX: 0, vY: 0, t: 0 };
 let lastTs = 0;
@@ -907,7 +907,11 @@ let navLockActive = false;
 let navIdleTimer = 0;
 function releaseNavLockSoon() {
   clearTimeout(navIdleTimer);
-  navIdleTimer = setTimeout(() => { navLockActive = false; updateActiveNavByIO(); }, 220);
+  navIdleTimer = setTimeout(() => {
+    navLockActive = false;
+    updateActiveNavByIO();
+    try { window.removeEventListener('scroll', releaseNavLockSoon); } catch {}
+  }, 220);
 }
 function startNavLock(target) {
   navLockActive = true;
