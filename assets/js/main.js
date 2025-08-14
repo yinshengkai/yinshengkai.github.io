@@ -783,32 +783,50 @@ function setActiveNav(sel) {
   navMap.forEach((link, key) => { if (link) link.classList.toggle('active', key === sel); });
 }
 const navSections = ['#profile-card', '#experience', '#projects', '#education'];
-function updateActiveNavByAnchor() {
-  const nav = document.querySelector('.shortcuts-wrap');
-  const navH = nav ? nav.getBoundingClientRect().height : 0;
-  const anchorY = window.scrollY + navH + 12; // account for fixed nav height and margin
-  let chosen = navSections[0];
-  navSections.forEach(sel => {
-    const el = document.querySelector(sel);
-    if (!el) return;
-    const topY = window.scrollY + el.getBoundingClientRect().top;
-    if (topY <= anchorY + 1) chosen = sel;
-  });
-  if (chosen && navMap.has(chosen)) setActiveNav(chosen);
+// IntersectionObserver-based scrollspy with click lock until scroll idle
+let navLockActive = false;
+let navIdleTimer = 0;
+function releaseNavLockSoon() {
+  clearTimeout(navIdleTimer);
+  navIdleTimer = setTimeout(() => { navLockActive = false; updateActiveNavByIO(); }, 220);
 }
-window.addEventListener('scroll', updateActiveNavByAnchor, { passive: true });
-window.addEventListener('resize', updateActiveNavByAnchor);
-updateActiveNavByAnchor();
-// Also reflect clicks and hash changes immediately
+function startNavLock(target) {
+  navLockActive = true;
+  setActiveNav(target);
+  clearTimeout(navIdleTimer);
+  window.addEventListener('scroll', releaseNavLockSoon, { passive: true, once: false });
+  releaseNavLockSoon();
+}
+const navRatios = new Map();
+function updateActiveNavByIO() {
+  if (navLockActive) return;
+  let bestSel = null, best = 0;
+  navRatios.forEach((ratio, sel) => { if (ratio > best) { best = ratio; bestSel = sel; } });
+  if (bestSel) setActiveNav(bestSel);
+}
+const navObserver = (typeof window !== 'undefined' && 'IntersectionObserver' in window)
+  ? new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        const id = en.target.getAttribute('id');
+        const sel = id ? `#${id}` : null;
+        if (sel && navMap.has(sel)) navRatios.set(sel, en.intersectionRatio || 0);
+      });
+      updateActiveNavByIO();
+    }, { root: null, rootMargin: '-45% 0px -45% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] })
+  : null;
+if (navObserver) {
+  navSections.forEach(sel => { const el = document.querySelector(sel); if (el) navObserver.observe(el); });
+}
+// Reflect clicks and hash changes immediately and lock until scroll idle
 document.querySelectorAll('.shortcut-link').forEach(a => {
   a.addEventListener('click', () => {
     const href = a.getAttribute('href');
-    if (href && navMap.has(href)) setActiveNav(href);
+    if (href && navMap.has(href)) startNavLock(href);
   });
 });
 window.addEventListener('hashchange', () => {
   const h = location.hash;
-  if (h && navMap.has(h)) setActiveNav(h);
+  if (h && navMap.has(h)) startNavLock(h);
 });
 
 // Scroll indicator
