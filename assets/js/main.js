@@ -306,6 +306,19 @@ function displayTitle(title) {
   return String(title).replace(/\s*\([^)]*\)\s*$/, '');
 }
 
+function stripHTML(html = '') {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = String(html);
+  return tmp.textContent || tmp.innerText || '';
+}
+
+function getPreview(p) {
+  if (p && p.descriptionHTML) return stripHTML(p.descriptionHTML);
+  if (p && p.description) return String(p.description);
+  if (p && p.summary) return String(p.summary);
+  return '';
+}
+
 function isPresent(period) {
   const end = (period && period.end) || '';
   return String(end).toLowerCase() === 'present';
@@ -332,7 +345,7 @@ projects.forEach((p, i) => {
 
   const desc = document.createElement("p");
   desc.className = "project-desc";
-  desc.textContent = p.summary;
+  desc.textContent = getPreview(p);
 
   const meta = document.createElement("div");
   meta.className = "project-meta";
@@ -485,7 +498,7 @@ const sheetBody = document.querySelector('#project-sheet .sheet-body');
 const sheetRange = $("#sheet-range");
 const sheetTags = $("#sheet-tags");
 const sheetBackdrop = sheet.querySelector("[data-close]");
-const sheetClose = sheet.querySelector(".icon.close");
+const sheetClose = sheet.querySelector(".close");
 
 const slider = $("#sheet-slider");
 const sliderTrack = $("#slider-track");
