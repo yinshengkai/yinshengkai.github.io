@@ -520,6 +520,7 @@ let sliderState = {
   media: [],
   typeTimer: 0,
 };
+let savedScrollY = 0;
 
 // Scroll lock via event blockers (keeps scrollbar width stable)
 const isSheetVisible = () => sheet && sheet.getAttribute('aria-hidden') === 'false';
@@ -608,8 +609,16 @@ function openSheet(project) {
       sheetBody.append(cta);
     }
   } catch { }
-  // Keep layout as-is; block background scroll via event listeners (no scrollbar removal)
-  document.documentElement.classList.add('modal-open');
+  // Robust scroll lock: capture scroll and fix body BEFORE applying classes to avoid jumps
+  try {
+    savedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${savedScrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+  } catch {}
+  // Block background scroll via CSS class (body only)
   document.body.classList.add('modal-open');
   // Focus the close button for accessibility
   setTimeout(() => { try { sheetClose.focus({ preventScroll: true }); } catch { try { sheetClose.focus(); } catch { } } }, 0);
@@ -627,12 +636,29 @@ function closeSheet() {
   sliderTrack.innerHTML = ""; sliderDots.innerHTML = ""; sliderProgress.style.transform = `scaleX(0)`;
   activeProject = null;
   document.removeEventListener("keydown", escToClose);
-  document.documentElement.classList.remove('modal-open');
   document.body.classList.remove('modal-open');
+  // Restore scroll without jumping to top
+  try {
+    const root = document.documentElement;
+    const prev = root.style.scrollBehavior;
+    root.style.scrollBehavior = 'auto';
+    // Unfix body and restore scroll position
+    document.body.style.position = '';
+    const y = savedScrollY || 0;
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    window.scrollTo(0, y);
+    // restore scroll-behavior next tick
+    setTimeout(() => { root.style.scrollBehavior = prev; }, 0);
+  } catch {}
   document.removeEventListener('touchmove', touchBlocker, { passive: false });
   window.removeEventListener('wheel', wheelBlocker, { passive: false });
   document.removeEventListener('keydown', keyBlocker, true);
-  if (lastTrigger) lastTrigger.focus();
+  if (lastTrigger && lastTrigger.focus) {
+    try { lastTrigger.focus({ preventScroll: true }); } catch { try { lastTrigger.focus(); } catch {} }
+  }
 }
 const escToClose = (e) => { if (e.key === "Escape") closeSheet(); };
 

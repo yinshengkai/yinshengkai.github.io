@@ -26,8 +26,13 @@
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 html { scroll-behavior: smooth; scrollbar-gutter: stable both-edges; overflow-y: scroll; }
-/* Prevent background scroll when modal/sheet is open (handled via JS event blockers now) */
-/* html.modal-open, body.modal-open { overflow: hidden; } */
+/* Hard lock background scroll when project sheet is open (desktop + mobile) */
+body.modal-open {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+  touch-action: none;
+  height: 100%;
+}
 /* Prevent background scroll while loading */
 html.loading, body.loading { overflow: hidden; }
 /* Prevent background scroll while dev warning is shown */
