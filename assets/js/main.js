@@ -29,7 +29,7 @@ const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
     document.documentElement.classList.remove('loading');
     document.body.classList.remove('loading');
     // notify others that loader is done (for reveal timing)
-    try { window.dispatchEvent(new Event('loader:done')); } catch {}
+    try { window.dispatchEvent(new Event('loader:done')); } catch { }
     setTimeout(() => loader.parentNode && loader.parentNode.removeChild(loader), 700);
   };
 
@@ -130,21 +130,29 @@ function placeholderImage(title, accent = "#6bb6ff", bg = "#0b0f14") {
 
 const projects = [
   {
-    id: "qt-backtester",
-    title: "Quantitative Trading & Backtesting System (Python)",
+    id: "skquant",
+    title: "skQuant",
     period: { start: "2025-05", end: "present" },
-    summary: "Personal system for data pipelines, strategy prototyping, and configurable backtesting.",
-    tags: ["Python", "Backtesting", "Pandas", "NumPy", "ML"],
-    media: [
-      { type: "image", src: placeholderImage("Backtesting System", "#6bb6ff"), alt: "Backtesting dashboard", caption: "Pipelines, strategies, and metrics" },
-      { type: "image", src: placeholderImage("Feature Pipeline", "#18c3a1"), alt: "Feature generation", caption: "Feature generation and preprocessing" },
-      { type: "image", src: placeholderImage("Strategy Engine", "#8d7bff"), alt: "Strategy engine", caption: "Extensible strategy engine" },
+    summary: "Sole developer of a config-driven, end-to-end backtesting that automates data prep, feature engineering, time-aware validation, budgeted optimization, and interactive reporting with reproducible artifacts.",
+    tags: [
+      "Python",
+      "AI/ML",
+      "Statistics",
+      "Time‑Series CV",
+      "HPO",
+      "Preprocessing",
+      "Feature Engineering",
+      "Multithreading",
+      "GPU Acceleration",
     ],
-    description: "Orchestrated robust data acquisition, transformation, and caching. Architected an extensible strategy engine for classical and ML-driven models. Built a highly configurable backtesting environment with granular controls over sourcing, feature engineering, portfolio rules, and execution parameters.",
+    media: [
+      { type: "image", src: placeholderImage("Overview Dashboard", "#6bb6ff"), alt: "Overview dashboard", caption: "Overview Dashboard: High-level run summary with configuration and results highlights." },
+    ],
+    descriptionHTML: `<p>skQuant is a config‑driven, end‑to‑end backtesting framework that runs your pipeline from data preparation and feature engineering to time‑aware validation and budgeted optimization, then produces an interactive report with reproducible artifacts. It enforces bias control with time‑aligned features and strict out‑of‑sample evaluation, accounts for transaction costs and slippage, and scales efficiently with parallel, hardware‑aware execution and smart caching.</p>`,
   },
   {
     id: "vulkan-engine",
-    title: "Custom 3D Game Engine (C++ & Vulkan)",
+    title: "heheEngine 3D",
     period: { start: "2023-09", end: "2024-03" },
     summary: "Year 3 project — scalable Vulkan-based engine with editor, assets, and ECS.",
     tags: ["C++", "Vulkan", "ImGui", "ECS", "RTTR", "Assimp", "Multithreading"],
@@ -153,14 +161,14 @@ const projects = [
       { type: "image", src: placeholderImage("Assets", "#18c3a1"), alt: "Asset pipeline", caption: "Binary asset compilation via Assimp" },
       { type: "image", src: placeholderImage("ECS", "#8d7bff"), alt: "ECS", caption: "Sparse set ECS and multithreading" },
     ],
-    description: "Led a 10-programmer team building a modular engine with a reflection-driven editor (RTTR) for native and Mono scripts, a binary asset pipeline via Assimp, prefab overrides/propagation, hierarchical transforms with quaternions, and a performant sparse-set ECS.",
+    description: "Led a 10-programmer team building a modular engine with a reflection-driven editor for native and Mono scripts, a binary asset pipeline via Assimp, prefab overrides/propagation, hierarchical transforms with quaternions, and a performant sparse-set ECS.",
   },
   {
     id: "blast-off",
-    title: "Blast Off Far Away (C++)",
+    title: "Blast Off Far Away",
     period: { start: "2022-01", end: "2022-04" },
     summary: "Year 1 project on Steam — component-based game with custom UI/graphics.",
-    tags: ["C++", "Alpha Engine", "UI", "Graphics", "Gameplay"],
+    tags: ["C++", "Component-based System", "UI", "Graphics", "Gameplay"],
     media: [
       { type: "image", src: placeholderImage("Blast Off", "#6bb6ff"), alt: "Game UI", caption: "Architecture and UI programming" },
       { type: "image", src: placeholderImage("Gameplay", "#18c3a1"), alt: "Gameplay", caption: "Graphics and gameplay tuning" },
@@ -252,7 +260,7 @@ else setTimeout(revealFallback, 400);
 // Render projects grid
 const grid = $("#projects-grid");
 function displayTitle(title) {
-  return String(title).replace(/\s*\([^)]*\)\s*$/,'');
+  return String(title).replace(/\s*\([^)]*\)\s*$/, '');
 }
 
 function isPresent(period) {
@@ -391,9 +399,9 @@ function createDateBadge(period, color) {
 function createProjectDate(periodObj) {
   const date = document.createElement('div');
   date.className = 'project-date';
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   let s = new Date();
-  try { s = parseYM(periodObj.start || ''); } catch {}
+  try { s = parseYM(periodObj.start || ''); } catch { }
   const sM = months[s.getMonth()];
   const sY = s.getFullYear();
   let eText = 'Present';
@@ -421,7 +429,7 @@ function parsePeriod(period = '') {
 function toMY(s = '') {
   const m = /([A-Za-z]{3,})\s+(\d{4})/i.exec(s);
   if (!m) return { m: s || 'Present', y: '' };
-  const mo = m[1].slice(0,3);
+  const mo = m[1].slice(0, 3);
   const y = m[2];
   return { m: mo, y };
 }
@@ -466,18 +474,18 @@ const withinPanel = (target) => {
 const touchBlocker = (e) => {
   if (!isSheetVisible()) return;
   if (withinPanel(e.target)) return; // allow gestures within sheet
-  try { e.preventDefault(); } catch {}
+  try { e.preventDefault(); } catch { }
 };
 // Wheel (desktop)
 const wheelBlocker = (e) => {
   if (!isSheetVisible()) return;
   if (withinPanel(e.target)) return; // allow wheel inside sheet
-  try { e.preventDefault(); } catch {}
+  try { e.preventDefault(); } catch { }
 };
 // Keys (arrows, page up/down, space, home/end)
 const keyBlocker = (e) => {
   if (!isSheetVisible()) return;
-  const keys = ['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '];
+  const keys = ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '];
   if (!keys.includes(e.key)) return;
   // allow typing in inputs/selects/textareas inside sheet
   const target = e.target;
@@ -506,7 +514,7 @@ function parseYM(s) {
   return new Date(Number(y), Number(m) - 1, 1);
 }
 function formatYM(d) {
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   return `${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
@@ -542,12 +550,12 @@ function openSheet(project) {
       cta.append(a);
       sheetBody.append(cta);
     }
-  } catch {}
+  } catch { }
   // Keep layout as-is; block background scroll via event listeners (no scrollbar removal)
   document.documentElement.classList.add('modal-open');
   document.body.classList.add('modal-open');
   // Focus the close button for accessibility
-  setTimeout(() => { try { sheetClose.focus({ preventScroll: true }); } catch { try { sheetClose.focus(); } catch {} } }, 0);
+  setTimeout(() => { try { sheetClose.focus({ preventScroll: true }); } catch { try { sheetClose.focus(); } catch { } } }, 0);
   document.addEventListener("keydown", escToClose);
   // Block background scrolling while the sheet is open (multi-input)
   document.addEventListener('touchmove', touchBlocker, { passive: false });
@@ -861,13 +869,13 @@ function updateActiveNavByIO() {
 }
 const navObserver = (typeof window !== 'undefined' && 'IntersectionObserver' in window)
   ? new IntersectionObserver((entries) => {
-      entries.forEach((en) => {
-        const id = en.target.getAttribute('id');
-        const sel = id ? `#${id}` : null;
-        if (sel && navMap.has(sel)) navRatios.set(sel, en.intersectionRatio || 0);
-      });
-      updateActiveNavByIO();
-    }, { root: null, rootMargin: '-45% 0px -45% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] })
+    entries.forEach((en) => {
+      const id = en.target.getAttribute('id');
+      const sel = id ? `#${id}` : null;
+      if (sel && navMap.has(sel)) navRatios.set(sel, en.intersectionRatio || 0);
+    });
+    updateActiveNavByIO();
+  }, { root: null, rootMargin: '-45% 0px -45% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] })
   : null;
 if (navObserver) {
   navSections.forEach(sel => { const el = document.querySelector(sel); if (el) navObserver.observe(el); });
@@ -949,6 +957,6 @@ if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, b
 // Utility: initials from org
 function initials(name = '') {
   const parts = name.replace(/\(.+?\)/g, '').split(/[\s—-]+/).filter(Boolean);
-  const letters = parts.slice(0,3).map(p => p[0].toUpperCase()).join('');
+  const letters = parts.slice(0, 3).map(p => p[0].toUpperCase()).join('');
   return letters || '•';
 }
