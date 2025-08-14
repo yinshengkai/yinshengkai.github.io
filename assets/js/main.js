@@ -399,6 +399,9 @@ function openSheet(project) {
   });
   buildSlider(project.media || []);
   sheet.setAttribute("aria-hidden", "false");
+  // Lock background scroll on mobile
+  document.documentElement.classList.add('modal-open');
+  document.body.classList.add('modal-open');
   // Focus the close button for accessibility
   setTimeout(() => sheetClose.focus(), 0);
   document.addEventListener("keydown", escToClose);
@@ -410,6 +413,8 @@ function closeSheet() {
   sliderTrack.innerHTML = ""; sliderDots.innerHTML = ""; sliderProgress.style.transform = `scaleX(0)`;
   activeProject = null;
   document.removeEventListener("keydown", escToClose);
+  document.documentElement.classList.remove('modal-open');
+  document.body.classList.remove('modal-open');
   if (lastTrigger) lastTrigger.focus();
 }
 const escToClose = (e) => { if (e.key === "Escape") closeSheet(); };
@@ -430,7 +435,7 @@ function buildSlider(media) {
     if (m.type === "video") {
       el = document.createElement("video"); el.src = m.src; el.controls = true; el.playsInline = true; el.muted = true; el.setAttribute("preload", "metadata");
     } else {
-      el = document.createElement("img"); el.src = m.src; el.alt = m.alt || "";
+      el = document.createElement("img"); el.src = m.src; el.alt = m.alt || ""; el.loading = 'lazy'; el.decoding = 'async';
     }
     slide.append(el);
     if (m.caption) {
@@ -464,6 +469,32 @@ function prev() { goTo(sliderState.i - 1); }
 
 btnNext.addEventListener("click", () => next());
 btnPrev.addEventListener("click", () => prev());
+
+// Basic swipe gestures for slider (mobile-friendly)
+let touchStartX = 0, touchStartY = 0;
+let touchEndX = 0, touchEndY = 0;
+function onTouchStart(e) {
+  const t = e.touches && e.touches[0];
+  if (!t) return;
+  touchStartX = t.clientX; touchStartY = t.clientY;
+}
+function onTouchMove(e) {
+  const t = e.touches && e.touches[0];
+  if (!t) return;
+  touchEndX = t.clientX; touchEndY = t.clientY;
+}
+function onTouchEnd() {
+  const dx = (touchEndX || touchStartX) - touchStartX;
+  const dy = (touchEndY || touchStartY) - touchStartY;
+  if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+    if (dx < 0) next(); else prev();
+    restartAutoplay();
+  }
+  touchStartX = touchStartY = touchEndX = touchEndY = 0;
+}
+sliderTrack.addEventListener('touchstart', onTouchStart, { passive: true });
+sliderTrack.addEventListener('touchmove', onTouchMove, { passive: true });
+sliderTrack.addEventListener('touchend', onTouchEnd);
 
 // Keyboard navigation inside sheet
 sheet.addEventListener("keydown", (e) => {
