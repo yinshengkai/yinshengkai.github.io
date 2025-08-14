@@ -570,6 +570,7 @@ function buildSlider(media) {
     slide.append(el);
     if (m.caption) {
       const cap = document.createElement("div"); cap.className = "caption"; cap.textContent = m.caption; slide.append(cap);
+      slide.classList.add('has-caption');
     }
     sliderTrack.append(slide);
 
