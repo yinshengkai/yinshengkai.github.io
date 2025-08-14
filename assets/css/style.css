@@ -177,7 +177,9 @@ body {
 .glass.micro { border-radius: var(--radius-sm); padding: 12px 14px; display: inline-block; }
 
 /* Header profile card */
-.site-header { padding-top: 56px; }
+.site-header { padding-top: calc(96px + env(safe-area-inset-top)); }
+/* When navigating to the profile card via hash, keep it clear of the fixed navbar */
+#profile-card { scroll-margin-top: calc(110px + env(safe-area-inset-top)); }
 .profile { display: grid; grid-template-columns: 160px 1fr; gap: 20px; padding: 46px 22px 22px; align-items: center; }
 .avatar {
   width: 160px; height: 160px; border-radius: 28px;
@@ -293,11 +295,35 @@ body {
 .project-desc, .timeline-note { overflow-wrap: anywhere; }
 .timeline-role .chip.ongoing { margin-left: 8px; vertical-align: middle; }
 .ongoing-pill { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; margin-left: 8px; border-radius: 999px; font-size: 11px; color: #0b0f14; background: linear-gradient(180deg, #b7ffcf, #7dffb0); border: none; box-shadow: inset 0 1px rgba(255,255,255,0.25); }
+/* Remove background highlight from ongoing tiles (keep pill labels only) */
 .timeline-card.ongoing,
-.project-card.ongoing { 
-  box-shadow: 0 8px 24px rgba(107,182,255,0.35), 0 10px 26px rgba(0,0,0,0.4), inset 0 1px rgba(255,255,255,0.18);
-}
+.project-card.ongoing { box-shadow: none; }
 .chip.ongoing { background: linear-gradient(180deg, rgba(24,195,161,0.35), rgba(24,195,161,0.18)); color: #eafff8; box-shadow: inset 0 1px rgba(255,255,255,0.16); }
+
+/* Emphasize the profile tile instead */
+#profile-card {
+  position: relative;
+  /* Stronger glow + subtle accent ring */
+  box-shadow:
+    0 12px 34px rgba(0,0,0,0.55),
+    0 0 0 2px rgba(107,182,255,0.32),
+    0 0 28px rgba(107,182,255,0.20),
+    0 0 22px rgba(141,123,255,0.18),
+    inset 0 1px rgba(255,255,255,0.12);
+}
+#profile-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 2px; /* ring thickness */
+  border-radius: var(--radius);
+  pointer-events: none;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.28;
+}
 
 /* Sliding sheet */
 .sheet { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 80; overscroll-behavior: contain; }
