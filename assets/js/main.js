@@ -432,6 +432,38 @@ let sliderState = {
   paused: false,
 };
 
+// Scroll lock via event blockers (keeps scrollbar width stable)
+const isSheetVisible = () => sheet && sheet.getAttribute('aria-hidden') === 'false';
+const withinPanel = (target) => {
+  const panel = sheet && sheet.querySelector('.sheet-panel');
+  return !!(panel && panel.contains(target));
+};
+// Touch (mobile)
+const touchBlocker = (e) => {
+  if (!isSheetVisible()) return;
+  if (withinPanel(e.target)) return; // allow gestures within sheet
+  try { e.preventDefault(); } catch {}
+};
+// Wheel (desktop)
+const wheelBlocker = (e) => {
+  if (!isSheetVisible()) return;
+  if (withinPanel(e.target)) return; // allow wheel inside sheet
+  try { e.preventDefault(); } catch {}
+};
+// Keys (arrows, page up/down, space, home/end)
+const keyBlocker = (e) => {
+  if (!isSheetVisible()) return;
+  const keys = ['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '];
+  if (!keys.includes(e.key)) return;
+  // allow typing in inputs/selects/textareas inside sheet
+  const target = e.target;
+  const tag = (target && target.tagName) ? target.tagName.toLowerCase() : '';
+  const editable = target && (target.isContentEditable || tag === 'input' || tag === 'textarea' || tag === 'select');
+  if (editable) return;
+  if (withinPanel(target)) return; // let the sheet handle it
+  e.preventDefault();
+};
+
 // (reveal observer defined earlier)
 
 function formatPeriod(period) {
@@ -471,12 +503,16 @@ function openSheet(project) {
   });
   buildSlider(project.media || []);
   sheet.setAttribute("aria-hidden", "false");
-  // Lock background scroll on mobile
+  // Keep layout as-is; block background scroll via event listeners (no scrollbar removal)
   document.documentElement.classList.add('modal-open');
   document.body.classList.add('modal-open');
   // Focus the close button for accessibility
-  setTimeout(() => sheetClose.focus(), 0);
+  setTimeout(() => { try { sheetClose.focus({ preventScroll: true }); } catch { try { sheetClose.focus(); } catch {} } }, 0);
   document.addEventListener("keydown", escToClose);
+  // Block background scrolling while the sheet is open (multi-input)
+  document.addEventListener('touchmove', touchBlocker, { passive: false });
+  window.addEventListener('wheel', wheelBlocker, { passive: false });
+  document.addEventListener('keydown', keyBlocker, true);
 }
 
 function closeSheet() {
@@ -487,6 +523,9 @@ function closeSheet() {
   document.removeEventListener("keydown", escToClose);
   document.documentElement.classList.remove('modal-open');
   document.body.classList.remove('modal-open');
+  document.removeEventListener('touchmove', touchBlocker, { passive: false });
+  window.removeEventListener('wheel', wheelBlocker, { passive: false });
+  document.removeEventListener('keydown', keyBlocker, true);
   if (lastTrigger) lastTrigger.focus();
 }
 const escToClose = (e) => { if (e.key === "Escape") closeSheet(); };

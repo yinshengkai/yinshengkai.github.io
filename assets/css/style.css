@@ -25,9 +25,9 @@
 
 * { box-sizing: border-box; }
 html, body { height: 100%; }
-html { scroll-behavior: smooth; }
-/* Prevent background scroll when modal/sheet is open */
-html.modal-open, body.modal-open { overflow: hidden; }
+html { scroll-behavior: smooth; scrollbar-gutter: stable both-edges; overflow-y: scroll; }
+/* Prevent background scroll when modal/sheet is open (handled via JS event blockers now) */
+/* html.modal-open, body.modal-open { overflow: hidden; } */
 /* Prevent background scroll while loading */
 html.loading, body.loading { overflow: hidden; }
 body {
@@ -194,11 +194,11 @@ body {
 .chip.ongoing { background: linear-gradient(180deg, rgba(24,195,161,0.35), rgba(24,195,161,0.18)); border-color: rgba(24,195,161,0.55); color: #eafff8; }
 
 /* Sliding sheet */
-.sheet { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 50; }
+.sheet { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 50; overscroll-behavior: contain; }
 .sheet[aria-hidden="false"] { pointer-events: auto; }
 .sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.45); opacity: 0; transition: opacity var(--speed-slow) ease; }
 .sheet[aria-hidden="false"] .sheet-backdrop { opacity: 1; }
-.sheet-panel { width: min(980px, calc(100% - 24px)); max-height: min(88vh, 900px); border-radius: var(--radius); transform: translateY(6px) scale(.98); opacity: 0; transition: transform var(--speed-slow) cubic-bezier(.2,.8,.2,1), opacity var(--speed); overflow: clip; }
+.sheet-panel { width: min(980px, calc(100% - 24px)); max-height: min(88vh, 900px); border-radius: var(--radius); transform: translateY(6px) scale(.98); opacity: 0; transition: transform var(--speed-slow) cubic-bezier(.2,.8,.2,1), opacity var(--speed); overflow: clip; overscroll-behavior: contain; }
 .sheet[aria-hidden="false"] .sheet-panel { transform: translateY(0) scale(1); opacity: 1; }
 .sheet-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--border); backdrop-filter: blur(6px); position: sticky; top: 0; z-index: 2; }
 .sheet-body { padding: 12px 14px 18px; display: grid; gap: 12px; }
