@@ -147,6 +147,8 @@ window.addEventListener('gate:open', () => {
   ack.addEventListener('click', hide, { once: true });
 })();
 
+// (Flags now use SVG as the primary method; no platform detection needed.)
+
 // Sample data + placeholder media generator
 function placeholderImage(title, accent = "#6bb6ff", bg = "#0b0f14") {
   const svg = `<?xml version='1.0' encoding='UTF-8'?>

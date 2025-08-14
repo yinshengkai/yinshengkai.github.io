@@ -130,6 +130,14 @@ body {
 .title { margin: 2px 0 4px; font-size: clamp(26px, 4.6vw, 36px); font-weight: 700; }
 .subtitle { margin: 0 0 8px; color: var(--muted); }
 .bio { margin: 8px 0 14px; color: #cdd7e1; }
+.profile-flair { margin: 8px 0 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+.chip.flair {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  background: linear-gradient(180deg, rgba(141,123,255,0.22), rgba(107,182,255,0.12));
+  color: #e9f3ff;
+}
+.chip.flair .sep { margin: 0 6px; opacity: .7; }
+.flag-svg { display: inline-block; vertical-align: -2px; margin-right: 6px; border-radius: 2px; box-shadow: inset 0 1px rgba(255,255,255,0.25), 0 6px 16px rgba(0,0,0,0.25); }
 .links { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .btn { appearance: none; border: none; color: var(--text); text-decoration: none; padding: 10px 14px; border-radius: 12px; transition: transform var(--speed), background var(--speed); background: var(--surface); box-shadow: 0 8px 24px rgba(0,0,0,0.28), inset 0 1px rgba(255,255,255,0.12); }
 .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(0,0,0,0.32), inset 0 1px rgba(255,255,255,0.18); }
