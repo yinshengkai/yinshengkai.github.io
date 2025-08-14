@@ -359,11 +359,12 @@ function createDateBadge(period, color) {
   date.className = 'timeline-date';
   if (color) date.style.setProperty('--logo-color', color);
   const { start, end } = parsePeriod(period);
-  const inner = document.createElement('div'); inner.className = 'date-inner';
-  const s = document.createElement('div'); s.className = 'date-line'; s.innerHTML = `<span class="m">${start.m}</span> <span class="y">${start.y}</span>`;
-  const dash = document.createElement('div'); dash.className = 'date-dash'; dash.textContent = '–';
-  const e = document.createElement('div'); e.className = 'date-line'; e.innerHTML = `<span class="m">${end.m}</span> <span class="y">${end.y}</span>`;
-  inner.append(s, dash, e); date.append(inner);
+  const text = document.createElement('span');
+  text.className = 'pd-text';
+  const endIsPresent = !end.y || /present/i.test(String(end.m || ''));
+  const endHTML = endIsPresent ? 'Present' : `<span class="m">${end.m}</span> <span class="y">${end.y}</span>`;
+  text.innerHTML = `<span class="m">${start.m}</span> <span class="y">${start.y}</span> <span class="date-dash">–</span> ${endHTML}`;
+  date.append(text);
   return date;
 }
 
