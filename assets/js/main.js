@@ -142,7 +142,8 @@ const projects = [
       { type: "image", src: placeholderImage("Blast Off", "#6bb6ff"), alt: "Game UI", caption: "Architecture and UI programming" },
       { type: "image", src: placeholderImage("Gameplay", "#18c3a1"), alt: "Gameplay", caption: "Graphics and gameplay tuning" },
     ],
-    descriptionHTML: "Architected a component system around DigiPen's Alpha Engine with transform hierarchies, led graphics programming and UI, and collaborated closely on gameplay. Available on Steam: <a href='http://s.team/a/2010150' target='_blank' rel='noopener'>http://s.team/a/2010150</a>",
+    descriptionHTML: "Architected a component system around DigiPen's Alpha Engine with transform hierarchies, led graphics programming and UI, and collaborated closely on gameplay.",
+    cta: { href: 'http://s.team/a/2010150', label: 'View on Steam' },
   },
 ];
 
@@ -410,6 +411,7 @@ function toMY(s = '') {
 const sheet = $("#project-sheet");
 const sheetTitle = $("#sheet-title");
 const sheetDesc = $("#sheet-desc");
+const sheetBody = document.querySelector('#project-sheet .sheet-body');
 const sheetRange = $("#sheet-range");
 const sheetTags = $("#sheet-tags");
 const sheetBackdrop = sheet.querySelector("[data-close]");
@@ -496,14 +498,30 @@ function openSheet(project) {
   } else {
     sheetDesc.textContent = project.description || project.summary || "";
   }
-  const { display } = formatPeriod(project.period || {});
-  sheetRange.textContent = display;
+  // Remove date range from project sheet
+  if (sheetRange) { sheetRange.textContent = ''; sheetRange.style.display = 'none'; }
   sheetTags.innerHTML = "";
   (project.tags || []).forEach((t) => {
     const el = document.createElement("span"); el.className = "tag"; el.textContent = t; sheetTags.append(el);
   });
   buildSlider(project.media || []);
   sheet.setAttribute("aria-hidden", "false");
+  // Insert CTA, if any
+  try {
+    const prev = document.getElementById('sheet-cta');
+    if (prev && prev.parentNode) prev.parentNode.removeChild(prev);
+    if (project.cta && project.cta.href && sheetBody) {
+      const cta = document.createElement('div');
+      cta.id = 'sheet-cta';
+      cta.className = 'sheet-cta';
+      const a = document.createElement('a');
+      a.className = 'btn primary';
+      a.href = project.cta.href; a.target = '_blank'; a.rel = 'noopener';
+      a.textContent = project.cta.label || 'Learn more';
+      cta.append(a);
+      sheetBody.append(cta);
+    }
+  } catch {}
   // Keep layout as-is; block background scroll via event listeners (no scrollbar removal)
   document.documentElement.classList.add('modal-open');
   document.body.classList.add('modal-open');
