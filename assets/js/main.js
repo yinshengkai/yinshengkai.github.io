@@ -53,18 +53,41 @@ const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   rafId = requestAnimationFrame(tick);
 })();
 
-// Reveal-on-scroll helper (defers "in" until loader completes)
+// Reveal-on-scroll helper (staggered, bidirectional: in when visible, out when not)
 const supportsIO = typeof window !== 'undefined' && 'IntersectionObserver' in window;
 const revealQueue = [];
 const isLoading = () => document.documentElement.classList.contains('loading');
+
+function computeStaggerIndex(el) {
+  const parent = el && el.parentElement;
+  if (!parent) return 0;
+  const kids = Array.from(parent.children).filter(c => c.classList && c.classList.contains('reveal'));
+  const idx = kids.indexOf(el);
+  return Math.max(0, idx);
+}
+function applyReveal(target, entering) {
+  if (!target) return;
+  if (entering) {
+    const idx = computeStaggerIndex(target);
+    const delay = Math.min(idx, 12) * 70; // cap long lists
+    target.style.setProperty('--reveal-delay', delay + 'ms');
+    target.classList.add('in');
+  } else {
+    target.classList.remove('in');
+  }
+}
+
 const observer = supportsIO ? new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting) {
       if (isLoading()) {
         revealQueue.push(entry.target);
       } else {
-        entry.target.classList.add('in');
+        applyReveal(entry.target, true);
       }
+    } else {
+      // remove when out of view to support bidirectional fly-in/fly-out
+      applyReveal(entry.target, false);
     }
   });
 }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 }) : null;
@@ -215,11 +238,11 @@ const yearEl = $("#year"); if (yearEl) yearEl.textContent = new Date().getFullYe
   });
 })();
 
-// Observe any static reveal elements now
+// Observe any static reveal elements now (only items, not whole sections)
 $$('.reveal').forEach(el => reveal(el));
 
-// Observe existing reveal elements and all sections
-$$('.reveal, section.container.section').forEach(el => reveal(el));
+// Observe existing reveal elements (items only)
+$$('.reveal').forEach(el => reveal(el));
 
 // Safety: if reveal observer fails, force show shortly after loader completes
 function revealFallback() {
@@ -242,8 +265,7 @@ function isPresent(period) {
 
 projects.forEach((p, i) => {
   const card = document.createElement("article");
-  card.className = "project-card glass card-enter reveal";
-  card.style.animationDelay = `${90 + i * 30}ms`;
+  card.className = "project-card glass reveal";
   card.setAttribute("tabindex", "0");
   card.setAttribute("role", "button");
   card.setAttribute("aria-label", `${displayTitle(p.title)} — open details`);
