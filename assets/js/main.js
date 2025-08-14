@@ -26,6 +26,9 @@ const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
     if (rafId) cancelAnimationFrame(rafId);
     setPct(100);
     loader.classList.add('hide');
+    // Keep the page gated until user acknowledges the dev warning
+    document.documentElement.classList.add('gated');
+    document.body.classList.add('gated');
     document.documentElement.classList.remove('loading');
     document.body.classList.remove('loading');
     // notify others that loader is done (for reveal timing)
@@ -56,7 +59,10 @@ const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 // Reveal-on-scroll helper (staggered, bidirectional: in when visible, out when not)
 const supportsIO = typeof window !== 'undefined' && 'IntersectionObserver' in window;
 const revealQueue = [];
-const isLoading = () => document.documentElement.classList.contains('loading');
+const isLoading = () => {
+  const de = document.documentElement;
+  return de.classList.contains('loading') || de.classList.contains('gated');
+};
 
 function computeStaggerIndex(el) {
   const parent = el && el.parentElement;
@@ -79,7 +85,9 @@ function applyReveal(target, entering) {
 
 const observer = supportsIO ? new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
-    if (entry.isIntersecting) {
+    const ratio = entry.intersectionRatio || 0;
+    const visible = entry.isIntersecting && ratio > 0.14; // require >14% visible
+    if (visible) {
       if (isLoading()) {
         revealQueue.push(entry.target);
       } else {
@@ -90,17 +98,52 @@ const observer = supportsIO ? new IntersectionObserver((entries) => {
       applyReveal(entry.target, false);
     }
   });
-}, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 }) : null;
+}, { rootMargin: '0px 0px -10% 0px', threshold: [0, 0.1, 0.2, 0.3, 0.5, 0.75, 1] }) : null;
 const reveal = (el) => { if (!el) return; if (observer) observer.observe(el); else el.classList.add('in'); };
-window.addEventListener('loader:done', () => {
-  const DELAY = 150; // tiny delay after loader fade begins
+function flushRevealQueue(delay = 150) {
   if (revealQueue.length) {
     setTimeout(() => {
       revealQueue.forEach(el => el.classList.add('in'));
       revealQueue.length = 0;
-    }, DELAY);
+    }, delay);
   }
+}
+// Flush when the gate opens (after user acknowledges)
+window.addEventListener('gate:open', () => flushRevealQueue(150));
+
+// Ensure profile card reveals and delay navbar appearance after gate opens
+window.addEventListener('gate:open', () => {
+  // reveal profile card if still pending
+  const pc = document.getElementById('profile-card');
+  if (pc && !pc.classList.contains('in')) {
+    // small delay to feel like other sections
+    setTimeout(() => { try { applyReveal(pc, true); } catch { pc.classList.add('in'); } }, 120);
+  }
+  // delay nav bar show a bit for a softer entrance
+  setTimeout(() => document.body.classList.remove('nav-hidden'), 450);
 });
+
+// Development warning overlay logic
+(function initDevWarning() {
+  const warn = document.getElementById('dev-warning');
+  const ack = document.getElementById('warn-ack');
+  if (!warn || !ack) return;
+  const show = () => {
+    warn.setAttribute('aria-hidden', 'false');
+    warn.classList.add('show');
+  };
+  const hide = () => {
+    warn.classList.remove('show');
+    warn.setAttribute('aria-hidden', 'true');
+    // allow content to animate in
+    document.documentElement.classList.remove('gated');
+    document.body.classList.remove('gated');
+    try { window.dispatchEvent(new Event('gate:open')); } catch { }
+    setTimeout(() => warn.parentNode && warn.parentNode.removeChild(warn), 700);
+  };
+  window.addEventListener('loader:done', show, { once: true });
+  ack.addEventListener('click', hide, { once: true });
+})();
 
 // Sample data + placeholder media generator
 function placeholderImage(title, accent = "#6bb6ff", bg = "#0b0f14") {
@@ -249,12 +292,12 @@ const yearEl = $("#year"); if (yearEl) yearEl.textContent = new Date().getFullYe
 // Observe existing reveal elements (items only)
 $$('.reveal').forEach(el => reveal(el));
 
-// Safety: if reveal observer fails, force show shortly after loader completes
+// Safety: if reveal observer fails, force show shortly after gate opens
 function revealFallback() {
   const pending = $$('.reveal:not(.in)');
   if (pending.length > 0) pending.forEach(el => el.classList.add('in'));
 }
-if (isLoading()) window.addEventListener('loader:done', () => setTimeout(revealFallback, 180));
+if (isLoading()) window.addEventListener('gate:open', () => setTimeout(revealFallback, 180));
 else setTimeout(revealFallback, 400);
 
 // Render projects grid

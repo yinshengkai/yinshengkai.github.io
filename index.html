@@ -16,13 +16,25 @@
     </style>
     <link rel="stylesheet" href="assets/css/style.css" />
   </head>
-  <body class="loading">
+  <body class="loading nav-hidden">
     <!-- Full-screen loader -->
     <div id="loader" class="loader-overlay" aria-hidden="false" role="status" aria-live="polite">
       <div class="loader-inner">
         <div class="loader-spinner" aria-hidden="true"></div>
         <div class="loader-brand" aria-label="Loading Yin Shengkai portfolio">YSK</div>
         <div id="loader-percent" class="loader-percent" aria-label="Loading progress">0%</div>
+      </div>
+    </div>
+    <!-- Post-load development warning overlay -->
+    <div id="dev-warning" class="warn-overlay" aria-hidden="true" role="dialog" aria-labelledby="warn-title" aria-describedby="warn-desc">
+      <div class="warn-card">
+        <div id="warn-title" class="warn-hero" aria-hidden="true">Heads Up</div>
+        <p id="warn-desc" class="warn-sub">This site is under active development. Content may be incomplete or inaccurate.</p>
+        <button id="warn-ack" class="icon-link warn-ack" aria-label="Acknowledge and continue" title="Acknowledge">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path fill="currentColor" d="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59z"/>
+          </svg>
+        </button>
       </div>
     </div>
     <!-- Top shortcuts -->
@@ -56,7 +68,7 @@
     </div>
 
     <header class="site-header container">
-      <div class="profile glass card-enter reveal" id="profile-card">
+      <div class="profile glass reveal" id="profile-card">
         <div class="avatar" role="img" aria-label="Profile avatar"></div>
         <div class="profile-body" id="profile">
           <h1 class="title" id="site-title">Yin Shengkai</h1>
