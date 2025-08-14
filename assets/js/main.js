@@ -423,6 +423,7 @@ const sliderProgress = $("#slider-progress");
 const btnPrev = $("#slider-prev");
 const btnNext = $("#slider-next");
 const sliderDots = $("#slider-dots");
+const sliderCaption = $("#slider-caption");
 
 let activeProject = null;
 let lastTrigger = null;
@@ -433,6 +434,7 @@ let sliderState = {
   raf: 0,
   t0: 0,
   paused: false,
+  media: [],
 };
 
 // Scroll lock via event blockers (keeps scrollbar width stable)
@@ -557,6 +559,7 @@ function buildSlider(media) {
   sliderDots.innerHTML = "";
   sliderState.i = 0;
   sliderState.count = media.length;
+  sliderState.media = media.slice();
 
   media.forEach((m, idx) => {
     const slide = document.createElement("div");
@@ -568,10 +571,6 @@ function buildSlider(media) {
       el = document.createElement("img"); el.src = m.src; el.alt = m.alt || ""; el.loading = 'lazy'; el.decoding = 'async';
     }
     slide.append(el);
-    if (m.caption) {
-      const cap = document.createElement("div"); cap.className = "caption"; cap.textContent = m.caption; slide.append(cap);
-      slide.classList.add('has-caption');
-    }
     sliderTrack.append(slide);
 
     const dot = document.createElement("div"); dot.className = "dot"; if (idx === 0) dot.classList.add("active");
@@ -580,6 +579,7 @@ function buildSlider(media) {
   });
 
   updateTrack();
+  updateCaption();
   if (!prefersReducedMotion) startAutoplay();
 }
 
@@ -589,9 +589,17 @@ function updateTrack() {
   $$(".dot", sliderDots).forEach((d, j) => d.classList.toggle("active", j === sliderState.i));
 }
 
+function updateCaption() {
+  if (!sliderCaption) return;
+  const m = sliderState.media && sliderState.media[sliderState.i];
+  const txt = (m && m.caption) ? m.caption : '';
+  sliderCaption.textContent = txt;
+}
+
 function goTo(i, user = false) {
   sliderState.i = (i + sliderState.count) % sliderState.count;
   updateTrack();
+  updateCaption();
   if (user) restartAutoplay();
 }
 
