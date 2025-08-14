@@ -178,7 +178,6 @@ const projects = [
     id: "skquant",
     title: "skQuant",
     period: { start: "2025-05", end: "present" },
-    summary: "Sole developer of a config-driven, end-to-end backtesting that automates data prep, feature engineering, time-aware validation, budgeted optimization, and interactive reporting with reproducible artifacts.",
     tags: [
       "Python",
       "AI/ML",
@@ -199,7 +198,6 @@ const projects = [
     id: "vulkan-engine",
     title: "heheEngine 3D",
     period: { start: "2023-09", end: "2024-03" },
-    summary: "Year 3 project — scalable Vulkan-based engine with editor, assets, and ECS.",
     tags: ["C++", "Vulkan", "ImGui", "ECS", "RTTR", "Assimp", "Multithreading"],
     media: [
       { type: "image", src: placeholderImage("Engine Editor", "#6bb6ff"), alt: "Editor UI", caption: "ImGui editor with reflection" },
@@ -212,7 +210,6 @@ const projects = [
     id: "blast-off",
     title: "Blast Off Far Away",
     period: { start: "2022-01", end: "2022-04" },
-    summary: "Year 1 project on Steam — component-based game with custom UI/graphics.",
     tags: ["C++", "Component-based System", "UI", "Graphics", "Gameplay"],
     media: [
       { type: "image", src: placeholderImage("Blast Off", "#6bb6ff"), alt: "Game UI", caption: "Architecture and UI programming" },
@@ -519,6 +516,7 @@ let sliderState = {
   t0: 0,
   paused: false,
   media: [],
+  typeTimer: 0,
 };
 
 // Scroll lock via event blockers (keeps scrollbar width stable)
@@ -622,6 +620,7 @@ function openSheet(project) {
 
 function closeSheet() {
   stopAutoplay();
+  if (sliderState.typeTimer) { clearInterval(sliderState.typeTimer); sliderState.typeTimer = 0; }
   sheet.setAttribute("aria-hidden", "true");
   sliderTrack.innerHTML = ""; sliderDots.innerHTML = ""; sliderProgress.style.transform = `scaleX(0)`;
   activeProject = null;
@@ -645,6 +644,15 @@ function buildSlider(media) {
   sliderState.count = media.length;
   sliderState.media = media.slice();
 
+  // Hide controls/progress when only a single (or zero) media item
+  const isSingle = sliderState.count <= 1;
+  if (btnPrev) { btnPrev.style.display = isSingle ? 'none' : ''; btnPrev.setAttribute('aria-hidden', String(isSingle)); btnPrev.tabIndex = isSingle ? -1 : 0; }
+  if (btnNext) { btnNext.style.display = isSingle ? 'none' : ''; btnNext.setAttribute('aria-hidden', String(isSingle)); btnNext.tabIndex = isSingle ? -1 : 0; }
+  if (sliderDots) sliderDots.style.display = isSingle ? 'none' : '';
+  if (sliderProgress) sliderProgress.style.display = isSingle ? 'none' : '';
+  if (isSingle) stopAutoplay();
+  slider.classList.toggle('single', isSingle);
+
   media.forEach((m, idx) => {
     const slide = document.createElement("div");
     slide.className = "slide";
@@ -664,7 +672,7 @@ function buildSlider(media) {
 
   updateTrack();
   updateCaption();
-  if (!prefersReducedMotion) startAutoplay();
+  if (!prefersReducedMotion && sliderState.count > 1) startAutoplay();
 }
 
 function updateTrack() {
@@ -676,8 +684,29 @@ function updateTrack() {
 function updateCaption() {
   if (!sliderCaption) return;
   const m = sliderState.media && sliderState.media[sliderState.i];
-  const txt = (m && m.caption) ? m.caption : '';
-  sliderCaption.textContent = txt;
+  const txt = (m && m.caption) ? String(m.caption) : '';
+  typeCaption(txt);
+}
+
+function typeCaption(text) {
+  if (!sliderCaption) return;
+  if (sliderState.typeTimer) { clearInterval(sliderState.typeTimer); sliderState.typeTimer = 0; }
+  const full = String(text || '');
+  if (prefersReducedMotion || !full) {
+    sliderCaption.textContent = full;
+    return;
+  }
+  sliderCaption.textContent = '';
+  let i = 0;
+  const speed = 14; // ms per character
+  sliderState.typeTimer = setInterval(() => {
+    i++;
+    sliderCaption.textContent = full.slice(0, i);
+    if (i >= full.length) {
+      clearInterval(sliderState.typeTimer);
+      sliderState.typeTimer = 0;
+    }
+  }, speed);
 }
 
 function goTo(i, user = false) {
