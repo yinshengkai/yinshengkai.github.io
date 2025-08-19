@@ -423,7 +423,7 @@ function renderEducation(education = []) {
         title: 'skQuant',
         period: { start: '2025-05', end: 'present' },
         tags: ['Python', 'AI/ML', 'Statistics', 'Time‑Series CV', 'HPO', 'Preprocessing', 'Feature Engineering', 'Multithreading', 'GPU Acceleration'],
-        media: [ { type: 'placeholder', title: 'Overview Dashboard', accent: '#6bb6ff' } ],
+        media: [ { type: 'placeholder', title: 'Overview Dashboard', accent: '#6bb6ff', caption: 'High-level KPIs and timeline at a glance' } ],
         descriptionHTML: '<p>skQuant is a config‑driven, end‑to‑end backtesting framework that runs your pipeline from data preparation and feature engineering to time‑aware validation and budgeted optimization, then produces an interactive report with reproducible artifacts. It enforces bias control with time‑aligned features and strict out‑of‑sample evaluation, accounts for transaction costs and slippage, and scales efficiently with parallel, hardware‑aware execution and smart caching.</p>'
       },
       {
@@ -432,9 +432,9 @@ function renderEducation(education = []) {
         period: { start: '2023-09', end: '2024-03' },
         tags: ['C++', 'Vulkan', 'ImGui', 'ECS', 'RTTR', 'Assimp', 'Multithreading'],
         media: [
-          { type: 'placeholder', title: 'Engine Editor', accent: '#6bb6ff' },
-          { type: 'placeholder', title: 'Assets', accent: '#18c3a1' },
-          { type: 'placeholder', title: 'ECS', accent: '#8d7bff' },
+          { type: 'placeholder', title: 'Engine Editor', accent: '#6bb6ff', caption: 'Reflection-driven editor UI' },
+          { type: 'placeholder', title: 'Assets', accent: '#18c3a1', caption: 'Binary asset pipeline and browser' },
+          { type: 'placeholder', title: 'ECS', accent: '#8d7bff', caption: 'Sparse-set ECS and inspector' },
         ],
         description: 'Led a 10-programmer team building a modular engine with a reflection-driven editor for native and Mono scripts, a binary asset pipeline via Assimp, prefab overrides/propagation, hierarchical transforms with quaternions, and a performant sparse-set ECS.'
       },
@@ -444,8 +444,8 @@ function renderEducation(education = []) {
         period: { start: '2022-01', end: '2022-04' },
         tags: ['C++', 'Component-based System', 'UI', 'Graphics', 'Gameplay'],
         media: [
-          { type: 'placeholder', title: 'Blast Off', accent: '#6bb6ff' },
-          { type: 'placeholder', title: 'Gameplay', accent: '#18c3a1' },
+          { type: 'placeholder', title: 'Blast Off', accent: '#6bb6ff', caption: 'Main menu and level select' },
+          { type: 'placeholder', title: 'Gameplay', accent: '#18c3a1', caption: 'Core gameplay loop showcase' },
         ],
         descriptionHTML: "Architected a component system around DigiPen's Alpha Engine with transform hierarchies, led graphics programming and UI, and collaborated closely on gameplay.",
         cta: { href: 'http://s.team/a/2010150', label: 'View on Steam' }
@@ -559,7 +559,8 @@ const sliderProgress = $("#slider-progress");
 const btnPrev = $("#slider-prev");
 const btnNext = $("#slider-next");
 const sliderDots = $("#slider-dots");
-const sliderCaption = $("#slider-caption");
+// Overlay caption element inside slider (not transformed with track)
+const sliderCap = $("#slider-cap");
 
 let activeProject = null;
 let lastTrigger = null;
@@ -755,51 +756,66 @@ function buildSlider(media) {
     sliderDots.append(dot);
   });
 
-  updateTrack();
-  updateCaption();
+  updateTrack(true);
   if (!prefersReducedMotion && sliderState.count > 1) startAutoplay();
 }
 
-function updateTrack() {
+function setActiveSlide(i) {
+  const slides = $$(".slide", sliderTrack);
+  slides.forEach((sl, idx) => sl.classList.toggle('active', idx === i));
+}
+
+function getMediaCaption(i) {
+  const m = sliderState.media && sliderState.media[i];
+  return (m && (m.caption || m.title)) ? String(m.caption || m.title) : '';
+}
+function showOverlayCaption(text) {
+  if (!sliderCap) return;
+  sliderCap.textContent = text;
+  sliderCap.classList.add('show');
+}
+function hideOverlayCaption() {
+  if (!sliderCap) return;
+  sliderCap.classList.remove('show');
+}
+
+function updateTrack(initial = false) {
   const x = -sliderState.i * 100;
   sliderTrack.style.transform = `translate3d(${x}%,0,0)`;
   $$(".dot", sliderDots).forEach((d, j) => d.classList.toggle("active", j === sliderState.i));
-}
+  // Hide caption during movement; it will show when transition ends
+  hideOverlayCaption();
 
-function updateCaption() {
-  if (!sliderCaption) return;
-  const m = sliderState.media && sliderState.media[sliderState.i];
-  const txt = (m && m.caption) ? String(m.caption) : '';
-  typeCaption(txt);
-}
+  // If initial render or no transition on track, set active immediately.
+  const cs = window.getComputedStyle(sliderTrack);
+  const props = (cs.transitionProperty || '').split(',').map(s => s.trim());
+  const durations = (cs.transitionDuration || '').split(',').map(s => parseFloat(s) || 0);
+  const idxTransform = props.findIndex(p => p === 'transform' || p === 'all');
+  const hasTransition = !initial && idxTransform !== -1 && (durations[idxTransform] > 0 || durations[0] > 0);
 
-function typeCaption(text) {
-  if (!sliderCaption) return;
-  if (sliderState.typeTimer) { clearInterval(sliderState.typeTimer); sliderState.typeTimer = 0; }
-  const full = String(text || '');
-  if (prefersReducedMotion || !full) {
-    sliderCaption.textContent = full;
+  if (!hasTransition) {
+    setActiveSlide(sliderState.i);
+    showOverlayCaption(getMediaCaption(sliderState.i));
     return;
   }
-  sliderCaption.textContent = '';
-  let i = 0;
-  const speed = 14; // ms per character
-  sliderState.typeTimer = setInterval(() => {
-    i++;
-    sliderCaption.textContent = full.slice(0, i);
-    if (i >= full.length) {
-      clearInterval(sliderState.typeTimer);
-      sliderState.typeTimer = 0;
-    }
-  }, speed);
+  // During animation, hide captions by removing active from all slides
+  setActiveSlide(-1);
+  // Wait for the transform transition to finish, then activate the current slide
+  const onEnd = (e) => {
+    if (e && e.target !== sliderTrack) return;
+    if (e && e.propertyName && e.propertyName !== 'transform') return;
+    try { sliderTrack.removeEventListener('transitionend', onEnd, true); } catch {}
+    setActiveSlide(sliderState.i);
+    showOverlayCaption(getMediaCaption(sliderState.i));
+  };
+  sliderTrack.addEventListener('transitionend', onEnd, true);
 }
 
 function goTo(i, user = false) {
   if (sliderState.count <= 0) return; // nothing to do
-  if (sliderState.count === 1) { updateTrack(); updateCaption(); return; }
+  if (sliderState.count === 1) { updateTrack(); return; }
   sliderState.i = (i + sliderState.count) % sliderState.count;
   updateTrack();
-  updateCaption();
   if (user) restartAutoplay();
 }
 

@@ -15,7 +15,7 @@
       "GPU Acceleration"
     ],
     "media": [
-      { "type": "placeholder", "title": "Overview Dashboard", "accent": "#6bb6ff" }
+      { "type": "placeholder", "title": "Overview Dashboard", "accent": "#6bb6ff", "caption": "High-level KPIs and timeline at a glance" }
     ],
     "descriptionHTML": "<p>skQuant is a config‑driven, end‑to‑end backtesting framework that runs your pipeline from data preparation and feature engineering to time‑aware validation and budgeted optimization, then produces an interactive report with reproducible artifacts. It enforces bias control with time‑aligned features and strict out‑of‑sample evaluation, accounts for transaction costs and slippage, and scales efficiently with parallel, hardware‑aware execution and smart caching.</p>"
   },
@@ -25,9 +25,9 @@
     "period": { "start": "2023-09", "end": "2024-03" },
     "tags": ["C++", "Vulkan", "ImGui", "ECS", "RTTR", "Assimp", "Multithreading"],
     "media": [
-      { "type": "placeholder", "title": "Engine Editor", "accent": "#6bb6ff" },
-      { "type": "placeholder", "title": "Assets", "accent": "#18c3a1" },
-      { "type": "placeholder", "title": "ECS", "accent": "#8d7bff" }
+      { "type": "placeholder", "title": "Engine Editor", "accent": "#6bb6ff", "caption": "Reflection-driven editor UI" },
+      { "type": "placeholder", "title": "Assets", "accent": "#18c3a1", "caption": "Binary asset pipeline and browser" },
+      { "type": "placeholder", "title": "ECS", "accent": "#8d7bff", "caption": "Sparse-set ECS and inspector" }
     ],
     "description": "Led a 10-programmer team building a modular engine with a reflection-driven editor for native and Mono scripts, a binary asset pipeline via Assimp, prefab overrides/propagation, hierarchical transforms with quaternions, and a performant sparse-set ECS."
   },
@@ -37,11 +37,10 @@
     "period": { "start": "2022-01", "end": "2022-04" },
     "tags": ["C++", "Component-based System", "UI", "Graphics", "Gameplay"],
     "media": [
-      { "type": "placeholder", "title": "Blast Off", "accent": "#6bb6ff" },
-      { "type": "placeholder", "title": "Gameplay", "accent": "#18c3a1" }
+      { "type": "placeholder", "title": "Blast Off", "accent": "#6bb6ff", "caption": "Main menu and level select" },
+      { "type": "placeholder", "title": "Gameplay", "accent": "#18c3a1", "caption": "Core gameplay loop showcase" }
     ],
     "descriptionHTML": "Architected a component system around DigiPen's Alpha Engine with transform hierarchies, led graphics programming and UI, and collaborated closely on gameplay.",
     "cta": { "href": "http://s.team/a/2010150", "label": "View on Steam" }
   }
 ]
-

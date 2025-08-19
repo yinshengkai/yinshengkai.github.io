@@ -419,7 +419,7 @@ body {
 .sheet[aria-hidden="false"] { pointer-events: auto; }
 .sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.35); opacity: 0; transition: opacity 220ms ease; backdrop-filter: blur(8px) saturate(120%); -webkit-backdrop-filter: blur(8px) saturate(120%); will-change: opacity; }
 .sheet[aria-hidden="false"] .sheet-backdrop { opacity: 1; }
-.sheet-panel { width: min(980px, calc(100% - 24px)); max-height: min(88vh, 900px); border-radius: var(--radius); transform: translateY(6px) scale(.98); opacity: 0; transition: transform var(--speed-slow) cubic-bezier(.2,.8,.2,1), opacity var(--speed); overflow: clip; overscroll-behavior: contain; }
+.sheet-panel { width: min(980px, calc(100% - 24px)); max-height: min(88vh, 900px); border-radius: var(--radius); transform: translateY(6px) scale(.98); opacity: 0; transition: transform var(--speed-slow) cubic-bezier(.2,.8,.2,1), opacity var(--speed); overflow: clip; overscroll-behavior: contain; display: flex; flex-direction: column; }
 .sheet[aria-hidden="false"] .sheet-panel { transform: translateY(0) scale(1); opacity: 1; }
 .sheet-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 16px; min-height: 72px; border-bottom: none; backdrop-filter: blur(6px); position: sticky; top: 0; z-index: 2; box-shadow: 0 8px 16px rgba(0,0,0,0.28), inset 0 1px rgba(255,255,255,0.06); }
 .sheet-header #sheet-title {
@@ -431,15 +431,49 @@ body {
   letter-spacing: 0.5px;
   font-size: clamp(22px, 4.2vw, 36px);
 }
-.sheet-body { padding: 12px 14px 18px; display: grid; gap: 12px; }
+.sheet-body {
+  padding: 12px 14px 18px;
+  display: grid;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+  grid-template-areas:
+    "slider"
+    "meta"
+    "desc";
+  grid-template-rows: auto auto 1fr;
+}
 .sheet-cta { display: flex; justify-content: flex-end; }
-.sheet-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.sheet-desc { color: #cfe6ff; opacity: 0.95; margin: 2px 0 8px; }
+.sheet-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; grid-area: meta; }
+.sheet-desc {
+  grid-area: desc;
+  color: #cfe6ff;
+  opacity: 0.95;
+  margin: 2px 0 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+  padding-right: 4px; /* avoid scrollbar overlap */
+  position: relative;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 14px;
+}
+/* Subtle gradient hint at top of scrollable description */
+.sheet-desc::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 14px;
+  background: linear-gradient(to bottom, rgba(8,12,18,0.65), rgba(8,12,18,0));
+  pointer-events: none;
+  z-index: 1;
+}
 .icon { appearance: none; border: none; background: var(--surface); color: var(--text); border-radius: 12px; padding: 8px; display: inline-flex; align-items: center; justify-content: center; transition: background var(--speed), transform var(--speed); box-shadow: inset 0 1px rgba(255,255,255,0.12); }
 .icon:hover { background: var(--surface-2); transform: translateY(-1px); }
 /* Close button adopts universal icon-link style via markup (class="icon-link close"). */
 
 /* Slider */
+.sheet #sheet-slider { grid-area: slider; }
 .slider { position: relative; border: none; border-radius: var(--radius); overflow: hidden; background: rgba(20,24,32,0.5); }
 .slider { touch-action: pan-y; }
 .slider-rail { overflow: hidden; position: relative; }
@@ -447,35 +481,58 @@ body {
 .slide { position: relative; aspect-ratio: 16/9; background: #0e1218; display: grid; place-items: center; }
 .slide img, .slide video { width: 100%; height: 100%; object-fit: cover; display: block; border: 0; outline: none; box-shadow: none; background: transparent; }
 /* Slider caption: centered text with gradient + blur backdrop for contrast */
-.slide .caption {
+/* Overlay caption lives in .slider-cap (outside track) to avoid transform blurring */
+.slider-cap {
   position: absolute;
   left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  background: transparent;
-  padding: 0 8px;
-  border-radius: 0;
-  font-size: 13px;
+  transform: translateX(-50%);
+  bottom: 30px;
+  padding: 0 10px;
+  width: calc(100% - 24px);
+  max-width: 960px;
   color: #fff;
   text-align: center;
+  font-size: 13px;
+  line-height: 1.3;
   text-shadow: 0 1px 2px rgba(0,0,0,0.7), 0 0 12px rgba(0,0,0,0.35);
-  z-index: 1;
   pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  /* Fade-out default: 140ms */
+  transition: opacity 140ms ease;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
-/* Gradient + blur at the bottom to improve legibility */
-.slide::after {
+.slider-cap.show {
+  opacity: 1;
+  /* Fade-in slower: 300ms */
+  transition-duration: 300ms;
+}
+/* Bottom gradient to improve legibility under the caption */
+.slider::after {
   content: "";
   position: absolute;
   left: 0; right: 0; bottom: 0;
-  height: 38%;
-  background: linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0.28), rgba(0,0,0,0));
+  height: 45%;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0.28), rgba(0,0,0,0));
   backdrop-filter: blur(6px) saturate(120%);
   -webkit-backdrop-filter: blur(6px) saturate(120%);
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 200ms ease;
+  opacity: 1; /* always visible */
+  z-index: 1; /* under dots and caption */
 }
-.slide.has-caption::after { opacity: 1; }
+.slide.active .caption { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .slide .caption,
+  .slide::after,
+  .slide.active .caption,
+  .slide.active.has-caption::after,
+  .slider-cap,
+  .slider-cap.show {
+    transition-delay: 0ms !important;
+    transition-duration: 0ms !important;
+  }
+}
 .slider-progress { position: absolute; left: 0; right: 0; top: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transform-origin: 0 50%; transform: scaleX(0); transition: transform 100ms linear; }
 .slider .prev, .slider .next { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; }
 .slider .prev { left: 8px; }
@@ -503,7 +560,7 @@ body {
   outline: 2px solid var(--hi);
   outline-offset: 2px;
 }
-.slider-dots { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; gap: 8px; }
+.slider-dots { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; gap: 8px; z-index: 3; }
 .dot { width: 8px; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.38); border: none; box-shadow: 0 1px 6px rgba(0,0,0,0.35), inset 0 1px rgba(255,255,255,0.12); }
 .dot.active { background: linear-gradient(180deg, rgba(107,182,255,0.9), rgba(107,182,255,0.4)); box-shadow: 0 0 0 4px var(--hi-ring); }
 
@@ -560,7 +617,38 @@ body {
     max-height: 100dvh;
     border-radius: 0;
   }
-  .sheet-body { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+  .sheet-body {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    grid-template-areas:
+      "slider"
+      "meta"
+      "desc";
+    grid-template-rows: auto auto 1fr;
+    gap: 16px;
+  }
+  .sheet-meta { grid-area: meta; }
+  #sheet-slider { grid-area: slider; }
+  .sheet-desc { grid-area: desc; }
+  /* Make description scroll within available space */
+  .sheet-desc {
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0;
+    padding-right: 4px; /* avoid scrollbar overlap */
+    position: relative;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 10px;
+  }
+  /* Subtle gradient hint at top of scrollable area */
+  .sheet-desc::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 14px;
+    background: linear-gradient(to bottom, rgba(8,12,18,0.65), rgba(8,12,18,0));
+    pointer-events: none;
+    z-index: 1;
+  }
   /* Larger tap targets for slider controls */
   .slider .prev, .slider .next { padding: 6px; }
 }
