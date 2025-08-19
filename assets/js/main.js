@@ -180,28 +180,11 @@ window.addEventListener('gate:open', () => {
 
 // (Flags now use SVG as the primary method; no platform detection needed.)
 
-// Placeholder media generator (used when data file requests placeholders)
-function placeholderImage(title, accent = "#6bb6ff", bg = "#0b0f14") {
+// Placeholder media generator (blank background; no text)
+function placeholderImage(bg = "#0b0f14") {
   const svg = `<?xml version='1.0' encoding='UTF-8'?>
   <svg xmlns='http://www.w3.org/2000/svg' width='1600' height='900'>
-    <defs>
-      <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
-        <stop offset='0%' stop-color='${accent}' stop-opacity='0.55'/>
-        <stop offset='100%' stop-color='#8d7bff' stop-opacity='0.45'/>
-      </linearGradient>
-      <filter id='f' x='-20%' y='-20%' width='140%' height='140%'>
-        <feGaussianBlur stdDeviation='60' />
-      </filter>
-    </defs>
     <rect width='100%' height='100%' fill='${bg}'/>
-    <circle cx='20%' cy='25%' r='220' fill='url(#g)' filter='url(#f)'/>
-    <circle cx='75%' cy='70%' r='260' fill='url(#g)' filter='url(#f)'/>
-    <g fill='none' stroke='rgba(255,255,255,.12)'>
-      <rect x='40' y='40' width='1520' height='820' rx='28'/>
-    </g>
-    <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle'
-      font-family='Segoe UI, Roboto, Helvetica, Arial' font-size='72'
-      fill='white' fill-opacity='0.9' letter-spacing='1'>${title}</text>
   </svg>`;
   // btoa fails on non-ASCII; encode to UTF-8 safely first
   const base64 = (() => {
@@ -300,7 +283,7 @@ function renderProjects(projects = []) {
   media.className = "media";
   const firstMedia = p.media?.[0];
   const src = (firstMedia && firstMedia.type === 'placeholder')
-    ? placeholderImage(firstMedia.title || displayTitle(p.title), firstMedia.accent || '#6bb6ff')
+    ? placeholderImage('#0b0f14')
     : (firstMedia && firstMedia.src) || '';
   media.style.backgroundImage = `url('${src}')`;
   cover.append(media);
@@ -423,7 +406,7 @@ function renderEducation(education = []) {
         title: 'skQuant',
         period: { start: '2025-05', end: 'present' },
         tags: ['Python', 'AI/ML', 'Statistics', 'Time‑Series CV', 'HPO', 'Preprocessing', 'Feature Engineering', 'Multithreading', 'GPU Acceleration'],
-        media: [ { type: 'placeholder', title: 'Overview Dashboard', accent: '#6bb6ff', caption: 'High-level KPIs and timeline at a glance' } ],
+        media: [ { type: 'placeholder', accent: '#6bb6ff', caption: 'High-level KPIs and timeline at a glance' } ],
         descriptionHTML: '<p>skQuant is a config‑driven, end‑to‑end backtesting framework that runs your pipeline from data preparation and feature engineering to time‑aware validation and budgeted optimization, then produces an interactive report with reproducible artifacts. It enforces bias control with time‑aligned features and strict out‑of‑sample evaluation, accounts for transaction costs and slippage, and scales efficiently with parallel, hardware‑aware execution and smart caching.</p>'
       },
       {
@@ -432,9 +415,9 @@ function renderEducation(education = []) {
         period: { start: '2023-09', end: '2024-03' },
         tags: ['C++', 'Vulkan', 'ImGui', 'ECS', 'RTTR', 'Assimp', 'Multithreading'],
         media: [
-          { type: 'placeholder', title: 'Engine Editor', accent: '#6bb6ff', caption: 'Reflection-driven editor UI' },
-          { type: 'placeholder', title: 'Assets', accent: '#18c3a1', caption: 'Binary asset pipeline and browser' },
-          { type: 'placeholder', title: 'ECS', accent: '#8d7bff', caption: 'Sparse-set ECS and inspector' },
+          { type: 'placeholder', accent: '#6bb6ff', caption: 'Reflection-driven editor UI' },
+          { type: 'placeholder', accent: '#18c3a1', caption: 'Binary asset pipeline and browser' },
+          { type: 'placeholder', accent: '#8d7bff', caption: 'Sparse-set ECS and inspector' },
         ],
         description: 'Led a 10-programmer team building a modular engine with a reflection-driven editor for native and Mono scripts, a binary asset pipeline via Assimp, prefab overrides/propagation, hierarchical transforms with quaternions, and a performant sparse-set ECS.'
       },
@@ -444,8 +427,8 @@ function renderEducation(education = []) {
         period: { start: '2022-01', end: '2022-04' },
         tags: ['C++', 'Component-based System', 'UI', 'Graphics', 'Gameplay'],
         media: [
-          { type: 'placeholder', title: 'Blast Off', accent: '#6bb6ff', caption: 'Main menu and level select' },
-          { type: 'placeholder', title: 'Gameplay', accent: '#18c3a1', caption: 'Core gameplay loop showcase' },
+          { type: 'placeholder', accent: '#6bb6ff', caption: 'Main menu and level select' },
+          { type: 'placeholder', accent: '#18c3a1', caption: 'Core gameplay loop showcase' },
         ],
         descriptionHTML: "Architected a component system around DigiPen's Alpha Engine with transform hierarchies, led graphics programming and UI, and collaborated closely on gameplay.",
         cta: { href: 'http://s.team/a/2010150', label: 'View on Steam' }
@@ -743,10 +726,8 @@ function buildSlider(media) {
       el = document.createElement("video"); el.src = m.src; el.controls = true; el.playsInline = true; el.muted = true; el.setAttribute("preload", "metadata");
     } else {
       el = document.createElement("img");
-      const src = (m.type === 'placeholder')
-        ? placeholderImage(m.title || (activeProject && displayTitle(activeProject.title)) || 'Preview', m.accent || '#6bb6ff')
-        : m.src;
-      el.src = src; el.alt = m.alt || m.title || ""; el.loading = 'lazy'; el.decoding = 'async';
+      const src = (m.type === 'placeholder') ? placeholderImage('#0b0f14') : m.src;
+      el.src = src; el.alt = m.alt || m.caption || ""; el.loading = 'lazy'; el.decoding = 'async';
     }
     slide.append(el);
     sliderTrack.append(slide);
@@ -767,11 +748,13 @@ function setActiveSlide(i) {
 
 function getMediaCaption(i) {
   const m = sliderState.media && sliderState.media[i];
-  return (m && (m.caption || m.title)) ? String(m.caption || m.title) : '';
+  return (m && m.caption) ? String(m.caption) : '';
 }
 function showOverlayCaption(text) {
   if (!sliderCap) return;
-  sliderCap.textContent = text;
+  const t = String(text || '').trim();
+  if (!t) { hideOverlayCaption(); return; }
+  sliderCap.textContent = t;
   sliderCap.classList.add('show');
 }
 function hideOverlayCaption() {
