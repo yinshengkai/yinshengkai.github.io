@@ -2,7 +2,7 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 // Global: reduced motion preference (use early and often)
-const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
 // Loader: fade out on window load with fallback
 (function initLoader() {
@@ -911,17 +911,21 @@ function animateBackground(ts) {
 }
 
 function onPointerMove(e) {
-  const rect = document.documentElement.getBoundingClientRect();
-  const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-  const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-  const nx = Math.max(0, Math.min(1, x / rect.width));
-  const ny = Math.max(0, Math.min(1, y / rect.height));
+  // Avoid layout thrash by using viewport size instead of getBoundingClientRect
+  const vw = window.innerWidth || document.documentElement.clientWidth || 1;
+  const vh = window.innerHeight || document.documentElement.clientHeight || 1;
+  const cx = e.touches ? e.touches[0].clientX : e.clientX;
+  const cy = e.touches ? e.touches[0].clientY : e.clientY;
+  const nx = Math.max(0, Math.min(1, cx / vw));
+  const ny = Math.max(0, Math.min(1, cy / vh));
   mouse.vX = nx - mouse.x; mouse.vY = ny - mouse.y;
   mouse.x = nx; mouse.y = ny;
 }
 
-window.addEventListener('mousemove', onPointerMove, { passive: true });
-window.addEventListener('touchmove', onPointerMove, { passive: true });
+if (!prefersReducedMotion) {
+  window.addEventListener('mousemove', onPointerMove, { passive: true });
+  window.addEventListener('touchmove', onPointerMove, { passive: true });
+}
 // Throttle expensive resizes to animation frames
 let resizeRaf = 0;
 function onResizeThrottled() {
@@ -929,24 +933,27 @@ function onResizeThrottled() {
   resizeRaf = requestAnimationFrame(() => { resizeRaf = 0; resizeCanvas(); });
 }
 window.addEventListener('resize', onResizeThrottled);
-resizeCanvas();
-requestAnimationFrame(animateBackground);
+if (!prefersReducedMotion) {
+  resizeCanvas();
+  requestAnimationFrame(animateBackground);
+} else {
+  try { if (dotsCanvas) dotsCanvas.style.display = 'none'; } catch {}
+}
 
 // loader removed
 
-// Timeline progress effect
+// Timeline progress effect (cache nodes to avoid repeated queries)
+const timelineEls = Array.from(document.querySelectorAll('.timeline'));
 function updateTimelineProgress() {
   const vH = window.innerHeight || document.documentElement.clientHeight;
-  document.querySelectorAll('.timeline').forEach(tl => {
+  for (let i = 0; i < timelineEls.length; i++) {
+    const tl = timelineEls[i];
     const rect = tl.getBoundingClientRect();
     const center = vH * 0.5;
     const ratio = Math.max(0, Math.min(1, (center - rect.top) / (rect.height || 1)));
     tl.style.setProperty('--progressRatio', ratio.toFixed(3));
-  });
+  }
 }
-window.addEventListener('scroll', updateTimelineProgress, { passive: true });
-window.addEventListener('resize', updateTimelineProgress);
-updateTimelineProgress();
 
 // Nav active section highlight
 const navMap = new Map([
@@ -1009,29 +1016,50 @@ window.addEventListener('hashchange', () => {
   if (h && navMap.has(h)) startNavLock(h);
 });
 
-// Scroll indicator
+// Scroll indicator (use cached reveal nodes and batch updates)
 const scrollInd = document.getElementById('scroll-indicator');
+const revealElsCache = Array.from(document.querySelectorAll('.reveal'));
 function updateScrollIndicator() {
   if (!scrollInd) return;
-  const atBottom = (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 2);
-  const remaining = $$('.reveal:not(.in)').length;
+  const atBottom = (window.innerHeight + (window.scrollY || window.pageYOffset || 0)) >= ((document.documentElement.scrollHeight || 0) - 2);
+  let remaining = 0;
+  for (let i = 0; i < revealElsCache.length; i++) {
+    if (!revealElsCache[i].classList.contains('in')) remaining++;
+  }
   const shouldShow = !atBottom && remaining > 0;
   scrollInd.classList.toggle('show', shouldShow);
 }
-updateScrollIndicator();
-window.addEventListener('scroll', updateScrollIndicator, { passive: true });
-window.addEventListener('resize', updateScrollIndicator);
 
 // Back-to-top visibility + behavior
 const backTop = document.getElementById('back-to-top');
 function updateBackTop() {
   if (!backTop) return;
-  const show = window.scrollY > (window.innerHeight * 0.35);
+  const y = window.scrollY || window.pageYOffset || 0;
+  const show = y > (window.innerHeight * 0.35);
   backTop.classList.toggle('show', show);
 }
 updateBackTop();
-window.addEventListener('scroll', updateBackTop, { passive: true });
-window.addEventListener('resize', updateBackTop);
+// Batch scroll/resize-driven updates with a single rAF per frame
+let _scrollRaf = 0, _resizeRaf = 0;
+function flushScroll() {
+  _scrollRaf = 0;
+  updateTimelineProgress();
+  updateScrollIndicator();
+  updateBackTop();
+}
+function onScrollRaf() { if (_scrollRaf) return; _scrollRaf = requestAnimationFrame(flushScroll); }
+function flushResize() {
+  _resizeRaf = 0;
+  updateTimelineProgress();
+  updateScrollIndicator();
+  updateBackTop();
+}
+function onResizeRaf() { if (_resizeRaf) return; _resizeRaf = requestAnimationFrame(flushResize); }
+window.addEventListener('scroll', onScrollRaf, { passive: true });
+window.addEventListener('resize', onResizeRaf);
+// Initial paint for scroll-dependent UI
+updateTimelineProgress();
+updateScrollIndicator();
 if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
 // Center-based scrollspy handles edges; no extra edge hack needed
@@ -1043,7 +1071,11 @@ if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, b
   const fallback = null; // set to 'assets/img/profile.jpg' if you add a local image
   try {
     const url = 'https://r.jina.ai/http://www.linkedin.com/in/yinshengkai/';
-    const res = await fetch(url);
+    // Guard fetch with a soft timeout to avoid long stalls
+    const controller = ('AbortController' in window) ? new AbortController() : null;
+    const to = setTimeout(() => { try { controller && controller.abort(); } catch {} }, 3500);
+    const res = await fetch(url, controller ? { signal: controller.signal } : undefined);
+    clearTimeout(to);
     if (!res.ok) throw new Error('fetch failed');
     const text = await res.text();
     const m = text.match(/property=\"og:image\" content=\"([^\"]+)/i);
@@ -1053,6 +1085,7 @@ if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, b
       imgEl.className = 'avatar-img';
       imgEl.src = img;
       imgEl.decoding = 'async';
+      imgEl.loading = 'lazy';
       imgEl.setAttribute('referrerpolicy', 'no-referrer');
       imgEl.alt = 'Profile picture';
       avatarEl.innerHTML = '';
@@ -1066,6 +1099,7 @@ if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, b
     imgEl.src = fallback;
     imgEl.alt = 'Profile picture';
     imgEl.decoding = 'async';
+    imgEl.loading = 'lazy';
     avatarEl.innerHTML = '';
     avatarEl.appendChild(imgEl);
   }
