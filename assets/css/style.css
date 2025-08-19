@@ -223,7 +223,10 @@ body {
 }
 .project-card .cover { height: 160px; border-radius: var(--radius-sm); border: none; overflow: hidden; position: relative; }
 .project-card .cover .media { position: absolute; inset: 0; background-size: cover; background-position: center; filter: saturate(110%) contrast(105%); transform: scale(1.02); transition: transform 600ms ease; }
-.project-card:hover .cover .media { transform: scale(1.08); }
+/* Limit image zoom on hover to hover-capable devices */
+@media (hover: hover) and (pointer: fine) {
+  .project-card:hover .cover .media { transform: scale(1.08); }
+}
 /* Visual tap/click affordance in the corner */
 .project-card .tap-hint {
   position: absolute;
@@ -255,27 +258,43 @@ body {
   padding: 0;
 }
 .project-card .tap-hint svg { width: 28px; height: 28px; }
-.project-card:hover .tap-hint svg,
-.project-card:focus-visible .tap-hint svg {
-  animation: arrowNudge 900ms ease-in-out infinite;
+/* Keep keyboard focus hint universally */
+.project-card:focus-visible .tap-hint svg { animation: arrowNudge 900ms ease-in-out infinite; }
+/* Only animate on hover for hover-capable devices */
+@media (hover: hover) and (pointer: fine) {
+  .project-card:hover .tap-hint svg { animation: arrowNudge 900ms ease-in-out infinite; }
 }
 @keyframes arrowNudge {
   0% { transform: translateX(0); }
   50% { transform: translateX(6px); }
   100% { transform: translateX(0); }
 }
-.project-card:hover .tap-hint,
+/* Show hint on keyboard focus universally */
 .project-card:focus-visible .tap-hint {
   opacity: 1;
   background: rgba(12,16,24,0.32);
   backdrop-filter: blur(12px) saturate(130%);
   -webkit-backdrop-filter: blur(12px) saturate(130%);
 }
+/* Only reveal hint on hover for hover-capable devices */
+@media (hover: hover) and (pointer: fine) {
+  .project-card:hover .tap-hint {
+    opacity: 1;
+    background: rgba(12,16,24,0.32);
+    backdrop-filter: blur(12px) saturate(130%);
+    -webkit-backdrop-filter: blur(12px) saturate(130%);
+  }
+}
 /* Subtle blur fallback on inner content for browsers without backdrop-filter */
-.project-card:hover > *:not(.tap-hint),
 .project-card:focus-visible > *:not(.tap-hint) {
   filter: blur(4px) saturate(115%) brightness(0.75);
   transition: filter var(--speed);
+}
+@media (hover: hover) and (pointer: fine) {
+  .project-card:hover > *:not(.tap-hint) {
+    filter: blur(4px) saturate(115%) brightness(0.75);
+    transition: filter var(--speed);
+  }
 }
 
 /* Dim overlay on hover */
@@ -289,8 +308,17 @@ body {
   pointer-events: none;
   z-index: 1;
 }
-.project-card:hover::after,
+/* Keep keyboard focus overlay universally */
 .project-card:focus-visible::after { background: rgba(0,0,0,0.15); }
+/* Only apply dim overlay on hover for hover-capable devices */
+@media (hover: hover) and (pointer: fine) {
+  .project-card:hover::after { background: rgba(0,0,0,0.15); }
+}
+
+/* On touch devices, avoid accidental hover during scroll */
+@media (hover: none), (pointer: coarse) {
+  .project-card { touch-action: manipulation; }
+}
 /* Ensure any previous decorative ::before ring is disabled */
 .project-card::before { content: none !important; animation: none !important; }
 /* Project titles: allow up to 2 lines, equal height across cards */
@@ -552,13 +580,21 @@ body {
 
 /* Enhancements: hover expansion, reveal animations, loader, icons, timeline logos */
 .project-card { transition: box-shadow var(--speed), background var(--speed-slow), filter var(--speed); will-change: auto; transform-origin: center; }
-.project-card:hover,
+/* Keep strong focus ring for keyboard users */
 .project-card:focus-visible {
-  /* No lift; keep a navbar-like highlight ring and glow */
   box-shadow:
     0 12px 30px rgba(0,0,0,0.55),
     0 0 0 3px var(--hi-ring),
     inset 0 1px rgba(255,255,255,0.18);
+}
+/* Apply hover highlight only on hover-capable devices */
+@media (hover: hover) and (pointer: fine) {
+  .project-card:hover {
+    box-shadow:
+      0 12px 30px rgba(0,0,0,0.55),
+      0 0 0 3px var(--hi-ring),
+      inset 0 1px rgba(255,255,255,0.18);
+  }
 }
 
 .reveal {
