@@ -169,7 +169,7 @@ window.addEventListener('gate:open', () => {
 
 // (Flags now use SVG as the primary method; no platform detection needed.)
 
-// Sample data + placeholder media generator
+// Placeholder media generator (used when data file requests placeholders)
 function placeholderImage(title, accent = "#6bb6ff", bg = "#0b0f14") {
   const svg = `<?xml version='1.0' encoding='UTF-8'?>
   <svg xmlns='http://www.w3.org/2000/svg' width='1600' height='900'>
@@ -195,90 +195,12 @@ function placeholderImage(title, accent = "#6bb6ff", bg = "#0b0f14") {
   return `data:image/svg+xml;base64,${btoa(svg)}`;
 }
 
-const projects = [
-  {
-    id: "skquant",
-    title: "skQuant",
-    period: { start: "2025-05", end: "present" },
-    tags: [
-      "Python",
-      "AI/ML",
-      "Statistics",
-      "Time‑Series CV",
-      "HPO",
-      "Preprocessing",
-      "Feature Engineering",
-      "Multithreading",
-      "GPU Acceleration",
-    ],
-    media: [
-      { type: "image", src: placeholderImage("Overview Dashboard", "#6bb6ff"), alt: "Overview dashboard", caption: "Overview Dashboard: High-level run summary with configuration and results highlights." },
-    ],
-    descriptionHTML: `<p>skQuant is a config‑driven, end‑to‑end backtesting framework that runs your pipeline from data preparation and feature engineering to time‑aware validation and budgeted optimization, then produces an interactive report with reproducible artifacts. It enforces bias control with time‑aligned features and strict out‑of‑sample evaluation, accounts for transaction costs and slippage, and scales efficiently with parallel, hardware‑aware execution and smart caching.</p>`,
-  },
-  {
-    id: "vulkan-engine",
-    title: "heheEngine 3D",
-    period: { start: "2023-09", end: "2024-03" },
-    tags: ["C++", "Vulkan", "ImGui", "ECS", "RTTR", "Assimp", "Multithreading"],
-    media: [
-      { type: "image", src: placeholderImage("Engine Editor", "#6bb6ff"), alt: "Editor UI", caption: "ImGui editor with reflection" },
-      { type: "image", src: placeholderImage("Assets", "#18c3a1"), alt: "Asset pipeline", caption: "Binary asset compilation via Assimp" },
-      { type: "image", src: placeholderImage("ECS", "#8d7bff"), alt: "ECS", caption: "Sparse set ECS and multithreading" },
-    ],
-    description: "Led a 10-programmer team building a modular engine with a reflection-driven editor for native and Mono scripts, a binary asset pipeline via Assimp, prefab overrides/propagation, hierarchical transforms with quaternions, and a performant sparse-set ECS.",
-  },
-  {
-    id: "blast-off",
-    title: "Blast Off Far Away",
-    period: { start: "2022-01", end: "2022-04" },
-    tags: ["C++", "Component-based System", "UI", "Graphics", "Gameplay"],
-    media: [
-      { type: "image", src: placeholderImage("Blast Off", "#6bb6ff"), alt: "Game UI", caption: "Architecture and UI programming" },
-      { type: "image", src: placeholderImage("Gameplay", "#18c3a1"), alt: "Gameplay", caption: "Graphics and gameplay tuning" },
-    ],
-    descriptionHTML: "Architected a component system around DigiPen's Alpha Engine with transform hierarchies, led graphics programming and UI, and collaborated closely on gameplay.",
-    cta: { href: 'http://s.team/a/2010150', label: 'View on Steam' },
-  },
-];
-
-const experience = [
-  {
-    role: "GenAI Software Engineer",
-    org: "HCLTech — Full-time (Hybrid, Singapore)",
-    period: "Jul 2025 — Present",
-    details: "Applied GenAI to real-world workflows; building ML-powered product features.",
-    logo: { text: "HCL", bg: "linear-gradient(180deg, #b5f, #68f)", color: "#4A8CFF" },
-  },
-  {
-    role: "Software QA Engineer",
-    org: "Razer Inc. — Internship (On-site, Singapore)",
-    period: "Sep 2024 — Apr 2025",
-    details: "Automated hundreds of TestRail cases via Selenium + Robot Framework. Built an ML-based self-healing framework using NLP to repair broken locators from DOM changes, significantly reducing test maintenance.",
-    logo: { text: "RZ", bg: "linear-gradient(180deg, #8f8, #4e8)", color: "#00FF70" },
-  },
-  {
-    role: "Teaching Assistant",
-    org: "DigiPen Institute of Technology Singapore — Contract",
-    period: "Sep 2022 — Aug 2024",
-    details: "TA/grader for Linear Algebra & Geometry, High-Level Programming 1 & 2, Game Implementation Techniques, Calculus and Analytic Geometry 1, Software Engineering Project 2, Computer Graphics.",
-    logo: { text: "DP", bg: "linear-gradient(180deg, #ffb, #fd8)", color: "#F5C542" },
-  },
-  {
-    role: "Operations & Planning Assistant",
-    org: "Singapore Armed Forces (SAF) — Full-time",
-    period: "Jul 2019 — Jul 2021",
-    details: "Led a team building automation for HR ops across 2 units (VBA, RPA). Built admin dashboards, trained NSFs, and received multiple awards (NSF of the Year 2021, PERSCOM Admin Specialist & ASA Award 2021).",
-    logo: { text: "SAF", bg: "linear-gradient(180deg, #faa, #f66)", color: "#FF6B6B" },
-  },
-  {
-    role: "Software Engineer",
-    org: "A*STAR — Internship",
-    period: "Oct 2018 — Jun 2019",
-    details: "Developed mobile games for cognitive psychology studies with MSSQL sync; built AR to project 3D molecular structures onto papers; created FTP-based DLC for AR model downloads; localized academic papers; received distinction and full marks.",
-    logo: { text: "A*", bg: "linear-gradient(180deg, #acf, #86f)", color: "#7A6BFF" },
-  },
-];
+// Data loading (modular content via JSON files under assets/data)
+async function loadJSON(url) {
+  const res = await fetch(url, { cache: 'no-cache' });
+  if (!res.ok) throw new Error(`Failed to load ${url}: ${res.status}`);
+  return res.json();
+}
 
 // Removed footer year hookup (no #year element in DOM)
 
@@ -343,9 +265,10 @@ function isPresent(period) {
   return String(end).toLowerCase() === 'present';
 }
 
-projects.forEach((p, i) => {
-  const card = document.createElement("article");
-  card.className = "project-card glass reveal";
+function renderProjects(projects = []) {
+  projects.forEach((p) => {
+    const card = document.createElement("article");
+    card.className = "project-card glass reveal";
   card.setAttribute("tabindex", "0");
   card.setAttribute("role", "button");
   card.setAttribute("aria-label", `${displayTitle(p.title)} — open details`);
@@ -355,7 +278,10 @@ projects.forEach((p, i) => {
   const media = document.createElement("div");
   media.className = "media";
   const firstMedia = p.media?.[0];
-  media.style.backgroundImage = `url('${firstMedia?.src || ""}')`;
+  const src = (firstMedia && firstMedia.type === 'placeholder')
+    ? placeholderImage(firstMedia.title || displayTitle(p.title), firstMedia.accent || '#6bb6ff')
+    : (firstMedia && firstMedia.src) || '';
+  media.style.backgroundImage = `url('${src}')`;
   cover.append(media);
 
   const title = document.createElement("h3");
@@ -405,13 +331,15 @@ projects.forEach((p, i) => {
   const open = () => openSheet(p);
   card.addEventListener("click", open);
   card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
-});
+  });
+}
 
 // Render experience timeline
 const expEl = $("#experience-timeline");
-experience.forEach((e) => {
-  const item = document.createElement("div");
-  item.className = "timeline-item reveal";
+function renderExperience(experience = []) {
+  experience.forEach((e) => {
+    const item = document.createElement("div");
+    item.className = "timeline-item reveal";
   const card = document.createElement("div");
   card.className = "timeline-card glass";
   const logo = document.createElement("div"); logo.className = "logo-badge"; logo.textContent = (e.logo && e.logo.text) || initials(e.org);
@@ -429,17 +357,15 @@ experience.forEach((e) => {
   }
   wrap.append(role, org, note);
   const date = createDateBadge(e.period, (e.logo && e.logo.color));
-  card.append(logo, wrap, date); item.append(card); expEl.append(item);
-  reveal(item);
-});
+    card.append(logo, wrap, date); item.append(card); expEl.append(item);
+    reveal(item);
+  });
+}
 
 // Render education timeline
 const eduEl = document.getElementById('education-timeline');
-const education = [
-  { school: 'Singapore Institute of Technology', degree: 'BSc in Computer Science in Real-Time Interactive Simulation', period: 'Sep 2021 — Apr 2025', details: 'GPA 4.77/5.00 • Provost\'s List AY2022/2023, AY2023/2024', logo: { text: 'SIT', color: '#0E7FFF' } },
-  { school: 'Temasek Polytechnic', degree: 'Diploma in Game Design & Development', period: 'Apr 2016 — Apr 2019', details: 'Director\'s List AY2017/2018', logo: { text: 'TP', color: '#E74C3C' } },
-];
-if (eduEl) {
+function renderEducation(education = []) {
+  if (!eduEl) return;
   education.forEach((e) => {
     const item = document.createElement('div');
     item.className = 'timeline-item reveal';
@@ -456,6 +382,84 @@ if (eduEl) {
     reveal(item);
   });
 }
+
+// Kick off loading and rendering of modular data
+(async function initData() {
+  // Fallback content for local file:// or fetch failures
+  const fallback = {
+    projects: [
+      {
+        id: 'skquant',
+        title: 'skQuant',
+        period: { start: '2025-05', end: 'present' },
+        tags: ['Python', 'AI/ML', 'Statistics', 'Time‑Series CV', 'HPO', 'Preprocessing', 'Feature Engineering', 'Multithreading', 'GPU Acceleration'],
+        media: [ { type: 'placeholder', title: 'Overview Dashboard', accent: '#6bb6ff' } ],
+        descriptionHTML: '<p>skQuant is a config‑driven, end‑to‑end backtesting framework that runs your pipeline from data preparation and feature engineering to time‑aware validation and budgeted optimization, then produces an interactive report with reproducible artifacts. It enforces bias control with time‑aligned features and strict out‑of‑sample evaluation, accounts for transaction costs and slippage, and scales efficiently with parallel, hardware‑aware execution and smart caching.</p>'
+      },
+      {
+        id: 'vulkan-engine',
+        title: 'heheEngine 3D',
+        period: { start: '2023-09', end: '2024-03' },
+        tags: ['C++', 'Vulkan', 'ImGui', 'ECS', 'RTTR', 'Assimp', 'Multithreading'],
+        media: [
+          { type: 'placeholder', title: 'Engine Editor', accent: '#6bb6ff' },
+          { type: 'placeholder', title: 'Assets', accent: '#18c3a1' },
+          { type: 'placeholder', title: 'ECS', accent: '#8d7bff' },
+        ],
+        description: 'Led a 10-programmer team building a modular engine with a reflection-driven editor for native and Mono scripts, a binary asset pipeline via Assimp, prefab overrides/propagation, hierarchical transforms with quaternions, and a performant sparse-set ECS.'
+      },
+      {
+        id: 'blast-off',
+        title: 'Blast Off Far Away',
+        period: { start: '2022-01', end: '2022-04' },
+        tags: ['C++', 'Component-based System', 'UI', 'Graphics', 'Gameplay'],
+        media: [
+          { type: 'placeholder', title: 'Blast Off', accent: '#6bb6ff' },
+          { type: 'placeholder', title: 'Gameplay', accent: '#18c3a1' },
+        ],
+        descriptionHTML: "Architected a component system around DigiPen's Alpha Engine with transform hierarchies, led graphics programming and UI, and collaborated closely on gameplay.",
+        cta: { href: 'http://s.team/a/2010150', label: 'View on Steam' }
+      }
+    ],
+    experience: [
+      { role: 'GenAI Software Engineer', org: 'HCLTech — Full-time (Hybrid, Singapore)', period: 'Jul 2025 — Present', details: 'Applied GenAI to real-world workflows; building ML-powered product features.', logo: { text: 'HCL', bg: 'linear-gradient(180deg, #b5f, #68f)', color: '#4A8CFF' } },
+      { role: 'Software QA Engineer', org: 'Razer Inc. — Internship (On-site, Singapore)', period: 'Sep 2024 — Apr 2025', details: 'Automated hundreds of TestRail cases via Selenium + Robot Framework. Built an ML-based self-healing framework using NLP to repair broken locators from DOM changes, significantly reducing test maintenance.', logo: { text: 'RZ', bg: 'linear-gradient(180deg, #8f8, #4e8)', color: '#00FF70' } },
+      { role: 'Teaching Assistant', org: 'DigiPen Institute of Technology Singapore — Contract', period: 'Sep 2022 — Aug 2024', details: 'TA/grader for Linear Algebra & Geometry, High-Level Programming 1 & 2, Game Implementation Techniques, Calculus and Analytic Geometry 1, Software Engineering Project 2, Computer Graphics.', logo: { text: 'DP', bg: 'linear-gradient(180deg, #ffb, #fd8)', color: '#F5C542' } },
+      { role: 'Operations & Planning Assistant', org: 'Singapore Armed Forces (SAF) — Full-time', period: 'Jul 2019 — Jul 2021', details: 'Led a team building automation for HR ops across 2 units (VBA, RPA). Built admin dashboards, trained NSFs, and received multiple awards (NSF of the Year 2021, PERSCOM Admin Specialist & ASA Award 2021).', logo: { text: 'SAF', bg: 'linear-gradient(180deg, #faa, #f66)', color: '#FF6B6B' } },
+      { role: 'Software Engineer', org: 'A*STAR — Internship', period: 'Oct 2018 — Jun 2019', details: 'Developed mobile games for cognitive psychology studies with MSSQL sync; built AR to project 3D molecular structures onto papers; created FTP-based DLC for AR model downloads; localized academic papers; received distinction and full marks.', logo: { text: 'A*', bg: 'linear-gradient(180deg, #acf, #86f)', color: '#7A6BFF' } },
+    ],
+    education: [
+      { school: 'Singapore Institute of Technology', degree: 'BSc in Computer Science in Real-Time Interactive Simulation', period: 'Sep 2021 — Apr 2025', details: "GPA 4.77/5.00 • Provost's List AY2022/2023, AY2023/2024", logo: { text: 'SIT', color: '#0E7FFF' } },
+      { school: 'Temasek Polytechnic', degree: 'Diploma in Game Design & Development', period: 'Apr 2016 — Apr 2019', details: "Director's List AY2017/2018", logo: { text: 'TP', color: '#E74C3C' } },
+    ]
+  };
+
+  const useFallback = () => {
+    console.warn('Using local fallback data (fetch unavailable).');
+    renderProjects(fallback.projects);
+    renderExperience(fallback.experience);
+    renderEducation(fallback.education);
+  };
+
+  if (String(location.protocol).startsWith('file')) {
+    // Browsers block fetch() for file:// URLs; use inline fallback for local previews
+    useFallback();
+    return;
+  }
+  try {
+    const [projects, experience, education] = await Promise.all([
+      loadJSON('assets/data/projects.json'),
+      loadJSON('assets/data/experience.json'),
+      loadJSON('assets/data/education.json'),
+    ]);
+    renderProjects(projects);
+    renderExperience(experience);
+    renderEducation(education);
+  } catch (err) {
+    console.warn('Failed to load data files:', err);
+    useFallback();
+  }
+})();
 
 function createDateBadge(period, color) {
   const date = document.createElement('div');
@@ -707,7 +711,11 @@ function buildSlider(media) {
     if (m.type === "video") {
       el = document.createElement("video"); el.src = m.src; el.controls = true; el.playsInline = true; el.muted = true; el.setAttribute("preload", "metadata");
     } else {
-      el = document.createElement("img"); el.src = m.src; el.alt = m.alt || ""; el.loading = 'lazy'; el.decoding = 'async';
+      el = document.createElement("img");
+      const src = (m.type === 'placeholder')
+        ? placeholderImage(m.title || (activeProject && displayTitle(activeProject.title)) || 'Preview', m.accent || '#6bb6ff')
+        : m.src;
+      el.src = src; el.alt = m.alt || m.title || ""; el.loading = 'lazy'; el.decoding = 'async';
     }
     slide.append(el);
     sliderTrack.append(slide);

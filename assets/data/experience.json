@@ -1,0 +1,38 @@
+[
+  {
+    "role": "GenAI Software Engineer",
+    "org": "HCLTech — Full-time (Hybrid, Singapore)",
+    "period": "Jul 2025 — Present",
+    "details": "Applied GenAI to real-world workflows; building ML-powered product features.",
+    "logo": { "text": "HCL", "bg": "linear-gradient(180deg, #b5f, #68f)", "color": "#4A8CFF" }
+  },
+  {
+    "role": "Software QA Engineer",
+    "org": "Razer Inc. — Internship (On-site, Singapore)",
+    "period": "Sep 2024 — Apr 2025",
+    "details": "Automated hundreds of TestRail cases via Selenium + Robot Framework. Built an ML-based self-healing framework using NLP to repair broken locators from DOM changes, significantly reducing test maintenance.",
+    "logo": { "text": "RZ", "bg": "linear-gradient(180deg, #8f8, #4e8)", "color": "#00FF70" }
+  },
+  {
+    "role": "Teaching Assistant",
+    "org": "DigiPen Institute of Technology Singapore — Contract",
+    "period": "Sep 2022 — Aug 2024",
+    "details": "TA/grader for Linear Algebra & Geometry, High-Level Programming 1 & 2, Game Implementation Techniques, Calculus and Analytic Geometry 1, Software Engineering Project 2, Computer Graphics.",
+    "logo": { "text": "DP", "bg": "linear-gradient(180deg, #ffb, #fd8)", "color": "#F5C542" }
+  },
+  {
+    "role": "Operations & Planning Assistant",
+    "org": "Singapore Armed Forces (SAF) — Full-time",
+    "period": "Jul 2019 — Jul 2021",
+    "details": "Led a team building automation for HR ops across 2 units (VBA, RPA). Built admin dashboards, trained NSFs, and received multiple awards (NSF of the Year 2021, PERSCOM Admin Specialist & ASA Award 2021).",
+    "logo": { "text": "SAF", "bg": "linear-gradient(180deg, #faa, #f66)", "color": "#FF6B6B" }
+  },
+  {
+    "role": "Software Engineer",
+    "org": "A*STAR — Internship",
+    "period": "Oct 2018 — Jun 2019",
+    "details": "Developed mobile games for cognitive psychology studies with MSSQL sync; built AR to project 3D molecular structures onto papers; created FTP-based DLC for AR model downloads; localized academic papers; received distinction and full marks.",
+    "logo": { "text": "A*", "bg": "linear-gradient(180deg, #acf, #86f)", "color": "#7A6BFF" }
+  }
+]
+

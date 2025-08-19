@@ -1,0 +1,17 @@
+[
+  {
+    "school": "Singapore Institute of Technology",
+    "degree": "BSc in Computer Science in Real-Time Interactive Simulation",
+    "period": "Sep 2021 — Apr 2025",
+    "details": "GPA 4.77/5.00 • Provost's List AY2022/2023, AY2023/2024",
+    "logo": { "text": "SIT", "color": "#0E7FFF" }
+  },
+  {
+    "school": "Temasek Polytechnic",
+    "degree": "Diploma in Game Design & Development",
+    "period": "Apr 2016 — Apr 2019",
+    "details": "Director's List AY2017/2018",
+    "logo": { "text": "TP", "color": "#E74C3C" }
+  }
+]
+
