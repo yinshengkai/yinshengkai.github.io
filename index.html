@@ -37,19 +37,14 @@
         </div>
       </div>
     </nav>
-    <!-- Animated background: liquid gradient blobs + subtle noise -->
-    <div class="bg">
-      <div class="blob b1"></div>
-      <div class="blob b2"></div>
-      <div class="blob b3"></div>
-      <canvas class="dots" id="bg-dots" aria-hidden="true"></canvas>
-      <div class="noise" aria-hidden="true"></div>
-      <div class="vignette" aria-hidden="true"></div>
-    </div>
+    <!-- Dimmed + blurred background image layer -->
+    <div class="bg-image" aria-hidden="true"></div>
 
     <header class="site-header container">
       <div class="profile glass reveal" id="profile-card">
-        <div class="avatar" role="img" aria-label="Profile avatar"></div>
+        <div class="avatar" role="img" aria-label="Profile avatar">
+          <img class="avatar-img" src="assets/images/avatar.jpg" alt="Profile avatar" />
+        </div>
         <div class="profile-body" id="profile">
           <h1 class="title" id="site-title">Yin Shengkai</h1>
           <p class="subtitle">Software Engineer • AI/ML • High‑Performance Game Engines • UI/UX</p>

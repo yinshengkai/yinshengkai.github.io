@@ -821,10 +821,11 @@ document.addEventListener("visibilitychange", () => {
 
 // Respect prefers-reduced-motion
 
-// Cursor-reactive parallax blobs + drifting dots
+// Cursor-reactive parallax blobs + drifting dots (disabled if no elements exist)
 const blobEls = $$(".blob");
 const dotsCanvas = $("#bg-dots");
 const ctx = (dotsCanvas && dotsCanvas.getContext) ? dotsCanvas.getContext("2d") : null;
+const bgActive = (blobEls && blobEls.length > 0) || !!ctx;
 let dots = [];
 let mouse = { x: 0.5, y: 0.5, vX: 0, vY: 0, t: 0 };
 let lastTs = 0;
@@ -920,7 +921,7 @@ function onPointerMove(e) {
   mouse.x = nx; mouse.y = ny;
 }
 
-if (!prefersReducedMotion) {
+if (bgActive && !prefersReducedMotion) {
   window.addEventListener('mousemove', onPointerMove, { passive: true });
   window.addEventListener('touchmove', onPointerMove, { passive: true });
 }
@@ -930,8 +931,8 @@ function onResizeThrottled() {
   if (resizeRaf) return;
   resizeRaf = requestAnimationFrame(() => { resizeRaf = 0; resizeCanvas(); });
 }
-window.addEventListener('resize', onResizeThrottled);
-if (!prefersReducedMotion) {
+if (bgActive) window.addEventListener('resize', onResizeThrottled);
+if (bgActive && !prefersReducedMotion) {
   resizeCanvas();
   requestAnimationFrame(animateBackground);
 } else {
