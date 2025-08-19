@@ -11,9 +11,10 @@
   --border: rgba(255, 255, 255, 0.14);
   --text: #e6edf3;
   --muted: #9fb0c0;
-  --accent: #6bb6ff; /* cool blue accent */
-  --accent-2: #8d7bff; /* purple */
-  --accent-3: #18c3a1; /* teal */
+  /* Accent colors (updated dynamically from background by JS; these are fallbacks) */
+  --accent: #6bb6ff;
+  --accent-2: #8d7bff;
+  --accent-3: #18c3a1;
   --shadow: 0 10px 30px rgba(0,0,0,0.45), inset 0 1px rgba(255,255,255,0.05);
   --radius: 16px;
   --radius-sm: 12px;
@@ -21,13 +22,16 @@
   --blur: 22px;
   --speed: 380ms;
   --speed-slow: 900ms;
-  /* Unified highlight (blue) */
-  --hi: #6bb6ff; /* base highlight color (blue) */
+  /* Unified highlight (derived dynamically by JS; fallback here) */
+  --hi: #6bb6ff;
   --hi-ring: rgba(107, 182, 255, 0.28);
   --hi-ring-strong: rgba(107, 182, 255, 0.36);
   --hi-glow: rgba(107, 182, 255, 0.22);
   /* Global vertical padding for top/bottom breathing room */
   --site-pad-y: 16px;
+  /* Card surface background (standardized, darker) */
+  /* Lighter again to reduce visual weight */
+  --card-bg: linear-gradient(180deg, rgba(12,16,24,0.48), rgba(12,16,24,0.36));
 }
 
 * { box-sizing: border-box; }
@@ -228,7 +232,8 @@ body { padding-bottom: calc(var(--dev-banner-h, 56px) + var(--site-pad-y)); }
 
 /* Glass utility */
 .glass {
-  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+  /* Standardized darker card background */
+  background: var(--card-bg);
   border: none;
   border-radius: var(--radius);
   backdrop-filter: blur(var(--blur)) saturate(120%);
@@ -647,8 +652,8 @@ body { padding-bottom: calc(var(--dev-banner-h, 56px) + var(--site-pad-y)); }
   outline-offset: 2px;
 }
 .slider-dots { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; gap: 8px; z-index: 3; }
-.dot { width: 8px; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.38); border: none; box-shadow: 0 1px 6px rgba(0,0,0,0.35), inset 0 1px rgba(255,255,255,0.12); }
-.dot.active { background: linear-gradient(180deg, rgba(107,182,255,0.9), rgba(107,182,255,0.4)); box-shadow: 0 0 0 4px var(--hi-ring); }
+.dot { width: 8px; height: 8px; border-radius: 999px; background: rgba(var(--accent-rgb, 107,182,255), 0.38); border: none; box-shadow: 0 1px 6px rgba(0,0,0,0.35), inset 0 1px rgba(255,255,255,0.12); }
+.dot.active { background: linear-gradient(180deg, var(--accent), var(--accent-2)); box-shadow: 0 0 0 4px var(--hi-ring); }
 
 /* Slider caption outside the image */
 .slider-caption {

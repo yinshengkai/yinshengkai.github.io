@@ -4,6 +4,174 @@ const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 // Global: reduced motion preference (use early and often)
 const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
+// Derive accent/highlight colors from the background image
+(function deriveDynamicPalette() {
+  const root = document.documentElement;
+  const bgEl = document.querySelector('.bg-image');
+  if (!bgEl) return;
+
+  // Extract url(...) from computed style
+  function getBgUrl() {
+    try {
+      const cs = window.getComputedStyle(bgEl);
+      const bi = cs && cs.backgroundImage || '';
+      const m = bi.match(/url\(["']?([^"')]+)["']?\)/i);
+      if (m && m[1]) return m[1];
+    } catch {}
+    return null;
+  }
+
+  // Helpers: RGB <-> HSL conversions
+  function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r,g,b), min = Math.min(r,g,b);
+    let h = 0, s = 0, l = (max + min) / 2;
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h /= 6;
+    }
+    return [h, s, l];
+  }
+  function hslToRgb(h, s, l) {
+    let r, g, b;
+    if (s === 0) { r = g = b = l; }
+    else {
+      const hue2rgb = (p, q, t) => {
+        if (t < 0) t += 1; if (t > 1) t -= 1;
+        if (t < 1/6) return p + (q - p) * 6 * t;
+        if (t < 1/2) return q;
+        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+      };
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1/3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1/3);
+    }
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+  }
+  function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+  function toHex(r,g,b) { const hx = (n)=>n.toString(16).padStart(2,'0'); return `#${hx(r)}${hx(g)}${hx(b)}`; }
+
+  // Simple quantization: 4 bits per channel histogram
+  function getPalette(img) {
+    const size = 64; // downsampled sampling size
+    const canvas = document.createElement('canvas');
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0, size, size);
+    const { data } = ctx.getImageData(0, 0, size, size);
+    const hist = new Map();
+    for (let i = 0; i < data.length; i += 4) {
+      const a = data[i+3];
+      if (a < 10) continue; // skip transparent
+      const r = data[i], g = data[i+1], b = data[i+2];
+      const [h, s, l] = rgbToHsl(r, g, b);
+      // ignore extremely dark/bright pixels (mostly vignette/overlays)
+      if (l < 0.07 || l > 0.92) continue;
+      // quantize to 4 bits/channel
+      const rq = r >> 4, gq = g >> 4, bq = b >> 4;
+      const key = (rq << 8) | (gq << 4) | bq;
+      hist.set(key, (hist.get(key) || 0) + 1);
+    }
+    const entries = Array.from(hist.entries()).sort((a,b)=>b[1]-a[1]);
+    const colors = entries.slice(0, 16).map(([key]) => {
+      const rq = (key >> 8) & 0xF, gq = (key >> 4) & 0xF, bq = key & 0xF;
+      return [rq << 4 | rq, gq << 4 | gq, bq << 4 | bq];
+    });
+    return colors;
+  }
+
+  function pickTwo(colors) {
+    if (!colors || colors.length === 0) return null;
+    // First: the most common
+    const primary = colors[0];
+    // Second: most different by hue and distance
+    let best = null, bestScore = -1;
+    const [pr,pg,pb] = primary;
+    const [ph,ps,pl] = rgbToHsl(pr,pg,pb);
+    for (let i=1;i<colors.length;i++) {
+      const [r,g,b] = colors[i];
+      const [h,s,l] = rgbToHsl(r,g,b);
+      // score: hue distance + lightness distance + saturation
+      const dh = Math.min(Math.abs(h-ph), 1-Math.abs(h-ph));
+      const dl = Math.abs(l-pl);
+      const score = dh*2 + dl + s*0.5;
+      if (score > bestScore) { bestScore = score; best = colors[i]; }
+    }
+    return [primary, best || primary];
+  }
+
+  function bumpSat(s, min, mult) { return clamp01(Math.max(min, s * mult)); }
+  function adjustForHighlight([r,g,b]) {
+    let [h,s,l] = rgbToHsl(r,g,b);
+    // Ensure strong pop on dark bg: higher saturation, slightly brighter
+    s = bumpSat(s, 0.65, 1.25);
+    l = clamp01(Math.max(l, 0.58));
+    return hslToRgb(h,s,l);
+  }
+  function adjustForAccent([r,g,b], lighten = false) {
+    let [h,s,l] = rgbToHsl(r,g,b);
+    if (lighten) {
+      s = bumpSat(s, 0.55, 1.2);
+      l = clamp01(Math.max(l, 0.65));
+    } else {
+      s = bumpSat(s, 0.6, 1.2);
+      l = clamp01(Math.max(l, 0.52));
+    }
+    return hslToRgb(h,s,l);
+  }
+
+  function applyVars(primary, secondary) {
+    const [hr,hg,hb] = adjustForHighlight(primary);
+    const hiHex = toHex(hr,hg,hb);
+    const [a1r,a1g,a1b] = adjustForAccent(primary);
+    const [a2r,a2g,a2b] = adjustForAccent(secondary, true);
+    const a1Hex = toHex(a1r,a1g,a1b);
+    const a2Hex = toHex(a2r,a2g,a2b);
+    try {
+      root.style.setProperty('--hi', hiHex);
+      root.style.setProperty('--hi-ring', `rgba(${hr}, ${hg}, ${hb}, 0.28)`);
+      root.style.setProperty('--hi-ring-strong', `rgba(${hr}, ${hg}, ${hb}, 0.36)`);
+      root.style.setProperty('--hi-glow', `rgba(${hr}, ${hg}, ${hb}, 0.22)`);
+      root.style.setProperty('--accent', a1Hex);
+      root.style.setProperty('--accent-2', a2Hex);
+      root.style.setProperty('--accent-rgb', `${a1r}, ${a1g}, ${a1b}`);
+      root.style.setProperty('--accent2-rgb', `${a2r}, ${a2g}, ${a2b}`);
+      // keep --accent-3 as is or derive a triad if desired
+    } catch {}
+  }
+
+  function run(url) {
+    if (!url) return;
+    const img = new Image();
+    img.decoding = 'async';
+    img.onload = () => {
+      try {
+        const colors = getPalette(img);
+        const picked = pickTwo(colors);
+        if (picked) applyVars(picked[0], picked[1]);
+      } catch {}
+    };
+    // ensure same-origin path
+    img.src = url;
+  }
+
+  // Start once DOM is ready (background element exists)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => run(getBgUrl()), { once: true });
+  } else {
+    run(getBgUrl());
+  }
+})();
+
 // Loader: fade out on window load with fallback
 (function initLoader() {
   const loader = document.getElementById('loader');
