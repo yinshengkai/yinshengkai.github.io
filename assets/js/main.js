@@ -148,8 +148,14 @@ window.addEventListener('gate:open', () => {
 // Development warning overlay logic
 (function initDevWarning() {
   const warn = document.getElementById('dev-warning');
-  const ack = document.getElementById('warn-ack');
-  if (!warn || !ack) return;
+  const hint = document.getElementById('warn-hint');
+  // Button removed; proceed as long as overlay exists
+  if (!warn) return;
+  // Update hint text for device type (tap vs click)
+  try {
+    const isCoarse = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+    if (hint) hint.textContent = isCoarse ? 'Tap anywhere to continue' : 'Click anywhere to continue';
+  } catch {}
   const show = () => {
     warn.setAttribute('aria-hidden', 'false');
     warn.classList.add('show');
@@ -164,7 +170,12 @@ window.addEventListener('gate:open', () => {
     setTimeout(() => warn.parentNode && warn.parentNode.removeChild(warn), 700);
   };
   window.addEventListener('loader:done', show, { once: true });
-  ack.addEventListener('click', hide, { once: true });
+  // Also allow tapping/clicking anywhere on the overlay to continue
+  warn.addEventListener('click', (e) => {
+    // Prevent accidental propagation and trigger the same hide action
+    try { e.preventDefault(); e.stopPropagation(); } catch {}
+    hide();
+  }, { once: true });
 })();
 
 // (Flags now use SVG as the primary method; no platform detection needed.)

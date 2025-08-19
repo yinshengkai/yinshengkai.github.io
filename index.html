@@ -26,15 +26,11 @@
       </div>
     </div>
     <!-- Post-load development warning overlay -->
-    <div id="dev-warning" class="warn-overlay" aria-hidden="true" role="dialog" aria-labelledby="warn-title" aria-describedby="warn-desc">
+    <div id="dev-warning" class="warn-overlay" aria-hidden="true" role="dialog" aria-labelledby="warn-title" aria-describedby="warn-desc warn-hint">
       <div class="warn-card">
         <div id="warn-title" class="warn-hero" aria-hidden="true">Heads Up</div>
         <p id="warn-desc" class="warn-sub">This site is under active development. Content may be incomplete or inaccurate.</p>
-        <button id="warn-ack" class="icon-link warn-ack" aria-label="Acknowledge and continue" title="Acknowledge">
-          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-            <path fill="currentColor" d="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59z"/>
-          </svg>
-        </button>
+        <p id="warn-hint" class="warn-hint" aria-hidden="true">Tap anywhere to continue</p>
       </div>
     </div>
     <!-- Top shortcuts -->

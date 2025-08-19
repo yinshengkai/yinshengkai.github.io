@@ -139,7 +139,7 @@ body {
   box-shadow: none;
   transition: color var(--speed), text-decoration-color var(--speed);
 }
-.brand-link:hover { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+.brand-link:hover { text-decoration: none; color: var(--hi); opacity: 1; }
 .brand-link:focus-visible { outline: 2px solid var(--hi); outline-offset: 2px; }
 .shortcut-link.active { opacity: 1; color: #fff; transform: translateY(-2px) scale(1.03); background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.22); box-shadow: 0 12px 30px rgba(0,0,0,0.55), 0 0 0 3px var(--hi-ring), inset 0 1px rgba(255,255,255,0.22); }
 /* removed accent dot under active icon for a cleaner look */
@@ -650,7 +650,7 @@ body {
   pointer-events: none;
   transition: opacity var(--speed-slow) ease;
 }
-.warn-overlay.show { opacity: 1; pointer-events: auto; }
+.warn-overlay.show { opacity: 1; pointer-events: auto; cursor: pointer; }
 .warn-card {
   max-width: 880px;
   width: 100%;
@@ -675,3 +675,20 @@ body {
   font-size: clamp(14px, 2.6vw, 18px);
 }
 .warn-ack { margin-top: 6px; }
+/* Tap-anywhere hint */
+.warn-hint {
+  margin-top: 42px; /* extra spacing from disclaimer text */
+  color: #dbe7f3;
+  opacity: 0.85;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  animation: hintPulse 2.4s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+@keyframes hintPulse {
+  0%, 100% { opacity: 0.78; transform: translateY(0) scale(1); }
+  50% { opacity: 1; transform: translateY(-1px) scale(1.02); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .warn-hint { animation: none; }
+}
