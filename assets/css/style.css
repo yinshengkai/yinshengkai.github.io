@@ -94,12 +94,7 @@ body {
 
 /* Top shortcuts */
 .top-shortcuts { position: fixed; top: calc(8px + env(safe-area-inset-top)); left: 0; right: 0; z-index: 60; pointer-events: none; padding: 0 10px; }
-.shortcuts-wrap { max-width: 1100px; margin: 0 auto; padding: 14px 20px; min-height: 56px; display: flex; align-items: center; gap: 16px; justify-content: space-between; position: relative; overflow: hidden; background:
-  linear-gradient(90deg,
-    rgba(107,182,255,0.22),
-    rgba(141,123,255,0.16) 55%,
-    rgba(24,195,161,0.12)
-  ), rgba(8,12,18,0.65);
+.shortcuts-wrap { max-width: 1100px; margin: 0 auto; padding: 14px 20px; min-height: 56px; display: flex; align-items: center; gap: 16px; justify-content: space-between; position: relative; overflow: hidden; background: rgba(8,12,18,0.70);
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 14px;
   backdrop-filter: blur(20px) saturate(140%);
@@ -110,19 +105,7 @@ body {
   will-change: transform, opacity;
 }
 /* Subtle gradient ring to make the navbar stand out */
-.shortcuts-wrap::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 14px;
-  padding: 1px; /* ring thickness */
-  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  opacity: 0.18;
-}
+.shortcuts-wrap::before { content: none; }
 /* Hide navbar smoothly while modal/sheet is open */
 .modal-open .top-shortcuts .shortcuts-wrap { transform: translateY(-120%); opacity: 0; pointer-events: none; }
 /* Delay showing navbar after gate opens */
@@ -130,9 +113,10 @@ body {
 .top-shortcuts .brand { opacity: 0.98; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
 .brand { color: #fff; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-weight: 900; letter-spacing: 1.2px; opacity: 0.95; font-size: 20px; }
 .shortcut-links { display: flex; gap: 10px; }
-.shortcut-link { pointer-events: auto; color: #fff; text-decoration: none; opacity: 0.9; transition: opacity var(--speed-slow), background var(--speed-slow), transform var(--speed), box-shadow var(--speed-slow), color var(--speed-slow); border-radius: 12px; }
-.shortcut-link.icon { position: relative; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: none; background: rgba(8,12,18,0.60); box-shadow: 0 8px 22px rgba(0,0,0,0.38), inset 0 1px rgba(255,255,255,0.12); }
- .shortcut-link.icon:hover { opacity: 1; transform: translateY(-1px); background: rgba(8,12,18,0.72); }
+.shortcut-link { pointer-events: auto; color: #fff; text-decoration: none; opacity: 0.95; transition: opacity var(--speed-slow), background var(--speed-slow), transform var(--speed), box-shadow var(--speed-slow), color var(--speed-slow); border-radius: 12px; }
+.shortcut-link.icon { position: relative; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.08); box-shadow: 0 10px 24px rgba(0,0,0,0.45), inset 0 1px rgba(255,255,255,0.16); }
+.shortcut-link.icon:hover { opacity: 1; transform: translateY(-2px); background: rgba(255,255,255,0.12); box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 0 3px rgba(107,182,255,0.18), inset 0 1px rgba(255,255,255,0.20); }
+.shortcut-link.icon:focus-visible { outline: 2px solid rgba(107,182,255,0.75); outline-offset: 2px; }
 
 /* Brand container (clickable, returns home) */
 .brand-link {
@@ -148,20 +132,18 @@ body {
   /* Equal visual extension left/right from the text */
   padding: 8px calc(20px + 12px) 8px calc(20px + 12px);
   border-radius: 0 12px 12px 0; /* only right edge rounded/visible */
-  background:
-    linear-gradient(90deg, rgba(107,182,255,0.18), rgba(141,123,255,0.12) 55%, rgba(24,195,161,0.10)),
-    rgba(8,12,18,0.72); /* slightly dimmer than navbar */
+  background: rgba(8,12,18,0.88); /* solid darker background */
   /* Standout via gradient + colored glow only (no border/extra blur), slightly subdued */
   box-shadow:
-    0 10px 28px rgba(0,0,0,0.45),
-    0 0 14px rgba(107,182,255,0.18),
-    0 0 12px rgba(141,123,255,0.14),
-    0 0 10px rgba(24,195,161,0.12);
+    0 10px 28px rgba(0,0,0,0.55),
+    0 0 10px rgba(107,182,255,0.12),
+    0 0 8px rgba(141,123,255,0.10),
+    0 0 6px rgba(24,195,161,0.08);
   transition: transform var(--speed), box-shadow var(--speed), background var(--speed-slow);
 }
 .brand-link:hover { transform: translateY(-1px); box-shadow: 0 12px 32px rgba(0,0,0,0.5), 0 0 18px rgba(107,182,255,0.28), 0 0 16px rgba(141,123,255,0.22), 0 0 14px rgba(24,195,161,0.18); }
 .brand-link:focus-visible { outline: 2px solid rgba(107,182,255,0.7); outline-offset: 2px; }
-.shortcut-link.active { opacity: 1; color: #fff; transform: translateY(-1px) scale(1.02); background: linear-gradient(180deg, rgba(107,182,255,0.28), rgba(107,182,255,0.12)); box-shadow: 0 8px 24px rgba(107,182,255,0.35), 0 8px 24px rgba(0,0,0,0.4), inset 0 1px rgba(255,255,255,0.18); }
+.shortcut-link.active { opacity: 1; color: #fff; transform: translateY(-2px) scale(1.03); background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.22); box-shadow: 0 12px 30px rgba(0,0,0,0.55), 0 0 0 3px rgba(107,182,255,0.25), inset 0 1px rgba(255,255,255,0.22); }
 /* removed accent dot under active icon for a cleaner look */
 .shortcut-link:hover { opacity: 1; text-decoration: underline; }
 

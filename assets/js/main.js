@@ -260,8 +260,7 @@ const experience = [
   },
 ];
 
-// Footer year (guarded)
-const yearEl = $("#year"); if (yearEl) yearEl.textContent = new Date().getFullYear();
+// Removed footer year hookup (no #year element in DOM)
 
 // Typewriter animation for profile subtitle/bio (skip if reduced motion)
 (function typewriter() {
