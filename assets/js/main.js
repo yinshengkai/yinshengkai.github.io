@@ -1058,6 +1058,52 @@ if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, b
 
 // Center-based scrollspy handles edges; no extra edge hack needed
 
+// Dynamically compute navbar height and apply as CSS var for top padding/scroll-margin
+(function dynamicNavOffset() {
+  const wrapSel = '.top-shortcuts .shortcuts-wrap';
+  let raf = 0;
+  function measure() {
+    raf = 0;
+    const wrap = document.querySelector(wrapSel);
+    if (!wrap) return;
+    const rect = wrap.getBoundingClientRect();
+    // Use the actual bottom edge from the top of the viewport (no hardcoded gaps)
+    const offset = Math.max(0, Math.ceil(rect.bottom));
+    try { document.documentElement.style.setProperty('--nav-offset', offset + 'px'); } catch {}
+  }
+  const queue = () => { if (raf) return; raf = requestAnimationFrame(measure); };
+  // Initial and after load (fonts/images can change height)
+  if (document.readyState !== 'loading') measure(); else window.addEventListener('DOMContentLoaded', measure, { once: true });
+  window.addEventListener('load', queue, { once: true });
+  // Recalculate on resize/orientation changes
+  window.addEventListener('resize', queue);
+  window.addEventListener('orientationchange', queue);
+})();
+
+// Dynamically compute bottom dev banner height and set CSS var to avoid overlap
+(function dynamicDevBannerHeight() {
+  const sel = '.dev-banner';
+  let raf = 0;
+  function measure() {
+    raf = 0;
+    const el = document.querySelector(sel);
+    if (!el) return;
+    const h = Math.ceil(el.getBoundingClientRect().height || 0);
+    try { document.documentElement.style.setProperty('--dev-banner-h', h + 'px'); } catch {}
+  }
+  const queue = () => { if (raf) return; raf = requestAnimationFrame(measure); };
+  if (document.readyState !== 'loading') measure(); else window.addEventListener('DOMContentLoaded', measure, { once: true });
+  window.addEventListener('load', queue, { once: true });
+  window.addEventListener('resize', queue);
+  window.addEventListener('orientationchange', queue);
+  try {
+    if ('ResizeObserver' in window) {
+      const el = document.querySelector(sel);
+      if (el) new ResizeObserver(queue).observe(el);
+    }
+  } catch {}
+})();
+
 // Try to retrieve LinkedIn profile image (best-effort, with fallback)
 (async function hydrateAvatar() {
   const avatarEl = document.querySelector('.avatar');

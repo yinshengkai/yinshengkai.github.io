@@ -26,6 +26,8 @@
   --hi-ring: rgba(107, 182, 255, 0.28);
   --hi-ring-strong: rgba(107, 182, 255, 0.36);
   --hi-glow: rgba(107, 182, 255, 0.22);
+  /* Global vertical padding for top/bottom breathing room */
+  --site-pad-y: 16px;
 }
 
 * { box-sizing: border-box; }
@@ -47,6 +49,8 @@ body {
   color: var(--text);
   background: var(--bg);
   line-height: 1.6;
+  /* Add gentle spacing from the top edge of the viewport */
+  padding-top: calc(var(--site-pad-y) + env(safe-area-inset-top));
 }
 
 .container {
@@ -99,6 +103,25 @@ body {
 
 /* Top shortcuts */
 .top-shortcuts { position: fixed; top: calc(8px + env(safe-area-inset-top)); left: 0; right: 0; z-index: 60; pointer-events: none; padding: 0 10px; }
+/* Full-width persistent bottom banner (development notice) */
+.dev-banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 65;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  text-align: center;
+  color: #0b0f14;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  background: #ffd34d; /* yellow */
+  border-top: 1px solid rgba(0,0,0,0.22);
+  box-shadow: 0 -8px 24px rgba(0,0,0,0.35), inset 0 1px rgba(255,255,255,0.25);
+}
+/* Ensure content isn't obscured by the bottom banner and add bottom spacing */
+body { padding-bottom: calc(var(--dev-banner-h, 56px) + var(--site-pad-y)); }
 .shortcuts-wrap { max-width: 1100px; margin: 0 auto; padding: 14px 20px; min-height: 56px; display: flex; align-items: center; gap: 16px; justify-content: space-between; position: relative; overflow: hidden; background: rgba(8,12,18,0.70);
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 14px;
@@ -157,9 +180,14 @@ body {
 .glass.micro { border-radius: var(--radius-sm); padding: 12px 14px; display: inline-block; }
 
 /* Header profile card */
-.site-header { padding-top: calc(96px + env(safe-area-inset-top)); }
+/* Top padding equals dynamic navbar bottom so content isn't covered */
+.site-header { padding-top: var(--nav-offset, 96px); }
 /* When navigating to the profile card via hash, keep it clear of the fixed navbar */
-#profile-card { scroll-margin-top: calc(110px + env(safe-area-inset-top)); }
+#profile-card { scroll-margin-top: var(--nav-offset, 96px); }
+/* Extra headroom on very narrow screens so navbar never covers profile */
+@media (max-width: 480px) {
+  /* Dynamic nav offset handles small screens; no hard-coded values needed */
+}
 .profile { display: grid; grid-template-columns: 160px 1fr; gap: 20px; padding: 46px 22px 22px; align-items: center; }
 .avatar {
   width: 160px; height: 160px; border-radius: 28px;
@@ -586,7 +614,13 @@ body {
 }
 
 /* Footer */
-.site-footer { padding-top: 24px; padding-bottom: 36px; display: grid; place-items: center; }
+.site-footer { 
+  padding-top: 24px; 
+  /* Add inner padding so text sits above the fixed banner */
+  padding-bottom: calc(36px + var(--dev-banner-h, 56px) + var(--site-pad-y)); 
+  display: grid; 
+  place-items: center; 
+}
 .footer-copy { color: #fff; opacity: 0.9; }
 
 /* Scroll indicator */

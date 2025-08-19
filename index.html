@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="loading">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -16,23 +16,7 @@
     </style>
     <link rel="stylesheet" href="assets/css/style.css" />
   </head>
-  <body class="loading nav-hidden">
-    <!-- Full-screen loader -->
-    <div id="loader" class="loader-overlay" aria-hidden="false" role="status" aria-live="polite">
-      <div class="loader-inner">
-        <div class="loader-spinner" aria-hidden="true"></div>
-        <div class="loader-brand" aria-label="Loading Yin Shengkai portfolio">YSK</div>
-        <div id="loader-percent" class="loader-percent" aria-label="Loading progress">0%</div>
-      </div>
-    </div>
-    <!-- Post-load development warning overlay -->
-    <div id="dev-warning" class="warn-overlay" aria-hidden="true" role="dialog" aria-labelledby="warn-title" aria-describedby="warn-desc warn-hint">
-      <div class="warn-card">
-        <div id="warn-title" class="warn-hero" aria-hidden="true">Heads Up</div>
-        <p id="warn-desc" class="warn-sub">This site is under active development. Content may be incomplete or inaccurate.</p>
-        <p id="warn-hint" class="warn-hint" aria-hidden="true">Tap anywhere to continue</p>
-      </div>
-    </div>
+  <body>
     <!-- Top shortcuts -->
     <nav class="top-shortcuts" aria-label="Quick navigation">
       <div class="shortcuts-wrap">
@@ -190,14 +174,12 @@
       <small class="footer-copy">© Yin Shengkai</small>
     </footer>
 
-    <!-- Global scroll indicator -->
-    <div id="scroll-indicator" class="scroll-indicator" aria-hidden="true">
-      <span class="si-arrow">▼</span>
-    </div>
 
-    <!-- Back to top -->
-    <button id="back-to-top" class="back-to-top" aria-label="Back to top" title="Back to top">▲</button>
 
     <script src="assets/js/main.js" defer></script>
+    <!-- Persistent development banner at bottom -->
+    <div class="dev-banner" role="status" aria-live="polite">
+      This site is under active development. Content may be incomplete.
+    </div>
   </body>
   </html>
