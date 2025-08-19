@@ -30,8 +30,8 @@
   /* Global vertical padding for top/bottom breathing room */
   --site-pad-y: 16px;
   /* Card surface background (standardized, darker) */
-  /* Lighter again to reduce visual weight */
-  --card-bg: linear-gradient(180deg, rgba(12,16,24,0.48), rgba(12,16,24,0.36));
+  /* Slightly higher opacity for a bit more body */
+  --card-bg: linear-gradient(180deg, rgba(12,16,24,0.56), rgba(12,16,24,0.44));
 }
 
 * { box-sizing: border-box; }
