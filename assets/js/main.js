@@ -192,7 +192,17 @@ function placeholderImage(title, accent = "#6bb6ff", bg = "#0b0f14") {
       font-family='Segoe UI, Roboto, Helvetica, Arial' font-size='72'
       fill='white' fill-opacity='0.9' letter-spacing='1'>${title}</text>
   </svg>`;
-  return `data:image/svg+xml;base64,${btoa(svg)}`;
+  // btoa fails on non-ASCII; encode to UTF-8 safely first
+  const base64 = (() => {
+    try {
+      return btoa(unescape(encodeURIComponent(svg)));
+    } catch {
+      // Fallback: minimal manual percent-decoding then btoa
+      const utf8 = encodeURIComponent(svg).replace(/%([0-9A-F]{2})/g, (_, p) => String.fromCharCode('0x' + p));
+      return btoa(utf8);
+    }
+  })();
+  return `data:image/svg+xml;base64,${base64}`;
 }
 
 // Data loading (modular content via JSON files under assets/data)
@@ -626,7 +636,7 @@ function openSheet(project) {
       cta.className = 'sheet-cta';
       const a = document.createElement('a');
       a.className = 'btn primary';
-      a.href = project.cta.href; a.target = '_blank'; a.rel = 'noopener';
+      a.href = project.cta.href; a.target = '_blank'; a.rel = 'noopener noreferrer';
       a.textContent = project.cta.label || 'Learn more';
       cta.append(a);
       sheetBody.append(cta);
@@ -765,6 +775,8 @@ function typeCaption(text) {
 }
 
 function goTo(i, user = false) {
+  if (sliderState.count <= 0) return; // nothing to do
+  if (sliderState.count === 1) { updateTrack(); updateCaption(); return; }
   sliderState.i = (i + sliderState.count) % sliderState.count;
   updateTrack();
   updateCaption();
@@ -805,8 +817,10 @@ sliderTrack.addEventListener('touchend', onTouchEnd);
 
 // Keyboard navigation inside sheet
 sheet.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowRight") { next(); }
-  if (e.key === "ArrowLeft") { prev(); }
+  if (sliderState.count > 1) {
+    if (e.key === "ArrowRight") { next(); }
+    if (e.key === "ArrowLeft") { prev(); }
+  }
 });
 
 // Autoplay with progress bar
@@ -1043,16 +1057,12 @@ window.addEventListener('hashchange', () => {
   if (h && navMap.has(h)) startNavLock(h);
 });
 
-// Scroll indicator (use cached reveal nodes and batch updates)
+// Scroll indicator (count reveals dynamically so late-rendered items are included)
 const scrollInd = document.getElementById('scroll-indicator');
-const revealElsCache = Array.from(document.querySelectorAll('.reveal'));
 function updateScrollIndicator() {
   if (!scrollInd) return;
   const atBottom = (window.innerHeight + (window.scrollY || window.pageYOffset || 0)) >= ((document.documentElement.scrollHeight || 0) - 2);
-  let remaining = 0;
-  for (let i = 0; i < revealElsCache.length; i++) {
-    if (!revealElsCache[i].classList.contains('in')) remaining++;
-  }
+  const remaining = document.querySelectorAll('.reveal:not(.in)').length;
   const shouldShow = !atBottom && remaining > 0;
   scrollInd.classList.toggle('show', shouldShow);
 }
