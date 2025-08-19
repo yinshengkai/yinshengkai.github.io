@@ -334,7 +334,16 @@ function renderProjects(projects = []) {
 
   // project date footer (console-styled, no pill)
   const pdate = createProjectDate(p.period || {});
-  card.append(cover, title, desc, tl, meta, pdate);
+  // Tap/click affordance hint (aria-hidden, purely visual)
+  const hint = document.createElement('div');
+  hint.className = 'tap-hint';
+  hint.setAttribute('aria-hidden', 'true');
+  hint.innerHTML = `
+    <span class="label">View details</span>
+    <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+      <path fill="currentColor" d="M8.59 16.59 10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+    </svg>`;
+  card.append(cover, title, desc, tl, meta, pdate, hint);
   grid.append(card);
   reveal(card);
 
