@@ -61,6 +61,8 @@ const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers
 // Reveal-on-scroll helper (staggered, bidirectional: in when visible, out when not)
 const supportsIO = typeof window !== 'undefined' && 'IntersectionObserver' in window;
 const revealQueue = [];
+// Hysteresis state to stop rapid in/out near viewport edges
+const _revealState = new WeakMap(); // el -> { visible: boolean, t: number }
 const isLoading = () => {
   const de = document.documentElement;
   return de.classList.contains('loading') || de.classList.contains('gated');
@@ -83,29 +85,47 @@ function applyReveal(target, entering) {
   } else {
     target.classList.remove('in');
   }
+  try {
+    const now = (window.performance && performance.now) ? performance.now() : Date.now();
+    _revealState.set(target, { visible: !!entering, t: now });
+  } catch {}
 }
 
 const observer = supportsIO ? new IntersectionObserver((entries) => {
+  const now = (window.performance && performance.now) ? performance.now() : Date.now();
+  const ENTER_R = 0.18; // enter when >=18% visible
+  const EXIT_R = 0.06;  // exit only when <=6% visible (hysteresis)
+  const COOLDOWN = 160; // ms minimum between state flips
+  const vH = window.innerHeight || document.documentElement.clientHeight || 0;
   entries.forEach((entry) => {
+    const el = entry.target;
     const ratio = entry.intersectionRatio || 0;
-    const visible = entry.isIntersecting && ratio > 0.14; // require >14% visible
-    if (visible) {
-      if (isLoading()) {
-        revealQueue.push(entry.target);
-      } else {
-        applyReveal(entry.target, true);
-      }
-    } else {
-      // remove when out of view to support bidirectional fly-in/fly-out
-      applyReveal(entry.target, false);
+    const st = _revealState.get(el) || { visible: false, t: 0 };
+
+    // Determine intents with hysteresis and offscreen guard
+    const wantsEnter = entry.isIntersecting && ratio >= ENTER_R;
+    const rect = entry.boundingClientRect || { top: 0, bottom: 0 };
+    const farOff = (rect.bottom <= 0) || (rect.top >= vH); // fully outside viewport
+    const wantsExit = (!entry.isIntersecting || ratio <= EXIT_R || farOff);
+
+    if (!st.visible && wantsEnter) {
+      if (isLoading()) revealQueue.push(el); else applyReveal(el, true);
+      _revealState.set(el, { visible: true, t: now });
+      return;
+    }
+    if (st.visible && wantsExit && (now - st.t) > COOLDOWN) {
+      applyReveal(el, false);
+      _revealState.set(el, { visible: false, t: now });
+      return;
     }
   });
-}, { rootMargin: '0px 0px -10% 0px', threshold: [0, 0.1, 0.2, 0.3, 0.5, 0.75, 1] }) : null;
+}, { rootMargin: '0px 0px -10% 0px', threshold: [0, 0.06, 0.18, 0.5, 1] }) : null;
 const reveal = (el) => { if (!el) return; if (observer) observer.observe(el); else el.classList.add('in'); };
 function flushRevealQueue(delay = 150) {
   if (revealQueue.length) {
     setTimeout(() => {
-      revealQueue.forEach(el => el.classList.add('in'));
+      const now = (window.performance && performance.now) ? performance.now() : Date.now();
+      revealQueue.forEach(el => { el.classList.add('in'); try { _revealState.set(el, { visible: true, t: now }); } catch {} });
       revealQueue.length = 0;
     }, delay);
   }
