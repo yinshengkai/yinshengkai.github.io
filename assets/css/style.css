@@ -67,7 +67,7 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   /* Blur and slight scale to hide blur edges */
-  filter: blur(12px) saturate(110%);
+  filter: blur(24px) saturate(100%);
   transform: scale(1.06);
 }
 .bg-image::before {
@@ -85,7 +85,7 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.35); /* dim overlay */
+  background: rgba(0,0,0,0.5); /* dim overlay */
 }
 
 /* Mobile: tone down heavy effects */
