@@ -398,67 +398,6 @@ function renderEducation(education = []) {
 
 // Kick off loading and rendering of modular data
 (async function initData() {
-  // Fallback content for local file:// or fetch failures
-  const fallback = {
-    projects: [
-      {
-        id: 'skquant',
-        title: 'skQuant',
-        period: { start: '2025-05', end: 'present' },
-        tags: ['Python', 'AI/ML', 'Statistics', 'Time‑Series CV', 'HPO', 'Preprocessing', 'Feature Engineering', 'Multithreading', 'GPU Acceleration'],
-        media: [ { type: 'placeholder', accent: '#6bb6ff', caption: 'High-level KPIs and timeline at a glance' } ],
-        descriptionHTML: '<p>skQuant is a config‑driven, end‑to‑end backtesting framework that runs your pipeline from data preparation and feature engineering to time‑aware validation and budgeted optimization, then produces an interactive report with reproducible artifacts. It enforces bias control with time‑aligned features and strict out‑of‑sample evaluation, accounts for transaction costs and slippage, and scales efficiently with parallel, hardware‑aware execution and smart caching.</p>'
-      },
-      {
-        id: 'vulkan-engine',
-        title: 'heheEngine 3D',
-        period: { start: '2023-09', end: '2024-03' },
-        tags: ['C++', 'Vulkan', 'ImGui', 'ECS', 'RTTR', 'Assimp', 'Multithreading'],
-        media: [
-          { type: 'placeholder', accent: '#6bb6ff', caption: 'Reflection-driven editor UI' },
-          { type: 'placeholder', accent: '#18c3a1', caption: 'Binary asset pipeline and browser' },
-          { type: 'placeholder', accent: '#8d7bff', caption: 'Sparse-set ECS and inspector' },
-        ],
-        description: 'Led a 10-programmer team building a modular engine with a reflection-driven editor for native and Mono scripts, a binary asset pipeline via Assimp, prefab overrides/propagation, hierarchical transforms with quaternions, and a performant sparse-set ECS.'
-      },
-      {
-        id: 'blast-off',
-        title: 'Blast Off Far Away',
-        period: { start: '2022-01', end: '2022-04' },
-        tags: ['C++', 'Component-based System', 'UI', 'Graphics', 'Gameplay'],
-        media: [
-          { type: 'placeholder', accent: '#6bb6ff', caption: 'Main menu and level select' },
-          { type: 'placeholder', accent: '#18c3a1', caption: 'Core gameplay loop showcase' },
-        ],
-        descriptionHTML: "Architected a component system around DigiPen's Alpha Engine with transform hierarchies, led graphics programming and UI, and collaborated closely on gameplay.",
-        cta: { href: 'http://s.team/a/2010150', label: 'View on Steam' }
-      }
-    ],
-    experience: [
-      { role: 'GenAI Software Engineer', org: 'HCLTech — Full-time (Hybrid, Singapore)', period: 'Jul 2025 — Present', details: 'Applied GenAI to real-world workflows; building ML-powered product features.', logo: { text: 'HCL', bg: 'linear-gradient(180deg, #b5f, #68f)', color: '#4A8CFF' } },
-      { role: 'Software QA Engineer', org: 'Razer Inc. — Internship (On-site, Singapore)', period: 'Sep 2024 — Apr 2025', details: 'Automated hundreds of TestRail cases via Selenium + Robot Framework. Built an ML-based self-healing framework using NLP to repair broken locators from DOM changes, significantly reducing test maintenance.', logo: { text: 'RZ', bg: 'linear-gradient(180deg, #8f8, #4e8)', color: '#00FF70' } },
-      { role: 'Teaching Assistant', org: 'DigiPen Institute of Technology Singapore — Contract', period: 'Sep 2022 — Aug 2024', details: 'TA/grader for Linear Algebra & Geometry, High-Level Programming 1 & 2, Game Implementation Techniques, Calculus and Analytic Geometry 1, Software Engineering Project 2, Computer Graphics.', logo: { text: 'DP', bg: 'linear-gradient(180deg, #ffb, #fd8)', color: '#F5C542' } },
-      { role: 'Operations & Planning Assistant', org: 'Singapore Armed Forces (SAF) — Full-time', period: 'Jul 2019 — Jul 2021', details: 'Led a team building automation for HR ops across 2 units (VBA, RPA). Built admin dashboards, trained NSFs, and received multiple awards (NSF of the Year 2021, PERSCOM Admin Specialist & ASA Award 2021).', logo: { text: 'SAF', bg: 'linear-gradient(180deg, #faa, #f66)', color: '#FF6B6B' } },
-      { role: 'Software Engineer', org: 'A*STAR — Internship', period: 'Oct 2018 — Jun 2019', details: 'Developed mobile games for cognitive psychology studies with MSSQL sync; built AR to project 3D molecular structures onto papers; created FTP-based DLC for AR model downloads; localized academic papers; received distinction and full marks.', logo: { text: 'A*', bg: 'linear-gradient(180deg, #acf, #86f)', color: '#7A6BFF' } },
-    ],
-    education: [
-      { school: 'Singapore Institute of Technology', degree: 'BSc in Computer Science in Real-Time Interactive Simulation', period: 'Sep 2021 — Apr 2025', details: "GPA 4.77/5.00 • Provost's List AY2022/2023, AY2023/2024", logo: { text: 'SIT', color: '#0E7FFF' } },
-      { school: 'Temasek Polytechnic', degree: 'Diploma in Game Design & Development', period: 'Apr 2016 — Apr 2019', details: "Director's List AY2017/2018", logo: { text: 'TP', color: '#E74C3C' } },
-    ]
-  };
-
-  const useFallback = () => {
-    console.warn('Using local fallback data (fetch unavailable).');
-    renderProjects(fallback.projects);
-    renderExperience(fallback.experience);
-    renderEducation(fallback.education);
-  };
-
-  if (String(location.protocol).startsWith('file')) {
-    // Browsers block fetch() for file:// URLs; use inline fallback for local previews
-    useFallback();
-    return;
-  }
   try {
     const [projects, experience, education] = await Promise.all([
       loadJSON('assets/data/projects.json'),
@@ -469,8 +408,7 @@ function renderEducation(education = []) {
     renderExperience(experience);
     renderEducation(education);
   } catch (err) {
-    console.warn('Failed to load data files:', err);
-    useFallback();
+    console.error('Failed to load data files:', err);
   }
 })();
 
