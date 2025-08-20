@@ -13,26 +13,24 @@
   --muted: #a8a8a8;
   /* Neutral accents */
   --accent: #ff5e00;
-  --accent-2: #d7d7d7;
-  --accent-3: #8f8f8f;
+  --accent-2: #ffb006;
   --accent-rgb: 200, 200, 200;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px rgba(255, 255, 255, 0.05);
   --radius: 16px;
   --radius-sm: 12px;
   --radius-xs: 10px;
-  --blur: 22px;
+  --blur: 48px;
   --speed: 380ms;
   --speed-slow: 900ms;
   /* Unified highlight (neutral fallback) */
-  --hi: #c6c6c6;
-  --hi-ring: rgba(255, 255, 255, 0.24);
-  --hi-ring-strong: rgba(255, 255, 255, 0.32);
-  --hi-glow: rgba(255, 255, 255, 0.16);
+  --hi: #ffb300;
+  --hi-profile: rgba(255, 255, 255, 0.32);
+  --hi-profile-2: rgba(255, 255, 255, 0.16);
   /* Global vertical padding for top/bottom breathing room */
   --site-pad-y: 16px;
   /* Card surface background (uniform across sections) */
   /* Standardized color and opacity (0.25) */
-  --card-bg: rgba(0, 0, 0, 0.25);
+  --card-bg: rgba(0, 0, 0, 0.35);
 }
 
 * {
@@ -467,7 +465,8 @@ body {
   opacity: 1;
   background: var(--surface-2);
   transform: translateY(-2px);
-  box-shadow: 0 0 0 3px var(--hi-ring);
+  box-shadow: 0 0 0 3px var(--hi
+  );
 }
 
 
@@ -672,7 +671,7 @@ body {
 .btn:hover {
   background: var(--surface-2);
   transform: translateY(-2px);
-  box-shadow: 0 0 0 3px var(--hi-ring);
+  box-shadow: 0 0 0 3px var(--hi);
 }
 
 .btn.primary {
@@ -683,7 +682,7 @@ body {
 .btn.primary:hover {
   background: rgba(255, 255, 255, 0.12);
   transform: translateY(-2px);
-  box-shadow: 0 0 0 3px var(--hi-ring);
+  box-shadow: 0 0 0 3px var(--hi);
 }
 
 .icon-link {
@@ -705,7 +704,7 @@ body {
 .icon-link:hover {
   background: var(--surface-2);
   transform: translateY(-2px);
-  box-shadow: 0 0 0 3px var(--hi-ring);
+  box-shadow: 0 0 0 3px var(--hi);
 }
 
 .icon-link:focus-visible {
@@ -1253,11 +1252,7 @@ body {
   box-shadow: none;
 }
 
-/* Remove background highlight from ongoing tiles (keep pill labels only) */
-.timeline-card.ongoing,
-.project-card.ongoing {
-  box-shadow: none;
-}
+/* Keep consistent shadows for ongoing tiles as well */
 
 .chip.ongoing {
   background: var(--surface-2);
@@ -1272,28 +1267,11 @@ body {
   /* Stronger glow + subtle accent ring */
   box-shadow:
     0 12px 34px rgba(0, 0, 0, 0.55),
-    0 0 0 2px var(--hi-ring-strong),
-    0 0 28px var(--hi-glow),
-    0 0 22px var(--hi-glow),
+    0 0 0 2px var(--hi-profile),
+    0 0 28px var(--hi-profile-2),
     inset 0 1px rgba(255, 255, 255, 0.12);
 }
 
-#profile-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 2px;
-  /* ring thickness */
-  border-radius: var(--radius);
-  pointer-events: none;
-  background: var(--hi-ring-strong);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0.28;
-  z-index: 1;
-  /* draw ring above glass background */
-}
 
 /* Sliding sheet */
 .sheet {
@@ -1635,7 +1613,7 @@ body {
 
 .dot.active {
   background: linear-gradient(180deg, var(--accent), var(--accent-2));
-  box-shadow: 0 0 0 4px var(--hi-ring);
+  box-shadow: 0 0 0 4px var(--hi);
 }
 
 /* Slider caption outside the image */
@@ -1714,7 +1692,7 @@ body {
   /* Set base shadows with a zero-width highlight ring so hover can animate smoothly */
   box-shadow:
     0 10px 30px rgba(0, 0, 0, 0.45),
-    0 0 0 0 var(--hi-ring),
+    0 0 0 0 var(--hi),
     inset 0 1px rgba(255, 255, 255, 0.12);
   transition: box-shadow 280ms cubic-bezier(.2, .8, .2, 1), background var(--speed-slow), filter var(--speed);
   will-change: box-shadow, background, filter;
@@ -1725,7 +1703,7 @@ body {
 .project-card:focus-visible {
   box-shadow:
     0 12px 30px rgba(0, 0, 0, 0.55),
-    0 0 0 3px var(--hi-ring),
+    0 0 0 3px var(--hi),
     inset 0 1px rgba(255, 255, 255, 0.18);
 }
 
@@ -1734,7 +1712,7 @@ body {
   .project-card:hover {
     box-shadow:
       0 12px 30px rgba(0, 0, 0, 0.55),
-      0 0 0 3px var(--hi-ring),
+      0 0 0 3px var(--hi),
       inset 0 1px rgba(255, 255, 255, 0.18);
   }
 }
