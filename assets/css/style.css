@@ -74,8 +74,8 @@ body {
   color: var(--text);
   background-color: var(--bg);
   line-height: 1.6;
-  /* Add gentle spacing from the top edge of the viewport */
-  padding-top: calc(var(--site-pad-y) + env(safe-area-inset-top));
+  /* Push all content strictly below the fixed navbar */
+  padding-top: calc(var(--nav-offset, 96px) + var(--site-pad-y));
 }
 
 /* Dimmed + blurred wallpaper layer */
@@ -188,7 +188,8 @@ body {
 
 .section {
   padding-top: 12px;
-  scroll-margin-top: 96px;
+  /* Use dynamic navbar height for in-page anchors, plus breathing room */
+  scroll-margin-top: calc(var(--nav-offset, 96px) + 16px);
 }
 
 .section-head {
@@ -308,12 +309,12 @@ body {
 /* Top shortcuts */
 .top-shortcuts {
   position: fixed;
-  top: calc(8px + env(safe-area-inset-top));
+  top: env(safe-area-inset-top);
   left: 0;
   right: 0;
   z-index: 60;
   pointer-events: none;
-  padding: 0 10px;
+  padding: 0;
 }
 
 /* Full-width persistent bottom banner (development notice) */
@@ -383,19 +384,22 @@ body {
 
 /* Debug reset UI removed; using external tool/bookmarklet */
 .shortcuts-wrap {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 14px 20px;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  /* Match the container side edges: 20px on small screens, center at 1100px */
+  padding: 8px max(20px, calc((100vw - 1100px) / 2));
   min-height: 56px;
   display: flex;
   align-items: center;
-  gap: 16px;
   justify-content: space-between;
   position: relative;
   overflow: hidden;
   background: rgba(8, 12, 18, 0.70);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
+  border-left-width: 0;
+  border-right-width: 0;
+  border-radius: 0;
   backdrop-filter: blur(20px) saturate(140%);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), inset 0 1px rgba(255, 255, 255, 0.12);
@@ -403,6 +407,12 @@ body {
   transition: transform 280ms cubic-bezier(.2, .8, .2, 1), opacity 280ms ease, background var(--speed-slow);
   will-change: transform, opacity;
 }
+
+/* Center content: brand on left edge, shortcuts on right edge of the centered track */
+/* Keep groups on one line and aligned to content edges */
+.top-shortcuts .shortcut-links { display: flex; gap: 10px; flex-wrap: nowrap; }
+
+/* Navbar is now full-width and edge-flush on all screens */
 
 /* Subtle gradient ring to make the navbar stand out */
 .shortcuts-wrap::before {
@@ -417,11 +427,7 @@ body {
 }
 
 /* Delay showing navbar after gate opens */
-.nav-hidden .top-shortcuts .shortcuts-wrap {
-  transform: translateY(-120%);
-  opacity: 0;
-  pointer-events: none;
-}
+/* Removed nav-hidden variant: always consistent behavior across breakpoints */
 
 .top-shortcuts .brand {
   opacity: 0.98;
@@ -560,26 +566,26 @@ body {
 /* Header profile card */
 /* Top padding equals dynamic navbar bottom so content isn't covered */
 .site-header {
-  padding-top: var(--nav-offset, 96px);
+  padding-top: 0; /* body top padding accounts for fixed navbar */
 }
 
 /* When navigating to the profile card via hash, keep it clear of the fixed navbar */
 #profile-card {
-  scroll-margin-top: var(--nav-offset, 96px);
+  scroll-margin-top: calc(var(--nav-offset, 96px) + 16px);
 }
 
-/* Extra headroom on very narrow screens so navbar never covers profile */
-@media (max-width: 480px) {
-  /* Dynamic nav offset handles small screens; no hard-coded values needed */
-}
+/* Removed narrow-screen headroom block; dynamic --nav-offset covers all sizes */
 
 .profile {
   display: grid;
-  grid-template-columns: 160px 1fr;
+  grid-template-columns: 1fr; /* stack: avatar on top, text below */
   gap: 20px;
   padding: 46px 22px 22px;
-  align-items: center;
+  align-items: start;
 }
+
+/* Center the avatar when stacked; keep text left-aligned */
+.profile .avatar { justify-self: start; }
 
 .avatar {
   width: 160px;
@@ -1665,19 +1671,15 @@ body {
     padding: 24px 16px;
   }
 
-  .shortcuts-wrap {
-    padding: 10px 12px;
-    gap: 10px;
-    border-radius: 12px;
-  }
+  /* Match navbar inner padding to container's 16px on narrow screens; keep edges flush and square */
+  .shortcuts-wrap { padding-inline: max(16px, calc((100vw - 1100px) / 2)); border-radius: 0; }
 
   .brand {
     font-size: 18px;
   }
 
-  .profile {
-    grid-template-columns: 1fr;
-  }
+  /* Maintain stacked layout on small screens as well */
+  .profile { grid-template-columns: 1fr; }
 
   .avatar {
     width: 120px;
