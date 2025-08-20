@@ -571,46 +571,91 @@ body {
 .profile {
   display: grid;
   grid-template-columns: 1fr;
-  /* stack: avatar on top, text below */
-  gap: 20px;
-  padding: 46px 22px 22px;
+  gap: 0;
+  padding: 0;
   align-items: start;
 }
 
 /* Center the avatar when stacked; keep text left-aligned */
-.profile .avatar {
-  justify-self: start;
-}
+/* Avatar spans full card width */
+.profile .avatar { justify-self: stretch; }
 
 .avatar {
-  width: 160px;
-  height: 160px;
-  border-radius: 28px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius);
   background: none;
-  /* remove dark gradient to avoid halo at rounded edges */
   position: relative;
   overflow: hidden;
   border: none;
   contain: paint;
-  /* crisper clipping in some browsers */
-  clip-path: inset(0 round 28px);
 }
 
 .avatar img.avatar-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
-  filter: saturate(110%) contrast(106%);
-  border-radius: inherit;
-  /* ensure no rectangular bleed on edges */
   background-color: transparent;
 }
 
 /* Remove decorative overlay to avoid any edge halo */
-.avatar::before {
-  content: none;
+.avatar::before { content: none; }
+
+/* Subtle bottom gradient to improve caption contrast */
+.avatar::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 38%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0));
+  pointer-events: none;
+  z-index: 1;
 }
+
+/* Name overlay on avatar */
+.avatar-name {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  color: #fff;
+  text-align: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  font-size: clamp(28px, 5vw, 56px);
+  line-height: 1;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.55);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Body padding below full-bleed avatar */
+.profile-body {
+  padding: 16px 22px 22px;
+  text-align: center;
+}
+
+/* Center align language chips and link buttons */
+.profile-flair { justify-content: center; }
+.links { justify-content: center; }
+
+/* Emphasized caption */
+.bio {
+  margin: 10px 0 16px;
+  color: #fff;
+  opacity: 0.98;
+  font-size: clamp(16px, 2.4vw, 20px);
+  font-weight: 400;
+}
+
+/* Removed inline bio emphasis styles */
 
 .title {
   margin: 2px 0 4px;
@@ -623,10 +668,7 @@ body {
   color: var(--muted);
 }
 
-.bio {
-  margin: 8px 0 14px;
-  color: #d0d0d0;
-}
+/* Removed older bio override to avoid conflicting styles */
 
 .profile-flair {
   margin: 8px 0 12px;
