@@ -1273,6 +1273,30 @@ if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, b
   } catch {}
 })();
 
+// Make the development banner dismissible and persist dismissal in localStorage
+(function devBannerDismiss() {
+  function init() {
+    const banner = document.querySelector('.dev-banner');
+    if (!banner) return;
+    const key = 'devBannerDismissed';
+    const hide = () => {
+      banner.classList.add('is-hidden');
+      try { document.documentElement.style.setProperty('--dev-banner-h', '0px'); } catch {}
+    };
+    // Respect previous dismissal
+    try { if (localStorage.getItem(key) === '1') { hide(); return; } } catch {}
+    const btn = banner.querySelector('.dev-banner-close');
+    if (btn) btn.addEventListener('click', () => {
+      try { localStorage.setItem(key, '1'); } catch {}
+      hide();
+    });
+  }
+  if (document.readyState !== 'loading') init();
+  else window.addEventListener('DOMContentLoaded', init, { once: true });
+})();
+
+// Debug reset UI removed by request; use external tool/bookmarklet instead
+
 // Try to retrieve LinkedIn profile image (best-effort, with fallback)
 (async function hydrateAvatar() {
   const avatarEl = document.querySelector('.avatar');
