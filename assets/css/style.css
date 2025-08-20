@@ -29,9 +29,9 @@
   --hi-glow: rgba(107, 182, 255, 0.22);
   /* Global vertical padding for top/bottom breathing room */
   --site-pad-y: 16px;
-  /* Card surface background (standardized, darker) */
-  /* Slightly higher opacity for a bit more body */
-  --card-bg: linear-gradient(180deg, rgba(12,16,24,0.56), rgba(12,16,24,0.44));
+  /* Card surface background (uniform across sections) */
+  /* Standardized color and opacity (0.3) */
+  --card-bg: rgba(12,16,24,0.30);
 }
 
 * { box-sizing: border-box; }
