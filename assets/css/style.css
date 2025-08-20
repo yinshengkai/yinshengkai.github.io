@@ -444,7 +444,7 @@ body {
   color: #fff;
   text-decoration: none;
   opacity: 0.95;
-  transition: opacity var(--speed-slow), background var(--speed-slow), transform var(--speed), box-shadow var(--speed-slow), color var(--speed-slow);
+  transition: opacity var(--speed), background var(--speed), transform var(--speed), box-shadow var(--speed), color var(--speed);
   border-radius: 12px;
 }
 
@@ -465,8 +465,13 @@ body {
   opacity: 1;
   background: var(--surface-2);
   transform: translateY(-2px);
-  box-shadow: 0 0 0 3px var(--hi
-  );
+  box-shadow: 0 0 0 3px var(--hi);
+}
+
+/* Keyboard focus gets the same gradual highlight */
+.shortcut-link.icon:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--hi);
 }
 
 
@@ -867,9 +872,12 @@ body {
   inset: 0;
   background-size: cover;
   background-position: center;
-  filter: saturate(110%) contrast(105%);
+  /* Standardize card preview to solid black */
+  background-color: #000 !important;
+  background-image: none !important;
+  filter: none;
   transform: scale(1.02);
-  transition: transform 600ms ease;
+  transition: transform var(--speed);
 }
 
 /* Limit image zoom on hover to hover-capable devices */
@@ -1694,7 +1702,7 @@ body {
     0 10px 30px rgba(0, 0, 0, 0.45),
     0 0 0 0 var(--hi),
     inset 0 1px rgba(255, 255, 255, 0.12);
-  transition: box-shadow 280ms cubic-bezier(.2, .8, .2, 1), background var(--speed-slow), filter var(--speed);
+  transition: background var(--speed), box-shadow var(--speed), filter var(--speed), transform var(--speed);
   will-change: box-shadow, background, filter;
   transform-origin: center;
 }
@@ -1748,6 +1756,48 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* Unified Interactive Highlight (applies consistently across controls)
+   JS adds the `.hl` class to: .btn, .icon-link, .shortcut-link.icon, .project-card
+   This centralizes the hover/focus animation and ring color. */
+.hl {
+  transition: background var(--speed), box-shadow var(--speed), transform var(--speed), color var(--speed), filter var(--speed);
+}
+
+/* Focus-visible: same ring + gentle lift */
+.hl:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--hi);
+  transform: translateY(-2px);
+}
+
+/* Hover on hover-capable devices: same ring + gentle lift */
+@media (hover: hover) and (pointer: fine) {
+  /* Don't force background on project cards; it has its own glass surface */
+  .hl:not(.project-card):hover {
+    background: var(--surface-2);
+  }
+  .hl:hover {
+    box-shadow: 0 0 0 3px var(--hi);
+    transform: translateY(-2px);
+  }
+}
+
+/* Project card: unify hover/focus ring and lift */
+.project-card.hl:focus-visible {
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.55),
+    0 0 0 3px var(--hi),
+    inset 0 1px rgba(255, 255, 255, 0.18);
+}
+@media (hover: hover) and (pointer: fine) {
+  .project-card.hl:hover {
+    box-shadow:
+      0 12px 30px rgba(0, 0, 0, 0.55),
+      0 0 0 3px var(--hi),
+      inset 0 1px rgba(255, 255, 255, 0.18);
+  }
 }
 
 .ed-icon {

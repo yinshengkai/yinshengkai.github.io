@@ -153,6 +153,8 @@ function renderProjects(projects = []) {
   projects.forEach((p) => {
     const card = document.createElement("article");
     card.className = "project-card glass reveal";
+    // Ensure unified highlight behavior on cards
+    card.classList.add('hl');
     card.setAttribute("tabindex", "0");
     card.setAttribute("role", "button");
     card.setAttribute("aria-label", `${displayTitle(p.title)} — open details`);
@@ -161,11 +163,8 @@ function renderProjects(projects = []) {
     cover.className = "cover";
     const media = document.createElement("div");
     media.className = "media";
-    const firstMedia = p.media?.[0];
-    const src = (firstMedia && firstMedia.type === 'placeholder')
-      ? placeholderImage('#0b0f14')
-      : (firstMedia && firstMedia.src) || '';
-    media.style.backgroundImage = `url('${src}')`;
+    // Force uniform black preview for grid cards
+    media.style.background = '#000000';
     cover.append(media);
 
     const title = document.createElement("h3");
@@ -823,6 +822,13 @@ updateTimelineProgress();
   // Recalculate on resize/orientation changes
   window.addEventListener('resize', queue);
   window.addEventListener('orientationchange', queue);
+})();
+
+// Generic: apply unified highlight class to interactive controls
+(function unifyHighlight() {
+  const sels = ['.btn', '.icon-link', '.shortcut-link.icon', '.project-card'];
+  const nodes = document.querySelectorAll(sels.join(','));
+  nodes.forEach(el => el.classList.add('hl'));
 })();
 
 // Dynamically compute bottom dev banner height and set CSS var to avoid overlap
