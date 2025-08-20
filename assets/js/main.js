@@ -258,7 +258,8 @@ function placeholderImage(bg = "#0b0f14") {
 
 // Data loading (modular content via JSON files under assets/data)
 async function loadJSON(url) {
-  const res = await fetch(url, { cache: 'no-cache' });
+  // Allow default HTTP caching for better performance on static assets
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to load ${url}: ${res.status}`);
   return res.json();
 }

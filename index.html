@@ -8,9 +8,8 @@
   <title>Yin Shengkai — Portfolio</title>
   <meta name="description"
     content="A sleek, dark, liquid-glass portfolio with project timelines and an animated, auto-playing detail slider." />
-  <!-- Preconnect only to hosts we use -->
-  <link rel="preconnect" href="https://r.jina.ai" crossorigin />
-  <link rel="preconnect" href="https://media.licdn.com" crossorigin />
+  <!-- Preload critical background image for faster first paint -->
+  <link rel="preload" as="image" href="assets/images/background.jpg" fetchpriority="high" />
   <!-- System font stack for performance and native feel -->
   <style>
     :root {
@@ -60,7 +59,7 @@
   <header class="site-header container">
     <div class="profile glass reveal" id="profile-card">
       <div class="avatar" role="img" aria-label="Profile avatar">
-        <img class="avatar-img" src="assets/images/avatar.jpg" alt="Profile avatar" />
+        <img class="avatar-img" src="assets/images/avatar.jpg" alt="Profile avatar" width="160" height="160" loading="eager" decoding="async" fetchpriority="high" />
       </div>
       <div class="profile-body" id="profile">
         <h1 class="title" id="site-title">Yin Shengkai</h1>

@@ -30,8 +30,8 @@
   /* Global vertical padding for top/bottom breathing room */
   --site-pad-y: 16px;
   /* Card surface background (uniform across sections) */
-  /* Standardized color and opacity (0.3) */
-  --card-bg: rgba(12, 16, 24, 0.30);
+  /* Standardized color and opacity (0.25) */
+  --card-bg: rgba(12, 16, 24, 0.25);
 }
 
 * {
@@ -585,10 +585,12 @@ body {
   width: 160px;
   height: 160px;
   border-radius: 28px;
-  background: conic-gradient(from 180deg, #134, #246, #134);
+  background: none; /* remove dark gradient to avoid halo at rounded edges */
   position: relative;
   overflow: hidden;
   border: none;
+  contain: paint; /* crisper clipping in some browsers */
+  clip-path: inset(0 round 28px);
 }
 
 .avatar img.avatar-img {
@@ -597,17 +599,12 @@ body {
   object-fit: cover;
   display: block;
   filter: saturate(110%) contrast(106%);
+  border-radius: inherit; /* ensure no rectangular bleed on edges */
+  background-color: transparent;
 }
 
-.avatar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  backdrop-filter: blur(0px);
-  background:
-    radial-gradient(60% 60% at 70% 30%, rgba(255, 255, 255, 0.25), transparent 50%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
-}
+/* Remove decorative overlay to avoid any edge halo */
+.avatar::before { content: none; }
 
 .title {
   margin: 2px 0 4px;
