@@ -207,16 +207,19 @@ body {
 .dev-banner .dev-banner-close {
   position: absolute;
   right: 8px;
-  bottom: calc(6px + env(safe-area-inset-bottom));
-  transform: translateY(-2px);
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
   appearance: none;
   border: none;
   background: rgba(0,0,0,0.08);
   color: #0b0f14;
-  width: 26px;
-  height: 22px;
-  line-height: 18px;
-  border-radius: 6px;
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  line-height: 1; /* use grid centering */
+  border-radius: 6px; /* rounded corners */
   cursor: pointer;
   font-size: 18px;
   padding: 0;
