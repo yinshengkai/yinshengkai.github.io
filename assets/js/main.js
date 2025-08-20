@@ -172,69 +172,12 @@ const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers
   }
 })();
 
-// Loader: fade out on window load with fallback
-(function initLoader() {
-  const loader = document.getElementById('loader');
-  const pctEl = document.getElementById('loader-percent');
-  if (!loader) return;
-
-  const MIN_MS = 500; // minimum visible time
-  const FAILSAFE_MS = 3000; // force-finish safety
-  const start = (window.performance && performance.now) ? performance.now() : Date.now();
-  let loaded = document.readyState === 'complete';
-  let finished = false;
-  let target = MIN_MS;
-  let rafId = 0;
-
-  const setPct = (v) => {
-    const pct = Math.max(0, Math.min(100, Math.round(v)));
-    if (pctEl) pctEl.textContent = pct + '%';
-  };
-  const finish = () => {
-    if (finished) return;
-    finished = true;
-    if (rafId) cancelAnimationFrame(rafId);
-    setPct(100);
-    loader.classList.add('hide');
-    // Keep the page gated until user acknowledges the dev warning
-    document.documentElement.classList.add('gated');
-    document.body.classList.add('gated');
-    document.documentElement.classList.remove('loading');
-    document.body.classList.remove('loading');
-    // notify others that loader is done (for reveal timing)
-    try { window.dispatchEvent(new Event('loader:done')); } catch { }
-    setTimeout(() => loader.parentNode && loader.parentNode.removeChild(loader), 700);
-  };
-
-  const nowTS = () => (window.performance && performance.now) ? performance.now() : Date.now();
-  const tick = () => {
-    const elapsed = nowTS() - start;
-    if (loaded) target = Math.max(target, elapsed);
-    let p = Math.min(1, elapsed / target);
-    if (!loaded) p = Math.min(p, 0.99); // avoid hitting 100% before load
-    setPct(p * 100);
-    if (loaded && elapsed >= target) finish();
-    else rafId = requestAnimationFrame(tick);
-  };
-
-  // Update on load to ensure we respect min 1s
-  window.addEventListener('load', () => { loaded = true; }, { once: true });
-  // Failsafe: if load stalls, still finish at FAILSAFE_MS minimum
-  setTimeout(() => { loaded = true; target = Math.max(target, FAILSAFE_MS); }, FAILSAFE_MS);
-
-  // If page is already loaded, still honor the 1s minimum
-  rafId = requestAnimationFrame(tick);
-})();
+// Loader removed (no overlay or gating)
 
 // Reveal-on-scroll helper (staggered, bidirectional: in when visible, out when not)
 const supportsIO = typeof window !== 'undefined' && 'IntersectionObserver' in window;
-const revealQueue = [];
 // Hysteresis state to stop rapid in/out near viewport edges
 const _revealState = new WeakMap(); // el -> { visible: boolean, t: number }
-const isLoading = () => {
-  const de = document.documentElement;
-  return de.classList.contains('loading') || de.classList.contains('gated');
-};
 
 function computeStaggerIndex(el) {
   const parent = el && el.parentElement;
@@ -277,7 +220,7 @@ const observer = supportsIO ? new IntersectionObserver((entries) => {
     const wantsExit = (!entry.isIntersecting || ratio <= EXIT_R || farOff);
 
     if (!st.visible && wantsEnter) {
-      if (isLoading()) revealQueue.push(el); else applyReveal(el, true);
+      applyReveal(el, true);
       _revealState.set(el, { visible: true, t: now });
       return;
     }
@@ -289,62 +232,8 @@ const observer = supportsIO ? new IntersectionObserver((entries) => {
   });
 }, { rootMargin: '0px 0px -10% 0px', threshold: [0, 0.06, 0.18, 0.5, 1] }) : null;
 const reveal = (el) => { if (!el) return; if (observer) observer.observe(el); else el.classList.add('in'); };
-function flushRevealQueue(delay = 150) {
-  if (revealQueue.length) {
-    setTimeout(() => {
-      const now = (window.performance && performance.now) ? performance.now() : Date.now();
-      revealQueue.forEach(el => { el.classList.add('in'); try { _revealState.set(el, { visible: true, t: now }); } catch { } });
-      revealQueue.length = 0;
-    }, delay);
-  }
-}
-// Flush when the gate opens (after user acknowledges)
-window.addEventListener('gate:open', () => flushRevealQueue(150));
 
-// Ensure profile card reveals and delay navbar appearance after gate opens
-window.addEventListener('gate:open', () => {
-  // reveal profile card if still pending
-  const pc = document.getElementById('profile-card');
-  if (pc && !pc.classList.contains('in')) {
-    // small delay to feel like other sections
-    setTimeout(() => { try { applyReveal(pc, true); } catch { pc.classList.add('in'); } }, 120);
-  }
-  // delay nav bar show a bit for a softer entrance
-  setTimeout(() => document.body.classList.remove('nav-hidden'), 450);
-});
-
-// Development warning overlay logic
-(function initDevWarning() {
-  const warn = document.getElementById('dev-warning');
-  const hint = document.getElementById('warn-hint');
-  // Button removed; proceed as long as overlay exists
-  if (!warn) return;
-  // Update hint text for device type (tap vs click)
-  try {
-    const isCoarse = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
-    if (hint) hint.textContent = isCoarse ? 'Tap anywhere to continue' : 'Click anywhere to continue';
-  } catch { }
-  const show = () => {
-    warn.setAttribute('aria-hidden', 'false');
-    warn.classList.add('show');
-  };
-  const hide = () => {
-    warn.classList.remove('show');
-    warn.setAttribute('aria-hidden', 'true');
-    // allow content to animate in
-    document.documentElement.classList.remove('gated');
-    document.body.classList.remove('gated');
-    try { window.dispatchEvent(new Event('gate:open')); } catch { }
-    setTimeout(() => warn.parentNode && warn.parentNode.removeChild(warn), 700);
-  };
-  window.addEventListener('loader:done', show, { once: true });
-  // Also allow tapping/clicking anywhere on the overlay to continue
-  warn.addEventListener('click', (e) => {
-    // Prevent accidental propagation and trigger the same hide action
-    try { e.preventDefault(); e.stopPropagation(); } catch { }
-    hide();
-  }, { once: true });
-})();
+// Dev warning overlay removed
 
 // (Flags now use SVG as the primary method; no platform detection needed.)
 
@@ -405,13 +294,12 @@ async function loadJSON(url) {
 // Observe existing reveal elements (items only)
 $$('.reveal').forEach(el => reveal(el));
 
-// Safety: if reveal observer fails, force show shortly after gate opens
+// Safety: if reveal observer fails, force show shortly after
 function revealFallback() {
   const pending = $$('.reveal:not(.in)');
   if (pending.length > 0) pending.forEach(el => el.classList.add('in'));
 }
-if (isLoading()) window.addEventListener('gate:open', () => setTimeout(revealFallback, 180));
-else setTimeout(revealFallback, 400);
+setTimeout(revealFallback, 400);
 
 // Render projects grid
 const grid = $("#projects-grid");
@@ -978,123 +866,7 @@ document.addEventListener("visibilitychange", () => {
 
 // Respect prefers-reduced-motion
 
-// Cursor-reactive parallax blobs + drifting dots (disabled if no elements exist)
-const blobEls = $$(".blob");
-const dotsCanvas = $("#bg-dots");
-const ctx = (dotsCanvas && dotsCanvas.getContext) ? dotsCanvas.getContext("2d") : null;
-const bgActive = (blobEls && blobEls.length > 0) || !!ctx;
-let dots = [];
-let mouse = { x: 0.5, y: 0.5, vX: 0, vY: 0, t: 0 };
-let lastTs = 0;
-
-function resizeCanvas() {
-  if (!ctx) return;
-  const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-  dotsCanvas.width = Math.floor(dotsCanvas.clientWidth * dpr);
-  dotsCanvas.height = Math.floor(dotsCanvas.clientHeight * dpr);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  initDots();
-}
-
-function initDots() {
-  if (!ctx) return;
-  const w = dotsCanvas.clientWidth, h = dotsCanvas.clientHeight;
-  const count = Math.floor((w * h) / 18000); // density
-  dots = Array.from({ length: count }, () => spawnDot(w, h));
-}
-function spawnDot(w, h) {
-  return {
-    x: Math.random() * w,
-    y: Math.random() * h,
-    r: 1 + Math.random() * 2,
-    vx: (Math.random() - 0.5) * 0.3,
-    vy: (Math.random() - 0.5) * 0.3,
-    drift: Math.random() * 6.28,
-    hue: 200 + Math.random() * 80,
-  };
-}
-
-function drawDots(dt) {
-  if (!ctx) return;
-  const w = dotsCanvas.clientWidth, h = dotsCanvas.clientHeight;
-  ctx.clearRect(0, 0, w, h);
-  for (const d of dots) {
-    // gentle drift + cursor influence
-    const g = 0.02; // gravity toward cursor
-    const tx = mouse.x * w, ty = mouse.y * h;
-    d.vx += (tx - d.x) * g * 0.0005;
-    d.vy += (ty - d.y) * g * 0.0005;
-    d.vx += Math.cos(d.drift) * 0.02; // ambient swirl
-    d.vy += Math.sin(d.drift) * 0.02;
-
-    d.x += d.vx * (dt * 0.06);
-    d.y += d.vy * (dt * 0.06);
-    d.drift += 0.005 * dt * 0.06;
-
-    // wrap around
-    if (d.x < -10) d.x = w + 10; if (d.x > w + 10) d.x = -10;
-    if (d.y < -10) d.y = h + 10; if (d.y > h + 10) d.y = -10;
-
-    ctx.beginPath();
-    ctx.fillStyle = `hsla(${d.hue}, 90%, 70%, 0.35)`;
-    ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
-
-function animateBackground(ts) {
-  if (!lastTs) lastTs = ts;
-  const dt = Math.max(16, ts - lastTs); // clamp
-  lastTs = ts;
-  mouse.t += dt * 0.001;
-
-  // If tab is hidden, skip heavy work but keep the loop alive
-  if (document.hidden) { requestAnimationFrame(animateBackground); return; }
-
-  // Parallax for blobs with subtle oscillation
-  blobEls.forEach((el, i) => {
-    const ax = (i + 1) * 1.8; // amplitude scale
-    const ay = (i + 1) * 1.2;
-    const oscX = Math.cos(mouse.t * (0.2 + i * 0.05)) * 4;
-    const oscY = Math.sin(mouse.t * (0.25 + i * 0.04)) * 3;
-    const mx = (mouse.x - 0.5) * ax * 10; // stronger near edges
-    const my = (mouse.y - 0.5) * ay * 10;
-    el.style.transform = `translate3d(${mx + oscX}px, ${my + oscY}px, 0) scale(1.03)`;
-  });
-
-  drawDots(dt);
-  requestAnimationFrame(animateBackground);
-}
-
-function onPointerMove(e) {
-  // Avoid layout thrash by using viewport size instead of getBoundingClientRect
-  const vw = window.innerWidth || document.documentElement.clientWidth || 1;
-  const vh = window.innerHeight || document.documentElement.clientHeight || 1;
-  const cx = e.touches ? e.touches[0].clientX : e.clientX;
-  const cy = e.touches ? e.touches[0].clientY : e.clientY;
-  const nx = Math.max(0, Math.min(1, cx / vw));
-  const ny = Math.max(0, Math.min(1, cy / vh));
-  mouse.vX = nx - mouse.x; mouse.vY = ny - mouse.y;
-  mouse.x = nx; mouse.y = ny;
-}
-
-if (bgActive && !prefersReducedMotion) {
-  window.addEventListener('mousemove', onPointerMove, { passive: true });
-  window.addEventListener('touchmove', onPointerMove, { passive: true });
-}
-// Throttle expensive resizes to animation frames
-let resizeRaf = 0;
-function onResizeThrottled() {
-  if (resizeRaf) return;
-  resizeRaf = requestAnimationFrame(() => { resizeRaf = 0; resizeCanvas(); });
-}
-if (bgActive) window.addEventListener('resize', onResizeThrottled);
-if (bgActive && !prefersReducedMotion) {
-  resizeCanvas();
-  requestAnimationFrame(animateBackground);
-} else {
-  try { if (dotsCanvas) dotsCanvas.style.display = 'none'; } catch { }
-}
+// Background parallax/dots removed (no corresponding DOM elements)
 
 // loader removed
 
@@ -1172,47 +944,23 @@ window.addEventListener('hashchange', () => {
   if (h && navMap.has(h)) startNavLock(h);
 });
 
-// Scroll indicator (count reveals dynamically so late-rendered items are included)
-const scrollInd = document.getElementById('scroll-indicator');
-function updateScrollIndicator() {
-  if (!scrollInd) return;
-  const atBottom = (window.innerHeight + (window.scrollY || window.pageYOffset || 0)) >= ((document.documentElement.scrollHeight || 0) - 2);
-  const remaining = document.querySelectorAll('.reveal:not(.in)').length;
-  const shouldShow = !atBottom && remaining > 0;
-  scrollInd.classList.toggle('show', shouldShow);
-}
-
-// Back-to-top visibility + behavior
-const backTop = document.getElementById('back-to-top');
-function updateBackTop() {
-  if (!backTop) return;
-  const y = window.scrollY || window.pageYOffset || 0;
-  const show = y > (window.innerHeight * 0.35);
-  backTop.classList.toggle('show', show);
-}
-updateBackTop();
+// Scroll indicator/back-to-top removed
 // Batch scroll/resize-driven updates with a single rAF per frame
 let _scrollRaf = 0, _resizeRaf = 0;
 function flushScroll() {
   _scrollRaf = 0;
   updateTimelineProgress();
-  updateScrollIndicator();
-  updateBackTop();
 }
 function onScrollRaf() { if (_scrollRaf) return; _scrollRaf = requestAnimationFrame(flushScroll); }
 function flushResize() {
   _resizeRaf = 0;
   updateTimelineProgress();
-  updateScrollIndicator();
-  updateBackTop();
 }
 function onResizeRaf() { if (_resizeRaf) return; _resizeRaf = requestAnimationFrame(flushResize); }
 window.addEventListener('scroll', onScrollRaf, { passive: true });
 window.addEventListener('resize', onResizeRaf);
 // Initial paint for scroll-dependent UI
 updateTimelineProgress();
-updateScrollIndicator();
-if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
 // Center-based scrollspy handles edges; no extra edge hack needed
 
@@ -1280,46 +1028,7 @@ if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, b
 
 // Debug reset UI removed by request; use external tool/bookmarklet instead
 
-// Try to retrieve LinkedIn profile image (best-effort, with fallback)
-(async function hydrateAvatar() {
-  const avatarEl = document.querySelector('.avatar');
-  if (!avatarEl) return;
-  const fallback = null; // set to 'assets/img/profile.jpg' if you add a local image
-  try {
-    const url = 'https://r.jina.ai/http://www.linkedin.com/in/yinshengkai/';
-    // Guard fetch with a soft timeout to avoid long stalls
-    const controller = ('AbortController' in window) ? new AbortController() : null;
-    const to = setTimeout(() => { try { controller && controller.abort(); } catch { } }, 3500);
-    const res = await fetch(url, controller ? { signal: controller.signal } : undefined);
-    clearTimeout(to);
-    if (!res.ok) throw new Error('fetch failed');
-    const text = await res.text();
-    const m = text.match(/property=\"og:image\" content=\"([^\"]+)/i);
-    const img = m && m[1];
-    if (img) {
-      const imgEl = document.createElement('img');
-      imgEl.className = 'avatar-img';
-      imgEl.src = img;
-      imgEl.decoding = 'async';
-      imgEl.loading = 'lazy';
-      imgEl.setAttribute('referrerpolicy', 'no-referrer');
-      imgEl.alt = 'Profile picture';
-      avatarEl.innerHTML = '';
-      avatarEl.appendChild(imgEl);
-      return;
-    }
-  } catch (e) { /* ignore */ }
-  if (fallback) {
-    const imgEl = document.createElement('img');
-    imgEl.className = 'avatar-img';
-    imgEl.src = fallback;
-    imgEl.alt = 'Profile picture';
-    imgEl.decoding = 'async';
-    imgEl.loading = 'lazy';
-    avatarEl.innerHTML = '';
-    avatarEl.appendChild(imgEl);
-  }
-})();
+// LinkedIn avatar fetch removed (keeps local avatar image)
 
 // Utility: initials from org
 function initials(name = '') {
