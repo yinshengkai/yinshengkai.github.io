@@ -545,11 +545,11 @@ function buildSlider(media) {
     slide.className = "slide";
     let el;
     if (m.type === "video") {
-      el = document.createElement("video"); el.src = m.src; el.controls = true; el.playsInline = true; el.muted = true; el.setAttribute("preload", "metadata");
+      el = document.createElement("video"); el.src = m.src; el.controls = true; el.playsInline = true; el.muted = true;
     } else {
       el = document.createElement("img");
       const src = (m.type === 'placeholder') ? placeholderImage('#000000') : m.src;
-      el.src = src; el.alt = m.alt || m.caption || ""; el.loading = 'lazy'; el.decoding = 'async';
+      el.src = src; el.alt = m.alt || m.caption || "";
     }
     slide.append(el);
     sliderTrack.append(slide);
