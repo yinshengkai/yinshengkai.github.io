@@ -6,7 +6,7 @@ const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers
 
 // Reveal-on-scroll helper (staggered, bidirectional: in when visible, out when not)
 const supportsIO = typeof window !== 'undefined' && 'IntersectionObserver' in window;
-// Hysteresis state to stop rapid in/out near viewport edges
+// Minimal state map (kept for stagger calc timing if needed)
 const _revealState = new WeakMap(); // el -> { visible: boolean, t: number }
 
 function computeStaggerIndex(el) {
@@ -32,35 +32,17 @@ function applyReveal(target, entering) {
   } catch { }
 }
 
+// Simpler IO config (more reliable on mobile Safari)
 const observer = supportsIO ? new IntersectionObserver((entries) => {
-  const now = (window.performance && performance.now) ? performance.now() : Date.now();
-  const ENTER_R = 0.18; // enter when >=18% visible
-  const EXIT_R = 0.06;  // exit only when <=6% visible (hysteresis)
-  const COOLDOWN = 160; // ms minimum between state flips
-  const vH = window.innerHeight || document.documentElement.clientHeight || 0;
   entries.forEach((entry) => {
     const el = entry.target;
-    const ratio = entry.intersectionRatio || 0;
-    const st = _revealState.get(el) || { visible: false, t: 0 };
-
-    // Determine intents with hysteresis and offscreen guard
-    const wantsEnter = entry.isIntersecting && ratio >= ENTER_R;
-    const rect = entry.boundingClientRect || { top: 0, bottom: 0 };
-    const farOff = (rect.bottom <= 0) || (rect.top >= vH); // fully outside viewport
-    const wantsExit = (!entry.isIntersecting || ratio <= EXIT_R || farOff);
-
-    if (!st.visible && wantsEnter) {
+    if (entry.isIntersecting) {
       applyReveal(el, true);
-      _revealState.set(el, { visible: true, t: now });
-      return;
-    }
-    if (st.visible && wantsExit && (now - st.t) > COOLDOWN) {
+    } else {
       applyReveal(el, false);
-      _revealState.set(el, { visible: false, t: now });
-      return;
     }
   });
-}, { rootMargin: '0px 0px -10% 0px', threshold: [0, 0.06, 0.18, 0.5, 1] }) : null;
+}, { root: null, rootMargin: '0px', threshold: [0, 0.1] }) : null;
 const reveal = (el) => { if (!el) return; if (observer) observer.observe(el); else el.classList.add('in'); };
 
 // Dev warning overlay removed
@@ -131,6 +113,19 @@ function revealFallback() {
   if (pending.length > 0) pending.forEach(el => el.classList.add('in'));
 }
 setTimeout(revealFallback, 400);
+
+// Scroll/resize fallback to ensure re-entry on mobile when IO misses events
+function revealCheckAll() {
+  const vH = window.innerHeight || document.documentElement.clientHeight || 0;
+  const margin = 24; // small cushion
+  const items = document.querySelectorAll('.reveal');
+  for (let i = 0; i < items.length; i++) {
+    const el = items[i];
+    const r = el.getBoundingClientRect();
+    const visible = (r.bottom > -margin) && (r.top < vH + margin);
+    applyReveal(el, visible);
+  }
+}
 
 // Render projects grid
 const grid = $("#projects-grid");
@@ -788,17 +783,21 @@ let _scrollRaf = 0, _resizeRaf = 0;
 function flushScroll() {
   _scrollRaf = 0;
   updateTimelineProgress();
+  // Ensure reveal state stays in sync on mobile
+  revealCheckAll();
 }
 function onScrollRaf() { if (_scrollRaf) return; _scrollRaf = requestAnimationFrame(flushScroll); }
 function flushResize() {
   _resizeRaf = 0;
   updateTimelineProgress();
+  revealCheckAll();
 }
 function onResizeRaf() { if (_resizeRaf) return; _resizeRaf = requestAnimationFrame(flushResize); }
 window.addEventListener('scroll', onScrollRaf, { passive: true });
 window.addEventListener('resize', onResizeRaf);
 // Initial paint for scroll-dependent UI
 updateTimelineProgress();
+revealCheckAll();
 
 // Center-based scrollspy handles edges; no extra edge hack needed
 
