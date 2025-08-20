@@ -17,14 +17,14 @@ const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers
       const bi = cs && cs.backgroundImage || '';
       const m = bi.match(/url\(["']?([^"')]+)["']?\)/i);
       if (m && m[1]) return m[1];
-    } catch {}
+    } catch { }
     return null;
   }
 
   // Helpers: RGB <-> HSL conversions
   function rgbToHsl(r, g, b) {
     r /= 255; g /= 255; b /= 255;
-    const max = Math.max(r,g,b), min = Math.min(r,g,b);
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
     let h = 0, s = 0, l = (max + min) / 2;
     if (max !== min) {
       const d = max - min;
@@ -44,21 +44,21 @@ const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers
     else {
       const hue2rgb = (p, q, t) => {
         if (t < 0) t += 1; if (t > 1) t -= 1;
-        if (t < 1/6) return p + (q - p) * 6 * t;
-        if (t < 1/2) return q;
-        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        if (t < 1 / 6) return p + (q - p) * 6 * t;
+        if (t < 1 / 2) return q;
+        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
         return p;
       };
       const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
       const p = 2 * l - q;
-      r = hue2rgb(p, q, h + 1/3);
+      r = hue2rgb(p, q, h + 1 / 3);
       g = hue2rgb(p, q, h);
-      b = hue2rgb(p, q, h - 1/3);
+      b = hue2rgb(p, q, h - 1 / 3);
     }
     return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
   }
   function clamp01(v) { return Math.max(0, Math.min(1, v)); }
-  function toHex(r,g,b) { const hx = (n)=>n.toString(16).padStart(2,'0'); return `#${hx(r)}${hx(g)}${hx(b)}`; }
+  function toHex(r, g, b) { const hx = (n) => n.toString(16).padStart(2, '0'); return `#${hx(r)}${hx(g)}${hx(b)}`; }
 
   // Simple quantization: 4 bits per channel histogram
   function getPalette(img) {
@@ -70,9 +70,9 @@ const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers
     const { data } = ctx.getImageData(0, 0, size, size);
     const hist = new Map();
     for (let i = 0; i < data.length; i += 4) {
-      const a = data[i+3];
+      const a = data[i + 3];
       if (a < 10) continue; // skip transparent
-      const r = data[i], g = data[i+1], b = data[i+2];
+      const r = data[i], g = data[i + 1], b = data[i + 2];
       const [h, s, l] = rgbToHsl(r, g, b);
       // ignore extremely dark/bright pixels (mostly vignette/overlays)
       if (l < 0.07 || l > 0.92) continue;
@@ -81,7 +81,7 @@ const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers
       const key = (rq << 8) | (gq << 4) | bq;
       hist.set(key, (hist.get(key) || 0) + 1);
     }
-    const entries = Array.from(hist.entries()).sort((a,b)=>b[1]-a[1]);
+    const entries = Array.from(hist.entries()).sort((a, b) => b[1] - a[1]);
     const colors = entries.slice(0, 16).map(([key]) => {
       const rq = (key >> 8) & 0xF, gq = (key >> 4) & 0xF, bq = key & 0xF;
       return [rq << 4 | rq, gq << 4 | gq, bq << 4 | bq];
@@ -95,30 +95,30 @@ const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers
     const primary = colors[0];
     // Second: most different by hue and distance
     let best = null, bestScore = -1;
-    const [pr,pg,pb] = primary;
-    const [ph,ps,pl] = rgbToHsl(pr,pg,pb);
-    for (let i=1;i<colors.length;i++) {
-      const [r,g,b] = colors[i];
-      const [h,s,l] = rgbToHsl(r,g,b);
+    const [pr, pg, pb] = primary;
+    const [ph, ps, pl] = rgbToHsl(pr, pg, pb);
+    for (let i = 1; i < colors.length; i++) {
+      const [r, g, b] = colors[i];
+      const [h, s, l] = rgbToHsl(r, g, b);
       // score: hue distance + lightness distance + saturation
-      const dh = Math.min(Math.abs(h-ph), 1-Math.abs(h-ph));
-      const dl = Math.abs(l-pl);
-      const score = dh*2 + dl + s*0.5;
+      const dh = Math.min(Math.abs(h - ph), 1 - Math.abs(h - ph));
+      const dl = Math.abs(l - pl);
+      const score = dh * 2 + dl + s * 0.5;
       if (score > bestScore) { bestScore = score; best = colors[i]; }
     }
     return [primary, best || primary];
   }
 
   function bumpSat(s, min, mult) { return clamp01(Math.max(min, s * mult)); }
-  function adjustForHighlight([r,g,b]) {
-    let [h,s,l] = rgbToHsl(r,g,b);
+  function adjustForHighlight([r, g, b]) {
+    let [h, s, l] = rgbToHsl(r, g, b);
     // Ensure strong pop on dark bg: higher saturation, slightly brighter
     s = bumpSat(s, 0.65, 1.25);
     l = clamp01(Math.max(l, 0.58));
-    return hslToRgb(h,s,l);
+    return hslToRgb(h, s, l);
   }
-  function adjustForAccent([r,g,b], lighten = false) {
-    let [h,s,l] = rgbToHsl(r,g,b);
+  function adjustForAccent([r, g, b], lighten = false) {
+    let [h, s, l] = rgbToHsl(r, g, b);
     if (lighten) {
       s = bumpSat(s, 0.55, 1.2);
       l = clamp01(Math.max(l, 0.65));
@@ -126,16 +126,16 @@ const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers
       s = bumpSat(s, 0.6, 1.2);
       l = clamp01(Math.max(l, 0.52));
     }
-    return hslToRgb(h,s,l);
+    return hslToRgb(h, s, l);
   }
 
   function applyVars(primary, secondary) {
-    const [hr,hg,hb] = adjustForHighlight(primary);
-    const hiHex = toHex(hr,hg,hb);
-    const [a1r,a1g,a1b] = adjustForAccent(primary);
-    const [a2r,a2g,a2b] = adjustForAccent(secondary, true);
-    const a1Hex = toHex(a1r,a1g,a1b);
-    const a2Hex = toHex(a2r,a2g,a2b);
+    const [hr, hg, hb] = adjustForHighlight(primary);
+    const hiHex = toHex(hr, hg, hb);
+    const [a1r, a1g, a1b] = adjustForAccent(primary);
+    const [a2r, a2g, a2b] = adjustForAccent(secondary, true);
+    const a1Hex = toHex(a1r, a1g, a1b);
+    const a2Hex = toHex(a2r, a2g, a2b);
     try {
       root.style.setProperty('--hi', hiHex);
       root.style.setProperty('--hi-ring', `rgba(${hr}, ${hg}, ${hb}, 0.28)`);
@@ -146,7 +146,7 @@ const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers
       root.style.setProperty('--accent-rgb', `${a1r}, ${a1g}, ${a1b}`);
       root.style.setProperty('--accent2-rgb', `${a2r}, ${a2g}, ${a2b}`);
       // keep --accent-3 as is or derive a triad if desired
-    } catch {}
+    } catch { }
   }
 
   function run(url) {
@@ -158,7 +158,7 @@ const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers
         const colors = getPalette(img);
         const picked = pickTwo(colors);
         if (picked) applyVars(picked[0], picked[1]);
-      } catch {}
+      } catch { }
     };
     // ensure same-origin path
     img.src = url;
@@ -256,7 +256,7 @@ function applyReveal(target, entering) {
   try {
     const now = (window.performance && performance.now) ? performance.now() : Date.now();
     _revealState.set(target, { visible: !!entering, t: now });
-  } catch {}
+  } catch { }
 }
 
 const observer = supportsIO ? new IntersectionObserver((entries) => {
@@ -293,7 +293,7 @@ function flushRevealQueue(delay = 150) {
   if (revealQueue.length) {
     setTimeout(() => {
       const now = (window.performance && performance.now) ? performance.now() : Date.now();
-      revealQueue.forEach(el => { el.classList.add('in'); try { _revealState.set(el, { visible: true, t: now }); } catch {} });
+      revealQueue.forEach(el => { el.classList.add('in'); try { _revealState.set(el, { visible: true, t: now }); } catch { } });
       revealQueue.length = 0;
     }, delay);
   }
@@ -323,7 +323,7 @@ window.addEventListener('gate:open', () => {
   try {
     const isCoarse = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
     if (hint) hint.textContent = isCoarse ? 'Tap anywhere to continue' : 'Click anywhere to continue';
-  } catch {}
+  } catch { }
   const show = () => {
     warn.setAttribute('aria-hidden', 'false');
     warn.classList.add('show');
@@ -341,7 +341,7 @@ window.addEventListener('gate:open', () => {
   // Also allow tapping/clicking anywhere on the overlay to continue
   warn.addEventListener('click', (e) => {
     // Prevent accidental propagation and trigger the same hide action
-    try { e.preventDefault(); e.stopPropagation(); } catch {}
+    try { e.preventDefault(); e.stopPropagation(); } catch { }
     hide();
   }, { once: true });
 })();
@@ -419,14 +419,7 @@ function displayTitle(title) {
   return String(title).replace(/\s*\([^)]*\)\s*$/, '');
 }
 
-function stripHTML(html = '') {
-  const tmp = document.createElement('div');
-  tmp.innerHTML = String(html);
-  return tmp.textContent || tmp.innerText || '';
-}
-
 function getPreview(p) {
-  if (p && p.descriptionHTML) return stripHTML(p.descriptionHTML);
   if (p && p.description) return String(p.description);
   if (p && p.summary) return String(p.summary);
   return '';
@@ -441,77 +434,77 @@ function renderProjects(projects = []) {
   projects.forEach((p) => {
     const card = document.createElement("article");
     card.className = "project-card glass reveal";
-  card.setAttribute("tabindex", "0");
-  card.setAttribute("role", "button");
-  card.setAttribute("aria-label", `${displayTitle(p.title)} — open details`);
+    card.setAttribute("tabindex", "0");
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", `${displayTitle(p.title)} — open details`);
 
-  const cover = document.createElement("div");
-  cover.className = "cover";
-  const media = document.createElement("div");
-  media.className = "media";
-  const firstMedia = p.media?.[0];
-  const src = (firstMedia && firstMedia.type === 'placeholder')
-    ? placeholderImage('#0b0f14')
-    : (firstMedia && firstMedia.src) || '';
-  media.style.backgroundImage = `url('${src}')`;
-  cover.append(media);
+    const cover = document.createElement("div");
+    cover.className = "cover";
+    const media = document.createElement("div");
+    media.className = "media";
+    const firstMedia = p.media?.[0];
+    const src = (firstMedia && firstMedia.type === 'placeholder')
+      ? placeholderImage('#0b0f14')
+      : (firstMedia && firstMedia.src) || '';
+    media.style.backgroundImage = `url('${src}')`;
+    cover.append(media);
 
-  const title = document.createElement("h3");
-  title.className = "project-title";
-  title.textContent = displayTitle(p.title);
+    const title = document.createElement("h3");
+    title.className = "project-title";
+    title.textContent = displayTitle(p.title);
 
-  const desc = document.createElement("p");
-  desc.className = "project-desc";
-  desc.textContent = getPreview(p);
+    const desc = document.createElement("p");
+    desc.className = "project-desc";
+    desc.textContent = getPreview(p);
 
-  const meta = document.createElement("div");
-  meta.className = "project-meta";
-  const tags = document.createElement("div");
-  tags.className = "tags";
-  (p.tags || []).slice(0, 3).forEach(t => {
-    const tag = document.createElement("span");
-    tag.className = "tag";
-    tag.textContent = t;
-    tags.append(tag);
-  });
-  // mark ongoing
-  if (isPresent(p.period)) {
-    card.classList.add('ongoing');
-    const ongoing = document.createElement('span');
-    ongoing.className = 'chip ongoing';
-    ongoing.textContent = 'Ongoing';
-    tags.prepend(ongoing);
-  }
-  meta.append(tags);
+    const meta = document.createElement("div");
+    meta.className = "project-meta";
+    const tags = document.createElement("div");
+    tags.className = "tags";
+    (p.tags || []).slice(0, 3).forEach(t => {
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = t;
+      tags.append(tag);
+    });
+    // mark ongoing
+    if (isPresent(p.period)) {
+      card.classList.add('ongoing');
+      const ongoing = document.createElement('span');
+      ongoing.className = 'chip ongoing';
+      ongoing.textContent = 'Ongoing';
+      tags.prepend(ongoing);
+    }
+    meta.append(tags);
 
-  // timeline bar
-  const tl = document.createElement("div");
-  tl.className = "timeline-bar";
-  const fill = document.createElement("div");
-  fill.className = "fill";
-  const per = formatPeriod(p.period || {});
-  const pct = per.progressPct;
-  fill.style.setProperty("--p", `${pct}%`);
-  tl.append(fill);
+    // timeline bar
+    const tl = document.createElement("div");
+    tl.className = "timeline-bar";
+    const fill = document.createElement("div");
+    fill.className = "fill";
+    const per = formatPeriod(p.period || {});
+    const pct = per.progressPct;
+    fill.style.setProperty("--p", `${pct}%`);
+    tl.append(fill);
 
-  // project date footer (console-styled, no pill)
-  const pdate = createProjectDate(p.period || {});
-  // Tap/click affordance hint (aria-hidden, purely visual)
-  const hint = document.createElement('div');
-  hint.className = 'tap-hint';
-  hint.setAttribute('aria-hidden', 'true');
-  hint.innerHTML = `
+    // project date footer (console-styled, no pill)
+    const pdate = createProjectDate(p.period || {});
+    // Tap/click affordance hint (aria-hidden, purely visual)
+    const hint = document.createElement('div');
+    hint.className = 'tap-hint';
+    hint.setAttribute('aria-hidden', 'true');
+    hint.innerHTML = `
     <span class="label">View details</span>
     <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
       <path fill="currentColor" d="M8.59 16.59 10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
     </svg>`;
-  card.append(cover, title, desc, tl, meta, pdate, hint);
-  grid.append(card);
-  reveal(card);
+    card.append(cover, title, desc, tl, meta, pdate, hint);
+    grid.append(card);
+    reveal(card);
 
-  const open = () => openSheet(p);
-  card.addEventListener("click", open);
-  card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+    const open = () => openSheet(p);
+    card.addEventListener("click", open);
+    card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
   });
 }
 
@@ -521,23 +514,23 @@ function renderExperience(experience = []) {
   experience.forEach((e) => {
     const item = document.createElement("div");
     item.className = "timeline-item reveal";
-  const card = document.createElement("div");
-  card.className = "timeline-card glass";
-  const logo = document.createElement("div"); logo.className = "logo-badge"; logo.textContent = (e.logo && e.logo.text) || initials(e.org);
-  if (e.logo && e.logo.bg) logo.style.background = e.logo.bg;
-  if (e.logo && e.logo.color) card.style.setProperty('--logo-color', e.logo.color);
-  const wrap = document.createElement("div");
-  const role = document.createElement("p"); role.className = "timeline-role"; role.textContent = `${e.role}`;
-  const org = document.createElement("p"); org.className = "timeline-org"; org.textContent = `${e.org}`;
-  const note = document.createElement("p"); note.className = "timeline-note"; note.textContent = `${e.details}`;
-  // ongoing highlight
-  if (/present/i.test(e.period)) {
-    card.classList.add('ongoing');
-    const pill = document.createElement('span'); pill.className = 'chip ongoing'; pill.textContent = 'Ongoing';
-    role.appendChild(pill);
-  }
-  wrap.append(role, org, note);
-  const date = createDateBadge(e.period, (e.logo && e.logo.color));
+    const card = document.createElement("div");
+    card.className = "timeline-card glass";
+    const logo = document.createElement("div"); logo.className = "logo-badge"; logo.textContent = (e.logo && e.logo.text) || initials(e.org);
+    if (e.logo && e.logo.bg) logo.style.background = e.logo.bg;
+    if (e.logo && e.logo.color) card.style.setProperty('--logo-color', e.logo.color);
+    const wrap = document.createElement("div");
+    const role = document.createElement("p"); role.className = "timeline-role"; role.textContent = `${e.role}`;
+    const org = document.createElement("p"); org.className = "timeline-org"; org.textContent = `${e.org}`;
+    const note = document.createElement("p"); note.className = "timeline-note"; note.textContent = `${e.details}`;
+    // ongoing highlight
+    if (/present/i.test(e.period)) {
+      card.classList.add('ongoing');
+      const pill = document.createElement('span'); pill.className = 'chip ongoing'; pill.textContent = 'Ongoing';
+      role.appendChild(pill);
+    }
+    wrap.append(role, org, note);
+    const date = createDateBadge(e.period, (e.logo && e.logo.color));
     card.append(logo, wrap, date); item.append(card); expEl.append(item);
     reveal(item);
   });
@@ -723,11 +716,7 @@ function openSheet(project) {
   activeProject = project;
   lastTrigger = document.activeElement;
   sheetTitle.textContent = displayTitle(project.title);
-  if (project.descriptionHTML) {
-    sheetDesc.innerHTML = project.descriptionHTML;
-  } else {
-    sheetDesc.textContent = project.description || project.summary || "";
-  }
+  sheetDesc.textContent = project.description || project.summary || "";
   // Remove date range from project sheet
   if (sheetRange) { sheetRange.textContent = ''; sheetRange.style.display = 'none'; }
   sheetTags.innerHTML = "";
@@ -760,7 +749,7 @@ function openSheet(project) {
     document.body.style.left = '0';
     document.body.style.right = '0';
     document.body.style.width = '100%';
-  } catch {}
+  } catch { }
   // Block background scroll via CSS class (body only)
   document.body.classList.add('modal-open');
   // Focus the close button for accessibility
@@ -795,12 +784,12 @@ function closeSheet() {
     window.scrollTo(0, y);
     // restore scroll-behavior next tick
     setTimeout(() => { root.style.scrollBehavior = prev; }, 0);
-  } catch {}
+  } catch { }
   document.removeEventListener('touchmove', touchBlocker, { passive: false });
   window.removeEventListener('wheel', wheelBlocker, { passive: false });
   document.removeEventListener('keydown', keyBlocker, true);
   if (lastTrigger && lastTrigger.focus) {
-    try { lastTrigger.focus({ preventScroll: true }); } catch { try { lastTrigger.focus(); } catch {} }
+    try { lastTrigger.focus({ preventScroll: true }); } catch { try { lastTrigger.focus(); } catch { } }
   }
 }
 const escToClose = (e) => { if (e.key === "Escape") closeSheet(); };
@@ -893,7 +882,7 @@ function updateTrack(initial = false) {
   const onEnd = (e) => {
     if (e && e.target !== sliderTrack) return;
     if (e && e.propertyName && e.propertyName !== 'transform') return;
-    try { sliderTrack.removeEventListener('transitionend', onEnd, true); } catch {}
+    try { sliderTrack.removeEventListener('transitionend', onEnd, true); } catch { }
     setActiveSlide(sliderState.i);
     showOverlayCaption(getMediaCaption(sliderState.i));
   };
@@ -1104,7 +1093,7 @@ if (bgActive && !prefersReducedMotion) {
   resizeCanvas();
   requestAnimationFrame(animateBackground);
 } else {
-  try { if (dotsCanvas) dotsCanvas.style.display = 'none'; } catch {}
+  try { if (dotsCanvas) dotsCanvas.style.display = 'none'; } catch { }
 }
 
 // loader removed
@@ -1141,7 +1130,7 @@ function releaseNavLockSoon() {
   navIdleTimer = setTimeout(() => {
     navLockActive = false;
     updateActiveNavByIO();
-    try { window.removeEventListener('scroll', releaseNavLockSoon); } catch {}
+    try { window.removeEventListener('scroll', releaseNavLockSoon); } catch { }
   }, 220);
 }
 function startNavLock(target) {
@@ -1238,7 +1227,7 @@ if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, b
     const rect = wrap.getBoundingClientRect();
     // Use the actual bottom edge from the top of the viewport (no hardcoded gaps)
     const offset = Math.max(0, Math.ceil(rect.bottom));
-    try { document.documentElement.style.setProperty('--nav-offset', offset + 'px'); } catch {}
+    try { document.documentElement.style.setProperty('--nav-offset', offset + 'px'); } catch { }
   }
   const queue = () => { if (raf) return; raf = requestAnimationFrame(measure); };
   // Initial and after load (fonts/images can change height)
@@ -1258,7 +1247,7 @@ if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, b
     const el = document.querySelector(sel);
     if (!el) return;
     const h = Math.ceil(el.getBoundingClientRect().height || 0);
-    try { document.documentElement.style.setProperty('--dev-banner-h', h + 'px'); } catch {}
+    try { document.documentElement.style.setProperty('--dev-banner-h', h + 'px'); } catch { }
   }
   const queue = () => { if (raf) return; raf = requestAnimationFrame(measure); };
   if (document.readyState !== 'loading') measure(); else window.addEventListener('DOMContentLoaded', measure, { once: true });
@@ -1270,7 +1259,7 @@ if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, b
       const el = document.querySelector(sel);
       if (el) new ResizeObserver(queue).observe(el);
     }
-  } catch {}
+  } catch { }
 })();
 
 // Make the development banner dismissible (no persistence; shows every refresh)
@@ -1280,7 +1269,7 @@ if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, b
     if (!banner) return;
     const hide = () => {
       banner.classList.add('is-hidden');
-      try { document.documentElement.style.setProperty('--dev-banner-h', '0px'); } catch {}
+      try { document.documentElement.style.setProperty('--dev-banner-h', '0px'); } catch { }
     };
     const btn = banner.querySelector('.dev-banner-close');
     if (btn) btn.addEventListener('click', hide);
@@ -1300,7 +1289,7 @@ if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, b
     const url = 'https://r.jina.ai/http://www.linkedin.com/in/yinshengkai/';
     // Guard fetch with a soft timeout to avoid long stalls
     const controller = ('AbortController' in window) ? new AbortController() : null;
-    const to = setTimeout(() => { try { controller && controller.abort(); } catch {} }, 3500);
+    const to = setTimeout(() => { try { controller && controller.abort(); } catch { } }, 3500);
     const res = await fetch(url, controller ? { signal: controller.signal } : undefined);
     clearTimeout(to);
     if (!res.ok) throw new Error('fetch failed');

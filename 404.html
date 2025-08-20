@@ -1,58 +1,86 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0b0f14" />
-    <title>404 — Yin Shengkai</title>
-    <link rel="stylesheet" href="assets/css/style.css" />
-    <style>
-      .notfound-wrap { min-height: 100dvh; display: grid; place-items: center; padding: 24px; }
-      .nf-card {
-        max-width: 820px; width: 100%; padding: 28px 24px; text-align: center;
-        /* Remove any border/glass visual */
-        background: transparent; border: none; box-shadow: none;
-        /* Console font */
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-        color: #fff;
-      }
-      .nf-hero {
-        margin: 2px 0 8px;
-        font-weight: 900;
-        line-height: 0.9;
-        letter-spacing: -2px;
-        font-size: clamp(72px, 20vw, 220px);
-        color: #fff;
-      }
-      .nf-sub { margin: 0 0 18px; color: #fff; opacity: .98; font-size: clamp(14px, 2.4vw, 18px); }
-      .nf-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-    </style>
-  </head>
-  <body>
-    <div class="bg">
-      <div class="blob b1"></div>
-      <div class="blob b2"></div>
-      <div class="blob b3"></div>
-      <div class="noise" aria-hidden="true"></div>
-      <div class="vignette" aria-hidden="true"></div>
-    </div>
-    <main class="notfound-wrap">
-      <div class="nf-card card-enter">
-        <div class="nf-hero" aria-hidden="true">404</div>
-        <p class="nf-sub">Whoops, this page doesn’t exist.</p>
-        <div class="nf-actions">
-          <a class="icon-link" href="/" aria-label="Home" title="Home">
-            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-              <path fill="currentColor" d="M12 3 2 12h3v8h6v-6h2v6h6v-8h3z"/>
-            </svg>
-          </a>
-          <a class="icon-link" href="mailto:yinshengkai98@gmail.com" aria-label="Contact" title="Contact">
-            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-              <path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 4-8 5L4 8V6l8 5 8-5z"/>
-            </svg>
-          </a>
-        </div>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b0f14" />
+  <title>404 — Yin Shengkai</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    .notfound-wrap {
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .nf-card {
+      max-width: 820px;
+      width: 100%;
+      padding: 28px 24px;
+      text-align: center;
+      /* Remove any border/glass visual */
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      /* Console font */
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color: #fff;
+    }
+
+    .nf-hero {
+      margin: 2px 0 8px;
+      font-weight: 900;
+      line-height: 0.9;
+      letter-spacing: -2px;
+      font-size: clamp(72px, 20vw, 220px);
+      color: #fff;
+    }
+
+    .nf-sub {
+      margin: 0 0 18px;
+      color: #fff;
+      opacity: .98;
+      font-size: clamp(14px, 2.4vw, 18px);
+    }
+
+    .nf-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+    <div class="noise" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+  </div>
+  <main class="notfound-wrap">
+    <div class="nf-card card-enter">
+      <div class="nf-hero" aria-hidden="true">404</div>
+      <p class="nf-sub">Whoops, this page doesn’t exist.</p>
+      <div class="nf-actions">
+        <a class="icon-link" href="/" aria-label="Home" title="Home">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path fill="currentColor" d="M12 3 2 12h3v8h6v-6h2v6h6v-8h3z" />
+          </svg>
+        </a>
+        <a class="icon-link" href="mailto:yinshengkai98@gmail.com" aria-label="Contact" title="Contact">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path fill="currentColor"
+              d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 4-8 5L4 8V6l8 5 8-5z" />
+          </svg>
+        </a>
       </div>
-    </main>
-  </body>
-  </html>
+    </div>
+  </main>
+</body>
+
+</html>
