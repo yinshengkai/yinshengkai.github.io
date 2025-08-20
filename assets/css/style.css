@@ -93,19 +93,36 @@ body {
   .bg-image { filter: blur(8px) saturate(108%); transform: scale(1.04); }
 }
 
-/* Ensure glass blur is active during reveal: animate children, not container */
-.glass.reveal { opacity: 1 !important; transform: none !important; }
-.glass.reveal.in { transform: none !important; }
-.glass.reveal > :not(.tap-hint) {
+/* Reveal on glass: let container fade/transform; we only toggle blur to avoid flicker */
+.glass.reveal:not(.in) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none;
+}
+
+/* Fade the glass surface background in sync with content */
+.glass.reveal::before { opacity: 0; }
+.glass.reveal.in::before { opacity: 1; transition-delay: var(--reveal-delay, 0ms); }
+
+/* Do not animate entire sections (prevents glass descendants from inheriting opacity) */
+.section.reveal { opacity: 1 !important; transform: none !important; }
+
+/* Prevent backdrop-filter pop on timeline: animate the card, not its wrapper */
+.timeline-item.reveal { opacity: 1 !important; transform: none !important; }
+.timeline-item.reveal > .timeline-card {
   opacity: 0;
   transform: translateY(16px) scale(0.96);
   transition: transform 700ms cubic-bezier(.2,.8,.2,1), opacity 600ms ease;
 }
-.glass.reveal.in > :not(.tap-hint) {
+.timeline-item.reveal.in > .timeline-card {
   opacity: 1;
   transform: translateY(0) scale(1);
   transition-delay: var(--reveal-delay, 0ms);
 }
+
+/* Also fade the timeline card's surface background */
+.timeline-item.reveal > .timeline-card::before { opacity: 0; }
+.timeline-item.reveal.in > .timeline-card::before { opacity: 1; transition-delay: var(--reveal-delay, 0ms); }
 
 /* On mobile, fixed backgrounds can cause issues; allow scroll */
 @media (max-width: 700px) {
@@ -258,13 +275,28 @@ body { padding-bottom: calc(var(--dev-banner-h, 36px) + var(--site-pad-y)); }
 
 /* Glass utility */
 .glass {
-  /* Standardized darker card background */
-  background: var(--card-bg);
+  /* Blur remains stable on the container; background fades via ::before */
+  position: relative;
+  isolation: isolate; /* ensure ::before stays behind content inside */
+  z-index: 0;         /* create stacking context for safe negative layer */
+  overflow: hidden;   /* clip background to rounded corners */
+  background: transparent;
   border: none;
   border-radius: var(--radius);
   backdrop-filter: blur(var(--blur)) saturate(120%);
   -webkit-backdrop-filter: blur(var(--blur)) saturate(120%);
   box-shadow: var(--shadow);
+}
+/* Surface background layer so we can fade it without touching backdrop-filter */
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--card-bg);
+  z-index: -1; /* always beneath content */
+  opacity: 1;
+  transition: opacity 600ms ease;
 }
 .glass.micro { border-radius: var(--radius-sm); padding: 12px 14px; display: inline-block; }
 
@@ -436,8 +468,8 @@ body { padding-bottom: calc(var(--dev-banner-h, 36px) + var(--site-pad-y)); }
 @media (hover: none), (pointer: coarse) {
   .project-card { touch-action: manipulation; }
 }
-/* Ensure any previous decorative ::before ring is disabled */
-.project-card::before { content: none !important; animation: none !important; }
+/* Ensure previous decorative project-card ring (if any) is disabled without affecting glass layer */
+/* Removed broad ::before reset so .glass::before background remains visible on project cards */
 /* Project titles: allow up to 2 lines, equal height across cards */
 .project-title {
   margin: 0;
@@ -517,7 +549,7 @@ body { padding-bottom: calc(var(--dev-banner-h, 36px) + var(--site-pad-y)); }
     0 0 22px var(--hi-glow),
     inset 0 1px rgba(255,255,255,0.12);
 }
-#profile-card::before {
+#profile-card::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -529,6 +561,7 @@ body { padding-bottom: calc(var(--dev-banner-h, 36px) + var(--site-pad-y)); }
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   opacity: 0.28;
+  z-index: 1; /* draw ring above glass background */
 }
 
 /* Sliding sheet */
