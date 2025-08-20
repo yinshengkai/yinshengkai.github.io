@@ -90,7 +90,7 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   /* Blur and desaturate the wallpaper for a neutral black theme */
-  filter: blur(48px) grayscale(100%) saturate(0%) brightness(70%);
+  filter: blur(32px) brightness(70%);
   transform: scale(1.06);
 }
 
@@ -475,6 +475,7 @@ body {
   opacity: 1;
   background: var(--surface-2);
   transform: translateY(-2px);
+  box-shadow: 0 0 0 3px var(--hi-ring);
 }
 
 
@@ -658,16 +659,16 @@ body {
   text-decoration: none;
   padding: 10px 14px;
   border-radius: 6px;
-  transition: background var(--speed), transform var(--speed);
+  transition: background var(--speed), transform var(--speed), box-shadow var(--speed);
   background: var(--surface);
   box-shadow: none;
 }
 
-.btn:hover { background: var(--surface-2); transform: translateY(-2px); }
+.btn:hover { background: var(--surface-2); transform: translateY(-2px); box-shadow: 0 0 0 3px var(--hi-ring); }
 
 .btn.primary { background: var(--surface-2); box-shadow: none; }
 
-.btn.primary:hover { background: rgba(255,255,255,0.12); }
+.btn.primary:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px); box-shadow: 0 0 0 3px var(--hi-ring); }
 
 .icon-link {
   display: inline-flex;
@@ -679,13 +680,13 @@ body {
   color: #e6e6e6;
   background: var(--surface);
   border: 1px solid var(--border);
-  transition: background var(--speed), transform var(--speed);
+  transition: background var(--speed), transform var(--speed), box-shadow var(--speed);
   box-shadow: none;
   appearance: none;
   cursor: pointer;
 }
 
-.icon-link:hover { background: var(--surface-2); transform: translateY(-2px); }
+.icon-link:hover { background: var(--surface-2); transform: translateY(-2px); box-shadow: 0 0 0 3px var(--hi-ring); }
 
 .icon-link:focus-visible {
   outline: 2px solid var(--hi);
@@ -1789,8 +1790,13 @@ body {
 
 /* Enhancements: hover expansion, reveal animations, loader, icons, timeline logos */
 .project-card {
-  transition: box-shadow var(--speed), background var(--speed-slow), filter var(--speed);
-  will-change: auto;
+  /* Set base shadows with a zero-width highlight ring so hover can animate smoothly */
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.45),
+    0 0 0 0 var(--hi-ring),
+    inset 0 1px rgba(255, 255, 255, 0.12);
+  transition: box-shadow 280ms cubic-bezier(.2, .8, .2, 1), background var(--speed-slow), filter var(--speed);
+  will-change: box-shadow, background, filter;
   transform-origin: center;
 }
 
