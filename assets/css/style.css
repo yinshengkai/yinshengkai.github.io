@@ -583,7 +583,8 @@ body {
 .avatar {
   width: 100%;
   aspect-ratio: 16 / 9;
-  border-radius: var(--radius);
+  /* Round only the top corners; keep bottom edges square to meet the bio */
+  border-radius: var(--radius) var(--radius) 0 0;
   background: none;
   position: relative;
   overflow: hidden;
@@ -638,7 +639,7 @@ body {
 
 /* Body padding below full-bleed avatar */
 .profile-body {
-  padding: 16px 22px 22px;
+  padding: 0 0 22px;
   text-align: center;
 }
 
@@ -654,6 +655,16 @@ body {
   font-size: clamp(16px, 2.4vw, 20px);
   font-weight: 400;
 }
+
+/* Bio container to make the line stand out */
+.bio-box {
+  width: 100%;
+  margin: 0 0 18px;
+  border-radius: 0;
+}
+/* Ensure glass/micro variants don't reapply rounding */
+.bio-box.glass { border-radius: 0; }
+.bio-box .bio { margin: 0; }
 
 /* Removed inline bio emphasis styles */
 
