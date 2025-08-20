@@ -12,8 +12,8 @@
   --text: #e8e8e8;
   --muted: #a8a8a8;
   /* Neutral accents */
-  --accent: #bdbdbd;
-  --accent-2: #9e9e9e;
+  --accent: #ff5e00;
+  --accent-2: #d7d7d7;
   --accent-3: #8f8f8f;
   --accent-rgb: 200, 200, 200;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px rgba(255, 255, 255, 0.05);
@@ -90,7 +90,7 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   /* Blur and desaturate the wallpaper for a neutral black theme */
-  filter: blur(32px) brightness(70%);
+  filter: blur(32px) brightness(100%);
   transform: scale(1.06);
 }
 
@@ -411,7 +411,11 @@ body {
 
 /* Center content: brand on left edge, shortcuts on right edge of the centered track */
 /* Keep groups on one line and aligned to content edges */
-.top-shortcuts .shortcut-links { display: flex; gap: 10px; flex-wrap: nowrap; }
+.top-shortcuts .shortcut-links {
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
 
 /* Navbar is now full-width and edge-flush on all screens */
 
@@ -504,7 +508,9 @@ body {
   opacity: 1;
 }
 
-.brand-link:focus-visible { outline: none; }
+.brand-link:focus-visible {
+  outline: none;
+}
 
 .shortcut-link.active {
   opacity: 1;
@@ -514,8 +520,10 @@ body {
   box-shadow: none;
 }
 
-/* removed accent dot under active icon for a cleaner look */
-.shortcut-link:hover { opacity: 1; text-decoration: none; }
+.shortcut-link:hover {
+  opacity: 1;
+  text-decoration: none;
+}
 
 /* Glass utility */
 .glass {
@@ -557,7 +565,8 @@ body {
 /* Header profile card */
 /* Top padding equals dynamic navbar bottom so content isn't covered */
 .site-header {
-  padding-top: 0; /* body top padding accounts for fixed navbar */
+  padding-top: 0;
+  /* body top padding accounts for fixed navbar */
 }
 
 /* When navigating to the profile card via hash, keep it clear of the fixed navbar */
@@ -569,24 +578,29 @@ body {
 
 .profile {
   display: grid;
-  grid-template-columns: 1fr; /* stack: avatar on top, text below */
+  grid-template-columns: 1fr;
+  /* stack: avatar on top, text below */
   gap: 20px;
   padding: 46px 22px 22px;
   align-items: start;
 }
 
 /* Center the avatar when stacked; keep text left-aligned */
-.profile .avatar { justify-self: start; }
+.profile .avatar {
+  justify-self: start;
+}
 
 .avatar {
   width: 160px;
   height: 160px;
   border-radius: 28px;
-  background: none; /* remove dark gradient to avoid halo at rounded edges */
+  background: none;
+  /* remove dark gradient to avoid halo at rounded edges */
   position: relative;
   overflow: hidden;
   border: none;
-  contain: paint; /* crisper clipping in some browsers */
+  contain: paint;
+  /* crisper clipping in some browsers */
   clip-path: inset(0 round 28px);
 }
 
@@ -596,12 +610,15 @@ body {
   object-fit: cover;
   display: block;
   filter: saturate(110%) contrast(106%);
-  border-radius: inherit; /* ensure no rectangular bleed on edges */
+  border-radius: inherit;
+  /* ensure no rectangular bleed on edges */
   background-color: transparent;
 }
 
 /* Remove decorative overlay to avoid any edge halo */
-.avatar::before { content: none; }
+.avatar::before {
+  content: none;
+}
 
 .title {
   margin: 2px 0 4px;
@@ -664,11 +681,22 @@ body {
   box-shadow: none;
 }
 
-.btn:hover { background: var(--surface-2); transform: translateY(-2px); box-shadow: 0 0 0 3px var(--hi-ring); }
+.btn:hover {
+  background: var(--surface-2);
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 3px var(--hi-ring);
+}
 
-.btn.primary { background: var(--surface-2); box-shadow: none; }
+.btn.primary {
+  background: var(--surface-2);
+  box-shadow: none;
+}
 
-.btn.primary:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px); box-shadow: 0 0 0 3px var(--hi-ring); }
+.btn.primary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 3px var(--hi-ring);
+}
 
 .icon-link {
   display: inline-flex;
@@ -686,7 +714,11 @@ body {
   cursor: pointer;
 }
 
-.icon-link:hover { background: var(--surface-2); transform: translateY(-2px); box-shadow: 0 0 0 3px var(--hi-ring); }
+.icon-link:hover {
+  background: var(--surface-2);
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 3px var(--hi-ring);
+}
 
 .icon-link:focus-visible {
   outline: 2px solid var(--hi);
@@ -694,11 +726,18 @@ body {
 }
 
 /* Remove outlines from non-button pills/tags */
-.chip, .chip:focus-visible,
-.chip.flair, .chip.flair:focus-visible,
-.chip.ongoing, .chip.ongoing:focus-visible,
-.tag, .tag:focus-visible,
-.ongoing-pill, .ongoing-pill:focus-visible { outline: none; }
+.chip,
+.chip:focus-visible,
+.chip.flair,
+.chip.flair:focus-visible,
+.chip.ongoing,
+.chip.ongoing:focus-visible,
+.tag,
+.tag:focus-visible,
+.ongoing-pill,
+.ongoing-pill:focus-visible {
+  outline: none;
+}
 
 /* Education */
 .education {
@@ -1004,7 +1043,10 @@ body {
 }
 
 /* Ensure inline pill aligns with the title's first-line baseline */
-.project-title-row .chip { align-self: baseline; margin: 0; }
+.project-title-row .chip {
+  align-self: baseline;
+  margin: 0;
+}
 
 /* Clamp description to two lines and reserve equal height so the divider aligns */
 .project-desc {
@@ -1669,14 +1711,19 @@ body {
   }
 
   /* Match navbar inner padding to container's 16px on narrow screens; keep edges flush and square */
-  .shortcuts-wrap { padding-inline: max(16px, calc((100vw - 1100px) / 2)); border-radius: 0; }
+  .shortcuts-wrap {
+    padding-inline: max(16px, calc((100vw - 1100px) / 2));
+    border-radius: 0;
+  }
 
   .brand {
     font-size: 18px;
   }
 
   /* Maintain stacked layout on small screens as well */
-  .profile { grid-template-columns: 1fr; }
+  .profile {
+    grid-template-columns: 1fr;
+  }
 
   .avatar {
     width: 120px;
