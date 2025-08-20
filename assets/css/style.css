@@ -627,7 +627,7 @@ body {
 
 .chip.flair {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  background: var(--surface);
+  background: var(--surface-2);
   color: #e0e0e0;
 }
 
@@ -995,6 +995,16 @@ body {
   min-height: calc(2 * 1.3em);
 }
 
+/* Row to place title and inline pills side-by-side when needed */
+.project-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+/* Ensure inline pill aligns with the title's first-line baseline */
+.project-title-row .chip { align-self: baseline; margin: 0; }
+
 /* Clamp description to two lines and reserve equal height so the divider aligns */
 .project-desc {
   margin: 0;
@@ -1023,11 +1033,11 @@ body {
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: 999px;
   border: none;
-  background: var(--surface);
+  background: var(--surface-2);
   color: #e0e0e0;
   font-size: 12px;
   line-height: 1;
@@ -1052,10 +1062,10 @@ body {
   color: #e0e0e0;
   opacity: 0.9;
   border: none;
-  background: var(--surface);
+  background: var(--surface-2);
   padding: 6px 10px;
   line-height: 1;
-  border-radius: 6px;
+  border-radius: 999px;
   box-shadow: none;
 }
 
@@ -1208,10 +1218,10 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 2px 8px;
+  padding: 6px 10px;
   margin-left: 8px;
-  border-radius: 6px;
-  font-size: 11px;
+  border-radius: 999px;
+  font-size: 12px;
   color: var(--text);
   background: var(--surface-2);
   border: none;

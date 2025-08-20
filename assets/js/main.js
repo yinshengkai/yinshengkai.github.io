@@ -341,6 +341,9 @@ function renderProjects(projects = []) {
     const title = document.createElement("h3");
     title.className = "project-title";
     title.textContent = displayTitle(p.title);
+    const titleRow = document.createElement('div');
+    titleRow.className = 'project-title-row';
+    titleRow.append(title);
 
     const desc = document.createElement("p");
     desc.className = "project-desc";
@@ -362,7 +365,12 @@ function renderProjects(projects = []) {
       const ongoing = document.createElement('span');
       ongoing.className = 'chip ongoing';
       ongoing.textContent = 'Ongoing';
-      tags.prepend(ongoing);
+      // For skQuant, show pill beside title instead of in tags
+      if ((p.id || '').toLowerCase() === 'skquant' || /sk\s*quant/i.test(p.title || '')) {
+        titleRow.append(ongoing);
+      } else {
+        tags.prepend(ongoing);
+      }
     }
     meta.append(tags);
 
@@ -387,7 +395,7 @@ function renderProjects(projects = []) {
     <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
       <path fill="currentColor" d="M8.59 16.59 10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
     </svg>`;
-    card.append(cover, title, desc, tl, meta, pdate, hint);
+    card.append(cover, titleRow, desc, tl, meta, pdate, hint);
     grid.append(card);
     reveal(card);
 
