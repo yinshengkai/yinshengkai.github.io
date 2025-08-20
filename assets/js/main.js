@@ -710,7 +710,7 @@ function buildSlider(media) {
       el = document.createElement("video"); el.src = m.src; el.controls = true; el.playsInline = true; el.muted = true; el.setAttribute("preload", "metadata");
     } else {
       el = document.createElement("img");
-      const src = (m.type === 'placeholder') ? placeholderImage('#0b0f14') : m.src;
+      const src = (m.type === 'placeholder') ? placeholderImage('#000000') : m.src;
       el.src = src; el.alt = m.alt || m.caption || ""; el.loading = 'lazy'; el.decoding = 'async';
     }
     slide.append(el);
