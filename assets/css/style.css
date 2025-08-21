@@ -1753,8 +1753,8 @@ body {
   gap: 10px;
   min-height: 0;
   overflow: auto;
-  /* Clear visual separation from media to avoid perceived overlap */
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  /* Remove divider between media and metadata/description; keep spacing */
+  border-top: none;
   padding-top: 12px;
 }
 .sheet-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -1782,13 +1782,14 @@ body {
   padding-right: 4px;
   /* avoid scrollbar overlap */
   position: relative;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  /* Remove divider between tags and description; keep spacing */
+  border-top: none;
   padding-top: 14px;
 }
 
 /* Subtle gradient hint at top of scrollable description */
 .sheet-desc::before {
-  content: "";
+  content: none !important;
   position: absolute;
   left: 0;
   right: 0;
@@ -1936,7 +1937,7 @@ body {
 
 /* Bottom gradient to improve legibility under the caption */
 .slider::after {
-  content: "";
+  content: none;
   position: absolute;
   left: 0;
   right: 0;

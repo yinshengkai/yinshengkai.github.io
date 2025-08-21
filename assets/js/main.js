@@ -941,13 +941,14 @@ function buildSlider(media) {
   sliderState.media = media.slice();
   sliderState.durs = new Array(sliderState.count).fill(8000);
 
-  // Hide controls/progress when only a single (or zero) media item
+  // Controls/progress visibility; show progress for single-video projects
   const isSingle = sliderState.count <= 1;
+  const isSingleVideo = sliderState.count === 1 && media[0] && media[0].type === 'video';
   if (btnPrev) { btnPrev.style.display = isSingle ? 'none' : ''; btnPrev.setAttribute('aria-hidden', String(isSingle)); btnPrev.tabIndex = isSingle ? -1 : 0; }
   if (btnNext) { btnNext.style.display = isSingle ? 'none' : ''; btnNext.setAttribute('aria-hidden', String(isSingle)); btnNext.tabIndex = isSingle ? -1 : 0; }
   if (sliderDots) sliderDots.style.display = isSingle ? 'none' : '';
-  if (sliderProgress) sliderProgress.style.display = isSingle ? 'none' : '';
-  if (isSingle) stopAutoplay();
+  if (sliderProgress) sliderProgress.style.display = (isSingle && !isSingleVideo) ? 'none' : '';
+  if (isSingle && !isSingleVideo) stopAutoplay();
   slider.classList.toggle('single', isSingle);
 
   media.forEach((m, idx) => {
@@ -965,7 +966,8 @@ function buildSlider(media) {
       el.playsInline = true; el.setAttribute('playsinline', '');
       el.muted = true; el.defaultMuted = true; el.setAttribute('muted', '');
       try { el.volume = 0; } catch {}
-      el.loop = false; // advance when ended
+      // Loop videos so they repeat seamlessly
+      el.loop = true;
       el.preload = 'metadata';
       try { el.disablePictureInPicture = true; } catch {}
       try { el.setAttribute('controlsList', 'nodownload noplaybackrate noremoteplayback'); } catch {}
@@ -986,13 +988,7 @@ function buildSlider(media) {
         el.addEventListener('waiting', setLoading);
         el.addEventListener('stalled', setLoading);
         el.addEventListener('seeking', setLoading);
-        // Advance to next when active video ends
-        el.addEventListener('ended', () => {
-          if (sliderState.i === idx) {
-            goTo(sliderState.i + 1);
-            restartAutoplay();
-          }
-        });
+        // No ended handler needed; videos loop
       } catch {}
     } else {
       el = document.createElement("img");
@@ -1010,7 +1006,8 @@ function buildSlider(media) {
   });
 
   updateTrack(true);
-  if (sliderState.count > 1) startAutoplay();
+  // Start autoplay for multi-slide, and also for single-video so progress updates
+  if (sliderState.count > 1 || isSingleVideo) startAutoplay();
   // Ensure the slider uses available space while keeping desc >= 1/2
   try { layoutSheetMedia(); } catch {}
 }
@@ -1158,10 +1155,17 @@ function frame(ts) {
     const dur = v.duration;
     const ct = v.currentTime || 0;
     pct = Math.max(0, Math.min(1, ct / dur));
+    const isSingleVideo = (sliderState.count === 1);
     if (v.ended || pct >= 1) {
-      goTo(sliderState.i + 1);
-      sliderState.t0 = 0;
-      advanced = true;
+      if (isSingleVideo) {
+        // Keep on the same slide; restart progress cycle
+        sliderState.t0 = 0;
+        advanced = false;
+      } else {
+        goTo(sliderState.i + 1);
+        sliderState.t0 = 0;
+        advanced = true;
+      }
     }
   } else {
     // Fallback to time-based for images or before metadata is ready
@@ -1230,6 +1234,14 @@ function layoutSheetMedia() {
   if (isDesktop) {
     // Desktop uses CSS variable-driven split; avoid inline height
     try { slider.style.height = ''; } catch {}
+    // Fallback: if computed height collapses (rare), set an explicit 50% or 16:9 height
+    const hNow = slider.clientHeight || slider.offsetHeight || 0;
+    if (hNow < 40) {
+      const desiredMax = Math.floor(bodyH * 0.5);
+      const arH = Math.round((w * 9) / 16);
+      const h = Math.max(0, Math.min(desiredMax, arH));
+      slider.style.height = h + 'px';
+    }
     return;
   }
   const desiredMax = Math.floor(bodyH * 0.5);
