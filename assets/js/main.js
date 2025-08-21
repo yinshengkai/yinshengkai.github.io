@@ -36,11 +36,10 @@ function applyReveal(target, entering) {
   }
 }
 
-// Simpler IO config (more reliable on mobile Safari)
+// IO config: enter when a sliver shows; hide when fully gone
 const observer = supportsIO ? new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     const el = entry.target;
-    // Gentle thresholds: enter when a sliver shows; hide when fully gone
     const ratio = entry.intersectionRatio || 0;
     if (entry.isIntersecting && ratio > 0.02) {
       applyReveal(el, true);
@@ -126,6 +125,11 @@ function revealFallback() {
 }
 setTimeout(revealFallback, 400);
 
+// Force all reveal elements visible (safety against complex layout shifts)
+function forceRevealAll() {
+  try { $$('.reveal').forEach(el => el.classList.add('in')); } catch { }
+}
+
 // Scroll/resize fallback to ensure re-entry on mobile when IO misses events
 function revealCheckAll() {
   const vH = window.innerHeight || document.documentElement.clientHeight || 0;
@@ -135,7 +139,7 @@ function revealCheckAll() {
     const el = items[i];
     const r = el.getBoundingClientRect();
     const visible = (r.bottom > -margin) && (r.top < vH + margin);
-    applyReveal(el, visible);
+    if (visible) applyReveal(el, true);
   }
 }
 
@@ -157,6 +161,75 @@ function getPreview(p) {
 function isPresent(period) {
   const end = (period && period.end) || '';
   return String(end).toLowerCase() === 'present';
+}
+
+// Layout tags to fill a single line, truncating with an ellipsis tag if needed
+function layoutCardTags(tagsEl, names = [], prefixElems = []) {
+  if (!tagsEl) return;
+  // Reset and allow wrap for measuring line breaks
+  tagsEl.innerHTML = '';
+  const prevWrap = tagsEl.style.flexWrap;
+  tagsEl.style.flexWrap = 'wrap';
+
+  const appendTag = (label) => {
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.textContent = label;
+    tagsEl.appendChild(tag);
+    return tag;
+  };
+
+  // Append fixed prefixes first (e.g., Ongoing chip)
+  const fixed = Array.isArray(prefixElems) ? prefixElems : [];
+  fixed.forEach(el => { if (el) tagsEl.appendChild(el); });
+
+  let baseTop = null;
+  let shown = 0;
+  for (let i = 0; i < names.length; i++) {
+    const el = appendTag(String(names[i]));
+    const top = el.offsetTop;
+    if (baseTop == null) baseTop = top;
+    if (top > baseTop) { tagsEl.removeChild(el); break; }
+    shown++;
+  }
+  const remaining = names.length - shown;
+  if (remaining > 0) {
+    const dots = document.createElement('span');
+    dots.className = 'tag more';
+    dots.textContent = '…';
+    dots.setAttribute('aria-label', `${remaining} more`);
+    tagsEl.appendChild(dots);
+    // Ensure dots fits on the same first line; if not, remove last tag(s)
+    if (baseTop != null && dots.offsetTop > baseTop) {
+      // Remove tags before dots until dots fits or only prefixes remain
+      while (tagsEl.childNodes.length > fixed.length + 1 && dots.offsetTop > baseTop) {
+        const beforeDots = tagsEl.childNodes[tagsEl.childNodes.length - 2];
+        if (!beforeDots || beforeDots === dots) break;
+        tagsEl.removeChild(beforeDots);
+      }
+      // If still doesn't fit, remove dots
+      if (dots.offsetTop > baseTop) {
+        try { tagsEl.removeChild(dots); } catch { }
+      }
+    }
+  }
+  // Restore nowrap for final layout and hide overflow
+  tagsEl.style.flexWrap = prevWrap || '';
+}
+
+function observeTagLayout(tagsEl, names = [], prefixElems = []) {
+  if (!tagsEl) return;
+  const rerender = () => layoutCardTags(tagsEl, names, prefixElems);
+  try {
+    if ('ResizeObserver' in window) {
+      const ro = new ResizeObserver(() => rerender());
+      ro.observe(tagsEl);
+    } else {
+      window.addEventListener('resize', rerender);
+    }
+  } catch {
+    window.addEventListener('resize', rerender);
+  }
 }
 
 function renderProjects(projects = []) {
@@ -192,12 +265,7 @@ function renderProjects(projects = []) {
     meta.className = "project-meta";
     const tags = document.createElement("div");
     tags.className = "tags";
-    (p.tags || []).slice(0, 3).forEach(t => {
-      const tag = document.createElement("span");
-      tag.className = "tag";
-      tag.textContent = t;
-      tags.append(tag);
-    });
+    const tagNames = Array.isArray(p.tags) ? p.tags.slice() : [];
     // mark ongoing
     if (isPresent(p.period)) {
       card.classList.add('ongoing');
@@ -208,7 +276,9 @@ function renderProjects(projects = []) {
       if ((p.id || '').toLowerCase() === 'skquant' || /sk\s*quant/i.test(p.title || '')) {
         titleRow.append(ongoing);
       } else {
-        tags.prepend(ongoing);
+        // Defer adding; handle in layout as fixed prefix
+        // We'll capture this in prefixElems below
+        tags.__ongoing = ongoing;
       }
     }
     meta.append(tags);
@@ -236,6 +306,10 @@ function renderProjects(projects = []) {
     </svg>`;
     card.append(cover, titleRow, desc, tl, meta, pdate, hint);
     grid.append(card);
+    // Compute tags to fill one line and append ellipsis if overflow
+    const prefix = tags.__ongoing ? [tags.__ongoing] : [];
+    layoutCardTags(tags, tagNames, prefix);
+    observeTagLayout(tags, tagNames, prefix);
     reveal(card);
 
     const open = () => openSheet(p);
@@ -580,6 +654,8 @@ function openSheet(project) {
   } catch { }
   // Block background scroll via CSS class (body only)
   document.body.classList.add('modal-open');
+  // Notify listeners (e.g., parallax) to re-evaluate transforms
+  try { window.dispatchEvent(new Event('modal-change')); } catch { }
   // Focus the close button for accessibility
   setTimeout(() => { try { sheetClose.focus({ preventScroll: true }); } catch { try { sheetClose.focus(); } catch { } } }, 0);
   document.addEventListener("keydown", escToClose);
@@ -587,6 +663,8 @@ function openSheet(project) {
   document.addEventListener('touchmove', touchBlocker, { passive: false });
   window.addEventListener('wheel', wheelBlocker, { passive: false });
   document.addEventListener('keydown', keyBlocker, true);
+  // Ensure all reveals remain visible when modal opens
+  forceRevealAll();
 }
 
 function closeSheet() {
@@ -596,6 +674,8 @@ function closeSheet() {
   activeProject = null;
   document.removeEventListener("keydown", escToClose);
   document.body.classList.remove('modal-open');
+  // Notify listeners (e.g., parallax) to re-evaluate transforms
+  try { window.dispatchEvent(new Event('modal-change')); } catch { }
   // Restore scroll without jumping to top
   try {
     const root = document.documentElement;
@@ -901,6 +981,8 @@ revealCheckAll();
     // Use the actual bottom edge from the top of the viewport (no hardcoded gaps)
     const offset = Math.max(0, Math.ceil(rect.bottom));
     try { document.documentElement.style.setProperty('--nav-offset', offset + 'px'); } catch { }
+    // Layout shift may move reveal targets; refresh reveal states
+    try { revealCheckAll(); } catch {}
   }
   const queue = () => { if (raf) return; raf = requestAnimationFrame(measure); };
   // Initial and after load (fonts/images can change height)
@@ -928,6 +1010,8 @@ revealCheckAll();
     if (!el) return;
     const h = Math.ceil(el.getBoundingClientRect().height || 0);
     try { document.documentElement.style.setProperty('--dev-banner-h', h + 'px'); } catch { }
+    // Banner height affects bottom padding; refresh reveal states
+    try { revealCheckAll(); } catch {}
   }
   const queue = () => { if (raf) return; raf = requestAnimationFrame(measure); };
   if (document.readyState !== 'loading') measure(); else window.addEventListener('DOMContentLoaded', measure, { once: true });
@@ -990,7 +1074,7 @@ revealCheckAll();
   if (!el) return;
   const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
   let targetX = 0, targetY = 0; // from mouse
-  let scrollY = 0; // from scroll
+  let scrollY = 0; // from scroll (frozen when modal open)
   let raf = 0;
   const baseScale = 1.06;
   const maxMouseShift = 8; // px
@@ -998,12 +1082,21 @@ revealCheckAll();
   const update = () => {
     const pr = prefersReduced && prefersReduced.matches;
     const x = pr ? 0 : targetX;
-    const y = (pr ? 0 : targetY) + (scrollY * scrollFactor);
+    // While modal/sheet is open, freeze parallax at the saved scroll position to avoid jumps
+    const frozenY = (typeof savedScrollY === 'number') ? savedScrollY : scrollY;
+    const baseY = (document.body && document.body.classList && document.body.classList.contains('modal-open')) ? frozenY : scrollY;
+    const y = (pr ? 0 : targetY) + (baseY * scrollFactor);
     el.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${baseScale})`;
     raf = 0;
   };
   const queue = () => { if (!raf) raf = requestAnimationFrame(update); };
-  const onScroll = () => { scrollY = window.scrollY || window.pageYOffset || 0; queue(); };
+  const onScroll = () => {
+    // Ignore scroll updates while modal is open to keep background stable
+    if (!(document.body && document.body.classList && document.body.classList.contains('modal-open'))) {
+      scrollY = window.scrollY || window.pageYOffset || 0;
+    }
+    queue();
+  };
   const onMove = (e) => {
     const w = window.innerWidth || 1, h = window.innerHeight || 1;
     const nx = (e.clientX / w - 0.5) * 2; // -1..1
@@ -1014,8 +1107,13 @@ revealCheckAll();
   };
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('mousemove', onMove, { passive: true });
+  // Re-evaluate when modal state changes
+  window.addEventListener('modal-change', queue);
   onScroll();
 })();
+
+// Ensure reveal reacts to modal/layout changes immediately
+try { window.addEventListener('modal-change', () => { revealCheckAll(); forceRevealAll(); }); } catch {}
 
 // Utility: initials from org
 function initials(name = '') {

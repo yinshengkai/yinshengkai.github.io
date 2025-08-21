@@ -1363,6 +1363,9 @@ body {
   color: var(--muted);
   font-size: 13px;
   line-height: 1.5;
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -1688,6 +1691,9 @@ body {
   color: #dcdcdc;
   opacity: 0.95;
   margin: 2px 0 0;
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
   overflow: auto;
   min-height: 0;
   padding-right: 4px;
