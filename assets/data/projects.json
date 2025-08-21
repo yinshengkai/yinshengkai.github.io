@@ -19,9 +19,8 @@
     ],
     "media": [
       {
-        "type": "placeholder",
-        "accent": "#6bb6ff",
-        "caption": "High-level KPIs and timeline at a glance"
+        "filename": "data.png",
+        "description": "Data pipeline, KPIs, and timeline"
       }
     ],
     "description": "skQuant is a config‑driven, end‑to‑end backtesting framework that runs your pipeline from data preparation and feature engineering to time‑aware validation and budgeted optimization, then produces an interactive report with reproducible artifacts. It enforces bias control with time‑aligned features and strict out‑of‑sample evaluation, accounts for transaction costs and slippage, and scales efficiently with parallel, hardware‑aware execution and smart caching."
@@ -44,19 +43,16 @@
     ],
     "media": [
       {
-        "type": "placeholder",
-        "accent": "#6bb6ff",
-        "caption": "Reflection-driven editor UI"
+        "filename": "editor.mp4",
+        "description": "Reflection-driven editor UI"
       },
       {
-        "type": "placeholder",
-        "accent": "#18c3a1",
-        "caption": "Binary asset pipeline and browser"
+        "filename": "tools.mp4",
+        "description": "Binary asset pipeline and tools browser"
       },
       {
-        "type": "placeholder",
-        "accent": "#8d7bff",
-        "caption": "Sparse-set ECS and inspector"
+        "filename": "gameplay.mp4",
+        "description": "In-editor playback and ECS inspector"
       }
     ],
     "description": "Led a 10-programmer team building a modular engine with a reflection-driven editor for native and Mono scripts, a binary asset pipeline via Assimp, prefab overrides/propagation, hierarchical transforms with quaternions, and a performant sparse-set ECS."
@@ -77,14 +73,8 @@
     ],
     "media": [
       {
-        "type": "placeholder",
-        "accent": "#6bb6ff",
-        "caption": "Main menu and level select"
-      },
-      {
-        "type": "placeholder",
-        "accent": "#18c3a1",
-        "caption": "Core gameplay loop showcase"
+        "filename": "trailer.mp4",
+        "description": "Gameplay trailer"
       }
     ],
     "description": "Architected a component system around DigiPen's Alpha Engine with transform hierarchies, led graphics programming and UI, and collaborated closely on gameplay.",

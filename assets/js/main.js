@@ -158,6 +158,36 @@ function getPreview(p) {
   return '';
 }
 
+// Build normalized media entries for a project.
+// Input: project.media uses { filename, description } (preferred) or legacy entries with { type, src/caption/accent }.
+// Output: Array of { type: 'image'|'video'|'placeholder', src, caption }
+function normalizeMedia(project) {
+  const id = (project && project.id) ? String(project.id) : '';
+  const base = id ? `assets/projects/${id}/` : '';
+  const items = Array.isArray(project && project.media) ? project.media : [];
+  const isVideoExt = (fn = '') => /\.(mp4|webm|mov|m4v)$/i.test(fn);
+  const isImageExt = (fn = '') => /\.(png|jpe?g|gif|webp|avif)$/i.test(fn);
+  const out = [];
+  for (const m of items) {
+    if (m && m.filename) {
+      const filename = String(m.filename).replace(/^\/+/, '');
+      const src = base ? base + filename : filename;
+      const desc = m.description || m.caption || '';
+      if (isVideoExt(filename)) out.push({ type: 'video', src, caption: desc });
+      else if (isImageExt(filename)) out.push({ type: 'image', src, caption: desc });
+      else out.push({ type: 'image', src, caption: desc });
+    } else if (m && m.type === 'video' && m.src) {
+      out.push({ type: 'video', src: m.src, caption: m.caption || '' });
+    } else if (m && m.type === 'image' && m.src) {
+      out.push({ type: 'image', src: m.src, caption: m.caption || '' });
+    } else if (m && m.type === 'placeholder') {
+      out.push({ type: 'placeholder', src: '', caption: m.caption || '' });
+    }
+  }
+  // Fallback to a single placeholder if empty
+  return out.length ? out : [{ type: 'placeholder', src: '', caption: '' }];
+}
+
 function isPresent(period) {
   const end = (period && period.end) || '';
   return String(end).toLowerCase() === 'present';
@@ -248,6 +278,8 @@ function renderProjects(projects = []) {
     media.className = "media";
     // Force uniform black preview for grid cards
     media.style.background = '#000000';
+    // Build auto-scrolling preview from project media (images/videos, muted)
+    try { buildCardPreview(media, normalizeMedia(p)); } catch { }
     cover.append(media);
 
     const title = document.createElement("h3");
@@ -316,6 +348,164 @@ function renderProjects(projects = []) {
     card.addEventListener("click", open);
     card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
   });
+}
+
+// Build an auto-scrolling preview inside a project card's media container
+function buildCardPreview(container, mediaList) {
+  if (!container) return;
+  const list = Array.isArray(mediaList) ? mediaList : [];
+  // Structure: .preview-rail > .preview-track > [ .preview-item* ]
+  const rail = document.createElement('div');
+  rail.className = 'preview-rail';
+  const track = document.createElement('div');
+  track.className = 'preview-track';
+  rail.append(track);
+
+  // Create slides
+  const slides = [];
+  list.forEach((m) => {
+    const item = document.createElement('div');
+    item.className = 'preview-item';
+    let el;
+    if (m.type === 'video') {
+      el = document.createElement('video');
+      el.src = m.src;
+      el.muted = true; el.defaultMuted = true; el.setAttribute('muted','');
+      try { el.volume = 0; } catch {}
+      el.loop = true; el.playsInline = true; el.setAttribute('playsinline','');
+      el.preload = 'metadata';
+      el.controls = false;
+      try { el.disablePictureInPicture = true; } catch {}
+      try { el.setAttribute('controlsList', 'nodownload noplaybackrate noremoteplayback'); } catch {}
+    } else if (m.type === 'image') {
+      el = document.createElement('img'); el.src = m.src; el.alt = m.caption || '';
+      el.loading = 'lazy'; el.decoding = 'async';
+    } else {
+      el = document.createElement('img'); el.src = placeholderImage('#000000'); el.alt = '';
+    }
+    item.append(el);
+    slides.push(item);
+  });
+  // If only one, duplicate once to keep motion consistent
+  const seq = slides.length <= 1 ? slides.concat(slides.map(s => s.cloneNode(true))) : slides;
+  seq.forEach((s) => track.appendChild(s));
+
+  container.innerHTML = '';
+  container.appendChild(rail);
+
+  // Adaptive slideshow: each item duration is either image=8s or video length
+  let idx = 0;
+  const count = slides.length;
+  if (count === 0) return;
+  let timer = 0;
+  let paused = false;
+
+  function clearTimer() { if (timer) { clearTimeout(timer); timer = 0; } }
+
+  function activeIndex() { return idx % count; }
+  function allItems() { return Array.from(track.querySelectorAll('.preview-item')); }
+
+  function scheduleNext(ms) {
+    clearTimer();
+    if (paused) return;
+    const dur = Math.max(500, Number(ms) || 8000);
+    timer = window.setTimeout(() => { advance(); }, dur);
+  }
+
+  function updateActive(play = true) {
+    const col = activeIndex();
+    const x = -(col * 100);
+    track.style.transform = `translate3d(${x}%,0,0)`;
+    const items = allItems();
+    items.forEach((it, j) => {
+      const v = it.querySelector('video');
+      if (!v) return;
+      // Reset any previous end handler
+      try { v.onended = null; } catch {}
+      // Always hard-mute previews
+      v.muted = true; v.defaultMuted = true; v.setAttribute('muted','');
+      try { v.volume = 0; } catch {}
+      v.playsInline = true; v.setAttribute('playsinline','');
+      v.loop = false; // let it end so we can advance
+      if (j % count === col && play && !paused) {
+        try { v.play().catch(() => {}); } catch {}
+        // Advance when the active video ends
+        v.onended = () => { if (!paused && activeIndex() === col) { clearTimer(); advance(); } };
+      } else {
+        try { v.pause(); v.currentTime = 0; } catch {}
+      }
+    });
+  }
+
+  function currentDurationMs() {
+    const col = activeIndex();
+    const items = allItems();
+    const it = items[col];
+    if (!it) return 8000;
+    const v = it.querySelector('video');
+    if (v) {
+      const dur = (isFinite(v.duration) && v.duration > 0) ? v.duration * 1000 : 8000;
+      // If metadata not yet loaded, try to schedule after it arrives
+      if (!(isFinite(v.duration) && v.duration > 0)) {
+        const onMeta = () => {
+          v.removeEventListener('loadedmetadata', onMeta);
+          if (!paused && activeIndex() === col) { scheduleNext(v.duration * 1000); }
+        };
+        try { v.addEventListener('loadedmetadata', onMeta, { once: true }); } catch { v.addEventListener('loadedmetadata', onMeta); }
+      }
+      return dur;
+    }
+    return 8000;
+  }
+
+  function advance() {
+    idx = (idx + 1) % count;
+    updateActive(true);
+    scheduleNext(currentDurationMs());
+  }
+
+  // Initial paint
+  updateActive(true);
+  scheduleNext(currentDurationMs());
+
+  // Pause on hover/focus
+  const root = container.closest('.project-card') || container;
+  const onEnter = () => { paused = true; clearTimer(); const items = allItems(); const v = items[activeIndex()] && items[activeIndex()].querySelector('video'); if (v) { try { v.pause(); } catch {} } };
+  const onLeave = () => { paused = false; updateActive(true); scheduleNext(currentDurationMs()); };
+  root.addEventListener('mouseenter', onEnter);
+  root.addEventListener('mouseleave', onLeave);
+  root.addEventListener('focusin', onEnter);
+  root.addEventListener('focusout', onLeave);
+  // Pause when not visible
+  try {
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(en => {
+          paused = !en.isIntersecting;
+          if (paused) { onEnter(); } else { onLeave(); }
+        });
+      }, { root: null, threshold: 0.05 });
+      io.observe(root);
+    }
+  } catch {}
+
+  // Register global preview pause control
+  try {
+    window._cardPreviews = window._cardPreviews || [];
+    const handle = {
+      root,
+      setPaused: (p) => { if (p) onEnter(); else onLeave(); }
+    };
+    window._cardPreviews.push(handle);
+  } catch {}
+}
+
+// Global helper to pause/resume all card previews
+function pauseAllCardPreviews(pause = true) {
+  try {
+    const arr = window._cardPreviews || [];
+    arr.forEach(h => { if (h && typeof h.setPaused === 'function') h.setPaused(!!pause); });
+  } catch {}
 }
 
 // Logos scroller: load image filenames from assets/logos/manifest.json and build infinite track
@@ -558,6 +748,7 @@ let sliderState = {
   t0: 0,
   paused: false,
   media: [],
+  durs: [],
 };
 let savedScrollY = 0;
 
@@ -625,7 +816,8 @@ function openSheet(project) {
   (project.tags || []).forEach((t) => {
     const el = document.createElement("span"); el.className = "tag"; el.textContent = t; sheetTags.append(el);
   });
-  buildSlider(project.media || []);
+  // Normalize media to build sheet slider
+  buildSlider(normalizeMedia(project) || []);
   sheet.setAttribute("aria-hidden", "false");
   // Insert CTA, if any
   try {
@@ -654,6 +846,8 @@ function openSheet(project) {
   } catch { }
   // Block background scroll via CSS class (body only)
   document.body.classList.add('modal-open');
+  // Pause all card previews while sheet is open
+  try { pauseAllCardPreviews(true); } catch {}
   // Notify listeners (e.g., parallax) to re-evaluate transforms
   try { window.dispatchEvent(new Event('modal-change')); } catch { }
   // Focus the close button for accessibility
@@ -674,6 +868,8 @@ function closeSheet() {
   activeProject = null;
   document.removeEventListener("keydown", escToClose);
   document.body.classList.remove('modal-open');
+  // Resume card previews
+  try { pauseAllCardPreviews(false); } catch {}
   // Notify listeners (e.g., parallax) to re-evaluate transforms
   try { window.dispatchEvent(new Event('modal-change')); } catch { }
   // Restore scroll without jumping to top
@@ -710,6 +906,7 @@ function buildSlider(media) {
   sliderState.i = 0;
   sliderState.count = media.length;
   sliderState.media = media.slice();
+  sliderState.durs = new Array(sliderState.count).fill(8000);
 
   // Hide controls/progress when only a single (or zero) media item
   const isSingle = sliderState.count <= 1;
@@ -725,7 +922,31 @@ function buildSlider(media) {
     slide.className = "slide";
     let el;
     if (m.type === "video") {
-      el = document.createElement("video"); el.src = m.src; el.controls = true; el.playsInline = true; el.muted = true;
+      el = document.createElement("video");
+      el.src = m.src;
+      // Enforce silent, inline playback
+      el.controls = false;
+      el.playsInline = true; el.setAttribute('playsinline', '');
+      el.muted = true; el.defaultMuted = true; el.setAttribute('muted', '');
+      try { el.volume = 0; } catch {}
+      el.loop = false; // advance when ended
+      el.preload = 'metadata';
+      try { el.disablePictureInPicture = true; } catch {}
+      try { el.setAttribute('controlsList', 'nodownload noplaybackrate noremoteplayback'); } catch {}
+      // Update duration when metadata is loaded
+      try {
+        el.addEventListener('loadedmetadata', () => {
+          const d = (isFinite(el.duration) && el.duration > 0) ? el.duration * 1000 : 8000;
+          sliderState.durs[idx] = d;
+        });
+        // Advance to next when active video ends
+        el.addEventListener('ended', () => {
+          if (sliderState.i === idx) {
+            goTo(sliderState.i + 1);
+            restartAutoplay();
+          }
+        });
+      } catch {}
     } else {
       el = document.createElement("img");
       const src = (m.type === 'placeholder') ? placeholderImage('#000000') : m.src;
@@ -781,6 +1002,7 @@ function updateTrack(initial = false) {
   if (!hasTransition) {
     setActiveSlide(sliderState.i);
     showOverlayCaption(getMediaCaption(sliderState.i));
+    try { syncSliderVideoPlayback(sliderState.i); } catch {}
     return;
   }
   // During animation, hide captions by removing active from all slides
@@ -792,8 +1014,27 @@ function updateTrack(initial = false) {
     try { sliderTrack.removeEventListener('transitionend', onEnd, true); } catch { }
     setActiveSlide(sliderState.i);
     showOverlayCaption(getMediaCaption(sliderState.i));
+    try { syncSliderVideoPlayback(sliderState.i); } catch {}
   };
   sliderTrack.addEventListener('transitionend', onEnd, true);
+}
+
+// Ensure only the active slide's video plays, and all are muted
+function syncSliderVideoPlayback(activeIndex) {
+  const slides = $$(".slide", sliderTrack);
+  slides.forEach((sl, idx) => {
+    const v = sl && sl.querySelector && sl.querySelector('video');
+    if (!v) return;
+    // Hard-mute
+    v.muted = true; v.defaultMuted = true; v.setAttribute('muted', '');
+    try { v.volume = 0; } catch {}
+    v.playsInline = true; v.setAttribute('playsinline', '');
+    if (idx === activeIndex && !sliderState.paused) {
+      try { v.play().catch(() => {}); } catch {}
+    } else {
+      try { v.pause(); v.currentTime = 0; } catch {}
+    }
+  });
 }
 
 function goTo(i, user = false) {
@@ -846,16 +1087,38 @@ sheet.addEventListener("keydown", (e) => {
 
 // Autoplay with progress bar
 function frame(ts) {
-  if (sliderState.paused) { sliderState.t0 = ts; requestAnimationFrame(frame); return; }
+  if (sliderState.paused) { sliderState.t0 = ts; sliderState.raf = requestAnimationFrame(frame); return; }
   if (!sliderState.t0) sliderState.t0 = ts;
-  const elapsed = ts - sliderState.t0;
-  const pct = Math.min(1, elapsed / sliderState.dur);
-  sliderProgress.style.transform = `scaleX(${pct})`;
-  if (pct >= 1) {
-    goTo(sliderState.i + 1);
-    sliderState.t0 = 0;
+
+  const slides = $$(".slide", sliderTrack);
+  const sl = slides[sliderState.i];
+  const v = sl && sl.querySelector && sl.querySelector('video');
+  let pct = 0;
+  let advanced = false;
+
+  if (v && isFinite(v.duration) && v.duration > 0) {
+    // Progress based on video playback
+    const dur = v.duration;
+    const ct = v.currentTime || 0;
+    pct = Math.max(0, Math.min(1, ct / dur));
+    if (v.ended || pct >= 1) {
+      goTo(sliderState.i + 1);
+      sliderState.t0 = 0;
+      advanced = true;
+    }
+  } else {
+    // Fallback to time-based for images or before metadata is ready
+    const durMs = sliderState.durs[sliderState.i] || sliderState.dur || 8000;
+    const elapsed = ts - sliderState.t0;
+    pct = Math.min(1, elapsed / durMs);
+    if (pct >= 1) {
+      goTo(sliderState.i + 1);
+      sliderState.t0 = 0;
+      advanced = true;
+    }
   }
-  sliderState.raf = requestAnimationFrame(frame);
+  sliderProgress.style.transform = `scaleX(${pct})`;
+  if (!advanced) sliderState.raf = requestAnimationFrame(frame);
 }
 
 function startAutoplay() {
@@ -870,17 +1133,18 @@ function stopAutoplay() {
 function restartAutoplay() { stopAutoplay(); startAutoplay(); }
 
 // Pause on hover/focus
+// Only pause on keyboard focus within the sheet (accessibility);
+// do not pause on hover over media in the project window.
 const pauseAreas = [slider, sheet];
 pauseAreas.forEach((el) => {
-  el.addEventListener("mouseenter", () => { sliderState.paused = true; });
-  el.addEventListener("mouseleave", () => { sliderState.paused = false; });
-  el.addEventListener("focusin", () => { sliderState.paused = true; });
-  el.addEventListener("focusout", () => { sliderState.paused = false; });
+  el.addEventListener("focusin", () => { sliderState.paused = true; try { syncSliderVideoPlayback(sliderState.i); } catch {} });
+  el.addEventListener("focusout", () => { sliderState.paused = false; try { syncSliderVideoPlayback(sliderState.i); } catch {} });
 });
 
 // Pause when tab hidden
 document.addEventListener("visibilitychange", () => {
   sliderState.paused = document.hidden;
+  try { syncSliderVideoPlayback(sliderState.i); } catch {}
 });
 
 

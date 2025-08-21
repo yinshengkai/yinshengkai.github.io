@@ -1200,6 +1200,36 @@ body {
   transition: transform var(--speed);
 }
 
+/* Card preview scroller */
+.project-card .cover .media .preview-rail {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.project-card .cover .media .preview-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 100%;
+  height: 100%;
+  transition: transform 600ms ease;
+  will-change: transform;
+}
+.project-card .cover .media .preview-item {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+.project-card .cover .media .preview-item img,
+.project-card .cover .media .preview-item video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border: 0;
+  background: transparent;
+}
+
 /* Limit image zoom on hover to hover-capable devices */
 @media (hover: hover) and (pointer: fine) {
   .project-card:hover .cover .media {
@@ -1825,9 +1855,7 @@ body {
   right: 0;
   bottom: 0;
   height: 45%;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0));
-  backdrop-filter: blur(6px) saturate(120%);
-  -webkit-backdrop-filter: blur(6px) saturate(120%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0));
   pointer-events: none;
   opacity: 1;
   /* always visible */
