@@ -22,7 +22,7 @@
   --speed: 380ms;
   --speed-slow: 900ms;
   /* Unified highlight (neutral fallback) */
-  --hi: #a953ff;
+  --hi: #be7dff;
   --hi-profile: rgba(255, 255, 255, 0.32);
   --hi-profile-2: rgba(255, 255, 255, 0.16);
   /* Global vertical padding for top/bottom breathing room */
@@ -923,6 +923,7 @@ body {
   will-change: transform;
   animation: logos-scroll var(--logos-dur, 30s) linear infinite;
 }
+.logos-track.js-logos { animation: none; }
 
 .logos-track .logo {
   flex: 0 0 auto;

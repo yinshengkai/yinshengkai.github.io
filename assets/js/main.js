@@ -1,11 +1,11 @@
 // Self-contained script (no ES module import) for broader compatibility
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
- 
+
 
 // Reveal-on-scroll helper (staggered, bidirectional: in when visible, out when not)
 const supportsIO = typeof window !== 'undefined' && 'IntersectionObserver' in window;
- 
+
 
 function computeStaggerIndex(el) {
   const parent = el && el.parentElement;
@@ -51,7 +51,7 @@ const observer = supportsIO ? new IntersectionObserver((entries) => {
 }, { root: null, rootMargin: '0px 0px -4% 0px', threshold: [0, 0.02, 0.1] }) : null;
 const reveal = (el) => { if (!el) return; if (observer) observer.observe(el); else el.classList.add('in'); };
 
- 
+
 
 // Placeholder media generator (blank background; no text)
 function placeholderImage(bg = "#0b0f14") {
@@ -80,7 +80,7 @@ async function loadJSON(url) {
   return res.json();
 }
 
- 
+
 
 // Typewriter animation for profile bio only (skip if reduced motion)
 (function typewriter() {
@@ -248,19 +248,19 @@ function normalizeLogo(img) {
       let data = ctx.getImageData(0, 0, cw, ch);
       const a = data.data;
       const idx = (x, y) => (y * cw + x) * 4;
-      const corners = [idx(0,0), idx(cw-1,0), idx(0,ch-1), idx(cw-1,ch-1)];
-      const whiteish = (i) => a[i] > 240 && a[i+1] > 240 && a[i+2] > 240 && a[i+3] > 200;
+      const corners = [idx(0, 0), idx(cw - 1, 0), idx(0, ch - 1), idx(cw - 1, ch - 1)];
+      const whiteish = (i) => a[i] > 240 && a[i + 1] > 240 && a[i + 2] > 240 && a[i + 3] > 200;
       const hasWhiteBG = corners.some(i => whiteish(i));
       if (hasWhiteBG) {
         for (let i = 0; i < a.length; i += 4) {
-          if (a[i] > 240 && a[i+1] > 240 && a[i+2] > 240) a[i+3] = 0; // make white transparent
+          if (a[i] > 240 && a[i + 1] > 240 && a[i + 2] > 240) a[i + 3] = 0; // make white transparent
         }
       }
       // Find tight bounds of non-transparent pixels
       let minX = cw, minY = ch, maxX = 0, maxY = 0;
       for (let y = 0; y < ch; y++) {
         for (let x = 0; x < cw; x++) {
-          const alpha = a[idx(x,y) + 3];
+          const alpha = a[idx(x, y) + 3];
           if (alpha > 10) {
             if (x < minX) minX = x;
             if (x > maxX) maxX = x;
@@ -278,7 +278,7 @@ function normalizeLogo(img) {
         ctx2.drawImage(c, minX, minY, w2, h2, 0, 0, w2, h2);
         img.src = c2.toDataURL('image/png');
       }
-    } catch {}
+    } catch { }
     resolve();
   });
 }
@@ -308,29 +308,47 @@ async function renderLogos() {
     wrap.appendChild(img);
     return wrap;
   });
-  // Two copies for seamless loop
+  // Triple sequence for smoother loop buffer
   const seqA = makeImgs();
   const seqB = makeImgs();
+  const seqC = makeImgs();
   seqA.forEach(el => track.appendChild(el));
   seqB.forEach(el => track.appendChild(el));
+  seqC.forEach(el => track.appendChild(el));
   // Compute half-width and set animation distance/duration after images are ready
   const imgs = Array.from(track.querySelectorAll('img'));
   const whenReady = Promise.all(imgs.map(img => {
-    if (img.decode) return img.decode().catch(() => {});
+    if (img.decode) return img.decode().catch(() => { });
     return new Promise(res => { if (img.complete) res(); else img.onload = () => res(); });
   }));
   whenReady.then(async () => {
     // Normalize each image: remove white BG and trim padding
     await Promise.all(imgs.map(normalizeLogo));
-    // Total width is two sequences; half is one sequence length
-    const half = Math.max(1, Math.round(track.scrollWidth / 2));
-    track.style.setProperty('--logos-w', half + 'px');
-    // Duration roughly proportional to distance for consistent speed
-    const pxPerSec = 60; // adjust for desired speed
-    const dur = Math.max(18, Math.round(half / pxPerSec));
-    track.style.setProperty('--logos-dur', dur + 's');
-    // Nudge to kick off hardware acceleration
-    track.style.transform = 'translate3d(0,0,0)';
+    // Switch to JS-driven RAF scroller for smoother performance
+    const cycle = Math.max(1, Math.round(track.scrollWidth / 3));
+    track.classList.add('js-logos');
+    let x = 0;
+    let raf = 0;
+    let last = performance.now();
+    const speed = 40; // px per second
+    const frame = (now) => {
+      const dt = Math.max(0, Math.min(100, now - last));
+      last = now;
+      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const v = prefersReduced ? 0 : speed;
+      x -= (v * dt) / 1000;
+      if (x <= -cycle) x += cycle;
+      track.style.transform = `translate3d(${x}px,0,0)`;
+      raf = requestAnimationFrame(frame);
+    };
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(frame);
+    document.addEventListener('visibilitychange', () => {
+      try {
+        if (document.hidden) { if (raf) cancelAnimationFrame(raf); }
+        else { raf = requestAnimationFrame((t) => { last = t; frame(t); }); }
+      } catch { }
+    });
   }).finally(() => {
     reveal(track.closest('.reveal'));
   });
@@ -775,9 +793,9 @@ document.addEventListener("visibilitychange", () => {
   sliderState.paused = document.hidden;
 });
 
- 
 
- 
+
+
 
 // Note: no CSS uses --progressRatio; updater removed
 
@@ -841,7 +859,7 @@ window.addEventListener('hashchange', () => {
   if (h && navMap.has(h)) startNavLock(h);
 });
 
- 
+
 // Batch scroll/resize-driven updates with a single rAF per frame
 let _scrollRaf = 0, _resizeRaf = 0;
 function flushScroll() {
@@ -931,7 +949,7 @@ revealCheckAll();
   else window.addEventListener('DOMContentLoaded', init, { once: true });
 })();
 
- 
+
 
 // Singapore clock tile
 (function initSGClock() {
@@ -952,10 +970,43 @@ revealCheckAll();
       if (hh) hh.textContent = h;
       if (mm) mm.textContent = m;
       // Blinking handled via CSS; no JS opacity changes
-    } catch {}
+    } catch { }
   };
   tick();
   setInterval(tick, 1000);
+})();
+
+// Background parallax (scroll + mouse)
+(function bgParallax() {
+  const el = document.querySelector('.bg-image');
+  if (!el) return;
+  const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
+  let targetX = 0, targetY = 0; // from mouse
+  let scrollY = 0; // from scroll
+  let raf = 0;
+  const baseScale = 1.06;
+  const maxMouseShift = 8; // px
+  const scrollFactor = 0.1; // slower than scroll
+  const update = () => {
+    const pr = prefersReduced && prefersReduced.matches;
+    const x = pr ? 0 : targetX;
+    const y = (pr ? 0 : targetY) + (scrollY * scrollFactor);
+    el.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${baseScale})`;
+    raf = 0;
+  };
+  const queue = () => { if (!raf) raf = requestAnimationFrame(update); };
+  const onScroll = () => { scrollY = window.scrollY || window.pageYOffset || 0; queue(); };
+  const onMove = (e) => {
+    const w = window.innerWidth || 1, h = window.innerHeight || 1;
+    const nx = (e.clientX / w - 0.5) * 2; // -1..1
+    const ny = (e.clientY / h - 0.5) * 2; // -1..1
+    targetX = nx * maxMouseShift;
+    targetY = ny * maxMouseShift;
+    queue();
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('mousemove', onMove, { passive: true });
+  onScroll();
 })();
 
 // Utility: initials from org
