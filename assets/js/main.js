@@ -139,6 +139,9 @@ function revealCheckAll() {
   }
 }
 
+// Shared month names
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 // Render projects grid
 const grid = $("#projects-grid");
 function displayTitle(title) {
@@ -418,15 +421,14 @@ function createDateBadge(period, color) {
 function createProjectDate(periodObj) {
   const date = document.createElement('div');
   date.className = 'project-date';
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   let s = new Date();
   try { s = parseYM(periodObj.start || ''); } catch { }
-  const sM = months[s.getMonth()];
+  const sM = MONTHS[s.getMonth()];
   const sY = s.getFullYear();
   let eText = 'Present';
   if (periodObj.end && String(periodObj.end).toLowerCase() !== 'present') {
     const e = parseYM(periodObj.end);
-    eText = `${months[e.getMonth()]} ${e.getFullYear()}`;
+    eText = `${MONTHS[e.getMonth()]} ${e.getFullYear()}`;
   }
   const text = document.createElement('span');
   text.className = 'pd-text';
@@ -535,8 +537,7 @@ function parseYM(s) {
   return new Date(Number(y), Number(m) - 1, 1);
 }
 function formatYM(d) {
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  return `${months[d.getMonth()]} ${d.getFullYear()}`;
+  return `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 function openSheet(project) {

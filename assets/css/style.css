@@ -700,26 +700,7 @@ body {
   .tile-avatar:hover::after { opacity: 1; }
 }
 
-.tile-companies {
-  grid-column: 1 / -1;
-}
-
-.companies-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 10px;
-}
-
-.companies-row .company-tile {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 56px;
-  border-radius: var(--radius-sm);
-  text-align: center;
-  padding: 10px 12px;
-  font-weight: 600;
-}
+/* removed unused companies grid styles */
 
 .tile-langs .langs {
   display: grid;
@@ -1016,38 +997,10 @@ body {
   z-index: 1;
 }
 
-/* Name overlay on avatar */
-.avatar-name {
-  position: absolute;
-  left: 50%;
-  bottom: 12px;
-  transform: translateX(-50%);
-  color: #fff;
-  text-align: center;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-weight: 900;
-  letter-spacing: 0.8px;
-  font-size: clamp(28px, 5vw, 56px);
-  line-height: 1;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
-  pointer-events: none;
-  z-index: 2;
-  white-space: nowrap;
-  max-width: calc(100% - 24px);
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+/* removed unused avatar-name overlay */
 
 /* Body padding below full-bleed avatar */
-.profile-body {
-  padding: 0 0 22px;
-  text-align: center;
-}
-
-/* Center align language chips and link buttons */
-.profile-flair {
-  justify-content: center;
-}
+/* removed unused profile-body/profile-flair */
 
 .links {
   justify-content: center;
@@ -1068,21 +1021,7 @@ body {
   will-change: filter;
 }
 
-/* Bio container to make the line stand out */
-.bio-box {
-  width: 100%;
-  margin: 0 0 18px;
-  border-radius: 0;
-}
-
-/* Ensure glass/micro variants don't reapply rounding */
-.bio-box.glass {
-  border-radius: 0;
-}
-
-.bio-box .bio {
-  margin: 0;
-}
+/* removed unused bio-box styles */
 
 /* During typewriter animation, keep the text slightly blurred */
 /* Typewriter per-letter blur-in */
@@ -1105,12 +1044,7 @@ body {
 
 
 
-.profile-flair {
-  margin: 8px 0 12px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
+/* removed unused profile-flair block */
 
 .chip.flair {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
