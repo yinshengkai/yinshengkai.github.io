@@ -32,15 +32,15 @@
   /* Standard font size for profile sub-cells (responsive) */
   --profile-sub-fz: clamp(14px, 2.2vw, 16px);
   /* Soft-edge blur amount for reveal-in animation */
-  --reveal-blur: 24px;
+  --reveal-blur: 32px;
   /* Slide + scale for a punchier reveal */
-  --reveal-shift: 24px;
+  --reveal-shift: 32px;
   --reveal-scale: 0.98;
   /* Desktop sheet media row height percentage */
   --sheet-media-pct: 70%;
   /* Fireflies parallax controls (tweakable) */
-  --ff-parallax-mouse: 16; /* px of mouse shift */
-  --ff-parallax-scroll: 0.16; /* fraction of scroll */
+  --ff-parallax-mouse: 32; /* px of mouse shift */
+  --ff-parallax-scroll: 0.26; /* fraction of scroll */
 }
 
 * {
