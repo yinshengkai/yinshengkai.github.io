@@ -867,11 +867,14 @@ function openSheet(project) {
   // Robust scroll lock: capture scroll and fix body BEFORE applying classes to avoid jumps
   try {
     savedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    // Compensate for scrollbar width to prevent horizontal content shift
+    const sw = Math.max(0, (window.innerWidth || 0) - (document.documentElement.clientWidth || 0));
     document.body.style.position = 'fixed';
     document.body.style.top = `-${savedScrollY}px`;
     document.body.style.left = '0';
     document.body.style.right = '0';
     document.body.style.width = '100%';
+    if (sw > 0) { document.body.style.paddingRight = sw + 'px'; }
   } catch { }
   // Block background scroll via CSS class (body only)
   document.body.classList.add('modal-open');
@@ -913,6 +916,7 @@ function closeSheet() {
     document.body.style.left = '';
     document.body.style.right = '';
     document.body.style.width = '';
+    document.body.style.paddingRight = '';
     window.scrollTo(0, y);
     // restore scroll-behavior next tick
     setTimeout(() => { root.style.scrollBehavior = prev; }, 0);
@@ -1319,8 +1323,8 @@ revealCheckAll();
     const wrap = document.querySelector(wrapSel);
     if (!wrap) return;
     const rect = wrap.getBoundingClientRect();
-    // Use the actual bottom edge from the top of the viewport (no hardcoded gaps)
-    const offset = Math.max(0, Math.ceil(rect.bottom));
+    // Use the element's own height (stable even if transformed off-screen)
+    const offset = Math.max(0, Math.ceil(rect.height || wrap.offsetHeight || wrap.clientHeight || 0));
     try { document.documentElement.style.setProperty('--nav-offset', offset + 'px'); } catch { }
     // Layout shift may move reveal targets; refresh reveal states
     try { revealCheckAll(); } catch {}
@@ -1332,6 +1336,20 @@ revealCheckAll();
   // Recalculate on resize/orientation changes
   window.addEventListener('resize', queue);
   window.addEventListener('orientationchange', queue);
+  // Ensure we re-measure when the modal sheet opens/closes, since the navbar
+  // is transformed during that state which can temporarily report a smaller rect.
+  window.addEventListener('modal-change', () => {
+    // Measure now and again after the navbar transition completes.
+    queue();
+    setTimeout(queue, 360);
+  });
+  // Also re-measure after the navbar finishes its own transform transition.
+  try {
+    const nav = document.querySelector(wrapSel);
+    if (nav) nav.addEventListener('transitionend', (e) => {
+      if (e && e.propertyName && e.propertyName.includes('transform')) queue();
+    });
+  } catch {}
 })();
 
 // Generic: apply unified highlight class to interactive controls
