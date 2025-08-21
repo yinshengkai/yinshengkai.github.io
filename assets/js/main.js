@@ -1,8 +1,7 @@
 // Self-contained script (no ES module import) for broader compatibility
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-// Global: reduced motion preference (use early and often)
-const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+ 
 
 // Reveal-on-scroll helper (staggered, bidirectional: in when visible, out when not)
 const supportsIO = typeof window !== 'undefined' && 'IntersectionObserver' in window;
@@ -74,7 +73,6 @@ async function loadJSON(url) {
 
 // Typewriter animation for profile bio only (skip if reduced motion)
 (function typewriter() {
-  if (prefersReducedMotion) return; // respect
   const items = [
     { sel: '.bio', speed: 8, start: 500 },
   ];
@@ -546,7 +544,7 @@ function buildSlider(media) {
   });
 
   updateTrack(true);
-  if (!prefersReducedMotion && sliderState.count > 1) startAutoplay();
+  if (sliderState.count > 1) startAutoplay();
 }
 
 function setActiveSlide(i) {
@@ -689,7 +687,7 @@ document.addEventListener("visibilitychange", () => {
   sliderState.paused = document.hidden;
 });
 
-// Respect prefers-reduced-motion
+ 
 
  
 

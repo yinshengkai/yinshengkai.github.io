@@ -1445,13 +1445,7 @@ body {
 
  
 
-@media (prefers-reduced-motion: reduce) {
-  .slider-cap,
-  .slider-cap.show {
-    transition-delay: 0ms !important;
-    transition-duration: 0ms !important;
-  }
-}
+ 
 
 .slider-progress {
   position: absolute;
@@ -1571,24 +1565,7 @@ body {
  
 
 /* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-
-  .blob,
-  .noise,
-  .card-enter,
-  .slider-track {
-    animation: none !important;
-    transition: none !important;
-  }
-
-  .slider-progress {
-    display: none;
-  }
-
-  .project-card .tap-hint svg {
-    animation: none !important;
-  }
-}
+ 
 
 /* Enhancements: hover expansion, reveal animations, loader, icons, timeline logos */
 .project-card {
