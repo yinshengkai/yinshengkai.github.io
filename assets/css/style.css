@@ -111,6 +111,9 @@ body {
   box-shadow: none;
 }
 
+/* Keep glass content visible; animate position and surface only */
+.glass.reveal { opacity: 1; }
+
 /* Fade the glass surface background in sync with content */
 .glass.reveal::before {
   opacity: 0;
@@ -1612,7 +1615,8 @@ body {
 
 /* Stronger pop-in for project cards */
 .project-card.reveal {
-  opacity: 0;
+  /* Avoid opacity animation on glass surfaces to prevent rare content non-paints */
+  opacity: 1;
   transform: translateY(16px) scale(0.96);
 }
 

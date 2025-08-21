@@ -14,30 +14,41 @@ function computeStaggerIndex(el) {
   const idx = kids.indexOf(el);
   return Math.max(0, idx);
 }
+// Reversible reveal with small hysteresis to avoid flicker on fast scroll
+const HIDE_DELAY = 140; // ms
 function applyReveal(target, entering) {
   if (!target) return;
+  const any = /** @type {any} */ (target);
   if (entering) {
+    // Cancel any pending hide
+    if (any._revealHideTimer) { clearTimeout(any._revealHideTimer); any._revealHideTimer = 0; }
     const idx = computeStaggerIndex(target);
     const delay = Math.min(idx, 12) * 70; // cap long lists
     target.style.setProperty('--reveal-delay', delay + 'ms');
     target.classList.add('in');
   } else {
-    target.classList.remove('in');
+    // Debounce hide to prevent rapid toggle when scrolling fast
+    if (any._revealHideTimer) return; // already queued
+    any._revealHideTimer = setTimeout(() => {
+      target.classList.remove('in');
+      any._revealHideTimer = 0;
+    }, HIDE_DELAY);
   }
-  
 }
 
 // Simpler IO config (more reliable on mobile Safari)
 const observer = supportsIO ? new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     const el = entry.target;
-    if (entry.isIntersecting) {
+    // Gentle thresholds: enter when a sliver shows; hide when fully gone
+    const ratio = entry.intersectionRatio || 0;
+    if (entry.isIntersecting && ratio > 0.02) {
       applyReveal(el, true);
-    } else {
+    } else if (!entry.isIntersecting && ratio === 0) {
       applyReveal(el, false);
     }
   });
-}, { root: null, rootMargin: '0px', threshold: [0, 0.1] }) : null;
+}, { root: null, rootMargin: '0px 0px -4% 0px', threshold: [0, 0.02, 0.1] }) : null;
 const reveal = (el) => { if (!el) return; if (observer) observer.observe(el); else el.classList.add('in'); };
 
  
@@ -107,7 +118,7 @@ setTimeout(revealFallback, 400);
 // Scroll/resize fallback to ensure re-entry on mobile when IO misses events
 function revealCheckAll() {
   const vH = window.innerHeight || document.documentElement.clientHeight || 0;
-  const margin = 24; // small cushion
+  const margin = 32; // small cushion
   const items = document.querySelectorAll('.reveal');
   for (let i = 0; i < items.length; i++) {
     const el = items[i];
