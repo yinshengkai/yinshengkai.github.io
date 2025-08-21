@@ -6,8 +6,7 @@ const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers
 
 // Reveal-on-scroll helper (staggered, bidirectional: in when visible, out when not)
 const supportsIO = typeof window !== 'undefined' && 'IntersectionObserver' in window;
-// Minimal state map (kept for stagger calc timing if needed)
-const _revealState = new WeakMap(); // el -> { visible: boolean, t: number }
+ 
 
 function computeStaggerIndex(el) {
   const parent = el && el.parentElement;
@@ -26,10 +25,7 @@ function applyReveal(target, entering) {
   } else {
     target.classList.remove('in');
   }
-  try {
-    const now = (window.performance && performance.now) ? performance.now() : Date.now();
-    _revealState.set(target, { visible: !!entering, t: now });
-  } catch { }
+  
 }
 
 // Simpler IO config (more reliable on mobile Safari)
@@ -697,18 +693,7 @@ document.addEventListener("visibilitychange", () => {
 
  
 
-// Timeline progress effect (cache nodes to avoid repeated queries)
-const timelineEls = Array.from(document.querySelectorAll('.timeline'));
-function updateTimelineProgress() {
-  const vH = window.innerHeight || document.documentElement.clientHeight;
-  for (let i = 0; i < timelineEls.length; i++) {
-    const tl = timelineEls[i];
-    const rect = tl.getBoundingClientRect();
-    const center = vH * 0.5;
-    const ratio = Math.max(0, Math.min(1, (center - rect.top) / (rect.height || 1)));
-    tl.style.setProperty('--progressRatio', ratio.toFixed(3));
-  }
-}
+// Note: no CSS uses --progressRatio; updater removed
 
 // Nav active section highlight
 const navMap = new Map([
@@ -776,21 +761,18 @@ window.addEventListener('hashchange', () => {
 let _scrollRaf = 0, _resizeRaf = 0;
 function flushScroll() {
   _scrollRaf = 0;
-  updateTimelineProgress();
   // Ensure reveal state stays in sync on mobile
   revealCheckAll();
 }
 function onScrollRaf() { if (_scrollRaf) return; _scrollRaf = requestAnimationFrame(flushScroll); }
 function flushResize() {
   _resizeRaf = 0;
-  updateTimelineProgress();
   revealCheckAll();
 }
 function onResizeRaf() { if (_resizeRaf) return; _resizeRaf = requestAnimationFrame(flushResize); }
 window.addEventListener('scroll', onScrollRaf, { passive: true });
 window.addEventListener('resize', onResizeRaf);
 // Initial paint for scroll-dependent UI
-updateTimelineProgress();
 revealCheckAll();
 
 // Center-based scrollspy handles edges; no extra edge hack needed

@@ -18,7 +18,6 @@
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px rgba(255, 255, 255, 0.05);
   --radius: 16px;
   --radius-sm: 12px;
-  --radius-xs: 10px;
   --blur: 48px;
   --speed: 380ms;
   --speed-slow: 900ms;
@@ -57,16 +56,7 @@ body.modal-open {
 }
 
 /* Prevent background scroll while loading */
-html.loading,
-body.loading {
-  overflow: hidden;
-}
-
-/* Prevent background scroll while dev warning is shown */
-html.gated,
-body.gated {
-  overflow: hidden;
-}
+ 
 
 body {
   margin: 0;
@@ -257,7 +247,7 @@ body {
   }
 }
 
-/* removed unused .dots decoration */
+ 
 
 .noise {
   position: absolute;
@@ -661,7 +651,7 @@ body {
 .bio-box.glass { border-radius: 0; }
 .bio-box .bio { margin: 0; }
 
-/* removed unused .subtitle styles */
+ 
 
 .profile-flair {
   margin: 8px 0 12px;
@@ -764,7 +754,7 @@ body {
   outline: none;
 }
 
-/* (old .education list styles removed) */
+ 
 
 /* Align timeline date typography with project date style */
 .timeline-date .pd-text {
@@ -950,7 +940,7 @@ body {
  
 
 /* Ensure previous decorative project-card ring (if any) is disabled without affecting glass layer */
-/* Removed broad ::before reset so .glass::before background remains visible on project cards */
+/* Keep .glass::before background visible on project cards */
 /* Project titles: allow up to 2 lines, equal height across cards */
 .project-title {
   margin: 0;
@@ -1453,16 +1443,9 @@ body {
   /* under dots and caption */
 }
 
-.slide.active .caption {
-  opacity: 0;
-}
+ 
 
 @media (prefers-reduced-motion: reduce) {
-
-  .slide .caption,
-  .slide::after,
-  .slide.active .caption,
-  .slide.active.has-caption::after,
   .slider-cap,
   .slider-cap.show {
     transition-delay: 0ms !important;
@@ -1552,19 +1535,7 @@ body {
   box-shadow: 0 0 0 4px var(--hi);
 }
 
-/* Slider caption outside the image */
-.slider-caption {
-  margin-top: 8px;
-  color: #dcdcdc;
-  opacity: 0.95;
-  font-size: 13px;
-  text-align: center;
-  display: grid;
-  place-items: center;
-  padding: 8px 10px;
-  min-height: 48px;
-  line-height: 1.3;
-}
+ 
 
 /* Motion entrance */
 .card-enter {
