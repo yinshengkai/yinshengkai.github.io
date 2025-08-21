@@ -38,6 +38,9 @@
   --reveal-scale: 0.98;
   /* Desktop sheet media row height percentage */
   --sheet-media-pct: 70%;
+  /* Fireflies parallax controls (tweakable) */
+  --ff-parallax-mouse: 16; /* px of mouse shift */
+  --ff-parallax-scroll: 0.16; /* fraction of scroll */
 }
 
 * {
@@ -80,7 +83,7 @@ body {
 .bg-image {
   position: fixed;
   inset: 0;
-  z-index: -2;
+  z-index: -3;
   /* behind content */
   background-image: url('../images/background.jpg');
   background-size: cover;
@@ -102,6 +105,50 @@ body {
     inset 0 120px 160px rgba(0, 0, 0, 0.6);
   pointer-events: none;
 }
+
+/* Blurred fireflies background */
+.fireflies {
+  position: fixed;
+  inset: 0;
+  z-index: -2; /* above bg-image (-3), below all content */
+  pointer-events: none;
+  overflow: hidden;
+}
+.fireflies .ff {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,210,0.95) 0%, rgba(255,255,150,0.65) 45%, rgba(255,255,150,0.0) 70%);
+  filter: blur(1.4px) saturate(130%);
+  opacity: 0.65;
+  animation:
+    firefly-fly var(--ff-dur, 22s) ease-in-out infinite,
+    firefly-flicker 3.6s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+@keyframes firefly-fly {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  25%  { transform: translate3d(8vw, -4vh, 0) scale(1.05); }
+  50%  { transform: translate3d(2vw, 6vh, 0) scale(0.95); }
+  75%  { transform: translate3d(-6vw, 2vh, 0) scale(1.08); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes firefly-flicker {
+  0%, 100% { opacity: 0.55; }
+  45% { opacity: 0.85; }
+  55% { opacity: 0.65; }
+}
+/* Individually place and vary timing/size/blur */
+.fireflies .ff:nth-child(1)  { top: 10%; left: 12%; --ff-dur: 24s; filter: blur(1.2px); }
+.fireflies .ff:nth-child(2)  { top: 18%; left: 68%; --ff-dur: 26s; filter: blur(1.6px); }
+.fireflies .ff:nth-child(3)  { top: 30%; left: 28%; --ff-dur: 22s; filter: blur(1.8px); }
+.fireflies .ff:nth-child(4)  { top: 42%; left: 82%; --ff-dur: 28s; filter: blur(1.3px); }
+.fireflies .ff:nth-child(5)  { top: 55%; left: 8%;  --ff-dur: 25s; filter: blur(1.7px); }
+.fireflies .ff:nth-child(6)  { top: 62%; left: 58%; --ff-dur: 23s; filter: blur(1.4px); }
+.fireflies .ff:nth-child(7)  { top: 70%; left: 38%; --ff-dur: 27s; filter: blur(1.9px); }
+.fireflies .ff:nth-child(8)  { top: 78%; left: 74%; --ff-dur: 24s; filter: blur(1.5px); }
+/* Reduced density: only first 8 are used */
 
 
 /* Reveal on glass: let container fade/transform; we only toggle blur to avoid flicker */
@@ -751,8 +798,8 @@ body {
 .tile-langs .langs .flag-svg {
   /* Icon-sized flag, same size as link icons */
   position: static;
-  width: calc(var(--profile-sub-fz) * 1.6);
-  height: calc(var(--profile-sub-fz) * 1.6);
+  width: calc(var(--profile-sub-fz) * 1.5);
+  height: calc(var(--profile-sub-fz) * 1.5);
   min-width: 18px;
   min-height: 18px;
   margin: 0;

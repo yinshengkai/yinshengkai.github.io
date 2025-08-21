@@ -608,20 +608,15 @@ async function renderLogos() {
     // Switch to JS-driven RAF scroller for smoother performance
     let cycle = Math.max(1, Math.round(track.scrollWidth / 3));
     track.classList.add('js-logos');
-    let x = 0;
     let raf = 0;
-    let last = performance.now();
-    const speed = 40; // px per second
-    const roundPx = (val) => Math.round(val); // reduce subpixel jitter
+    const loopSec = 30; // constant loop duration across devices
+    let start = performance.now();
     const frame = (now) => {
-      const dt = Math.max(0, Math.min(100, now - last));
-      last = now;
       const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const v = prefersReduced ? 0 : speed;
-      x -= (v * dt) / 1000;
-      if (x <= -cycle) x += cycle;
-      const xr = roundPx(x);
-      track.style.transform = `translate3d(${xr}px,0,0)`;
+      const t = prefersReduced ? 0 : Math.max(0, now - start);
+      const p = (t % (loopSec * 1000)) / (loopSec * 1000);
+      const x = -p * cycle;
+      track.style.transform = `translate3d(${Math.round(x)}px,0,0)`;
       raf = requestAnimationFrame(frame);
     };
     cancelAnimationFrame(raf);
@@ -629,12 +624,8 @@ async function renderLogos() {
     // Recompute cycle on resize to keep seam aligned and avoid jitter
     const onResize = () => {
       try {
-        const prev = cycle;
         cycle = Math.max(1, Math.round(track.scrollWidth / 3));
-        // Keep x within new cycle range
-        if (cycle !== prev) {
-          x = ((x % cycle) + cycle) % cycle;
-        }
+        // Time-based animation keeps continuity; no offset adjustment needed
       } catch {}
     };
     window.addEventListener('resize', onResize);
@@ -642,7 +633,7 @@ async function renderLogos() {
     document.addEventListener('visibilitychange', () => {
       try {
         if (document.hidden) { if (raf) cancelAnimationFrame(raf); }
-        else { raf = requestAnimationFrame((t) => { last = t; frame(t); }); }
+        else { raf = requestAnimationFrame(frame); }
       } catch { }
     });
   }).finally(() => {
@@ -1510,6 +1501,55 @@ revealCheckAll();
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('mousemove', onMove, { passive: true });
   // Re-evaluate when modal state changes
+  window.addEventListener('modal-change', queue);
+  onScroll();
+})();
+
+// Fireflies parallax (scroll + mouse) with tweakable speed via CSS vars
+(function firefliesParallax() {
+  const el = document.querySelector('.fireflies');
+  if (!el) return;
+  const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
+  let targetX = 0, targetY = 0; // from mouse
+  let scrollY = 0; // from scroll (frozen when modal open)
+  let raf = 0;
+  const readVar = (name, fallback) => {
+    try {
+      const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      const n = parseFloat(v);
+      return isFinite(n) ? n : fallback;
+    } catch { return fallback; }
+  };
+  const update = () => {
+    const pr = prefersReduced && prefersReduced.matches;
+    const maxMouseShift = readVar('--ff-parallax-mouse', 6);
+    const scrollFactor = readVar('--ff-parallax-scroll', 0.06);
+    const x = pr ? 0 : Math.max(-maxMouseShift, Math.min(maxMouseShift, targetX));
+    // Freeze parallax at saved scroll when modal open
+    const frozenY = (typeof savedScrollY === 'number') ? savedScrollY : scrollY;
+    const baseY = (document.body && document.body.classList && document.body.classList.contains('modal-open')) ? frozenY : scrollY;
+    const y = (pr ? 0 : Math.max(-maxMouseShift, Math.min(maxMouseShift, targetY))) + (baseY * scrollFactor);
+    el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    raf = 0;
+  };
+  const queue = () => { if (!raf) raf = requestAnimationFrame(update); };
+  const onScroll = () => {
+    if (!(document.body && document.body.classList && document.body.classList.contains('modal-open'))) {
+      scrollY = window.scrollY || window.pageYOffset || 0;
+    }
+    queue();
+  };
+  const onMove = (e) => {
+    const w = window.innerWidth || 1, h = window.innerHeight || 1;
+    const nx = (e.clientX / w - 0.5) * 2; // -1..1
+    const ny = (e.clientY / h - 0.5) * 2; // -1..1
+    const maxMouseShift = readVar('--ff-parallax-mouse', 6);
+    targetX = nx * maxMouseShift;
+    targetY = ny * maxMouseShift;
+    queue();
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('mousemove', onMove, { passive: true });
   window.addEventListener('modal-change', queue);
   onScroll();
 })();
