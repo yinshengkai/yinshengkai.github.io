@@ -740,6 +740,16 @@ const btnNext = $("#slider-next");
 // Ensure a play/pause button exists on the slider
 let ppBtn = slider && slider.querySelector('.pp-btn');
 if (!ppBtn && slider) { ppBtn = document.createElement('button'); ppBtn.type = 'button'; ppBtn.className = 'pp-btn'; slider.appendChild(ppBtn); }
+
+function updatePPBtnVisibility(activeIndex = sliderState.i) {
+  try {
+    if (!ppBtn || !sliderTrack) return;
+    const slides = $$(".slide", sliderTrack);
+    const sl = slides[activeIndex];
+    const hasVideo = !!(sl && sl.querySelector && sl.querySelector('video'));
+    ppBtn.style.display = hasVideo ? '' : 'none';
+  } catch {}
+}
 const sliderDots = $("#slider-dots");
 // Overlay caption element inside slider (not transformed with track)
 const sliderCap = $("#slider-cap");
@@ -824,6 +834,12 @@ function openSheet(project) {
   });
   // Normalize media to build sheet slider
   buildSlider(normalizeMedia(project) || []);
+  // Ensure default state is playing when sheet opens
+  try {
+    sliderState.paused = false;
+    updatePlayPauseUI();
+    try { syncSliderVideoPlayback(sliderState.i); } catch {}
+  } catch {}
   sheet.setAttribute("aria-hidden", "false");
   // Insert CTA, if any
   try {
@@ -838,7 +854,9 @@ function openSheet(project) {
       a.href = project.cta.href; a.target = '_blank'; a.rel = 'noopener noreferrer';
       a.textContent = project.cta.label || 'Learn more';
       cta.append(a);
-      sheetBody.append(cta);
+      const wrap = document.getElementById('sheet-desc-wrap');
+      if (wrap) wrap.append(cta); else sheetBody.append(cta);
+      try { layoutSheetMedia(); } catch {}
     }
   } catch { }
   // After content builds, size the media area
@@ -1032,6 +1050,7 @@ function updateTrack(initial = false) {
     setActiveSlide(sliderState.i);
     showOverlayCaption(getMediaCaption(sliderState.i));
     try { syncSliderVideoPlayback(sliderState.i); } catch {}
+    try { updatePPBtnVisibility(sliderState.i); } catch {}
     return;
   }
   // During animation, hide captions by removing active from all slides
@@ -1044,6 +1063,7 @@ function updateTrack(initial = false) {
     setActiveSlide(sliderState.i);
     showOverlayCaption(getMediaCaption(sliderState.i));
     try { syncSliderVideoPlayback(sliderState.i); } catch {}
+    try { updatePPBtnVisibility(sliderState.i); } catch {}
   };
   sliderTrack.addEventListener('transitionend', onEnd, true);
 }
@@ -1078,8 +1098,8 @@ function goTo(i, user = false) {
   if (user) restartAutoplay();
 }
 
-function next() { goTo(sliderState.i + 1); }
-function prev() { goTo(sliderState.i - 1); }
+function next() { goTo(sliderState.i + 1, true); }
+function prev() { goTo(sliderState.i - 1, true); }
 
 btnNext.addEventListener("click", () => next());
 btnPrev.addEventListener("click", () => prev());
@@ -1167,14 +1187,7 @@ function stopAutoplay() {
 }
 function restartAutoplay() { stopAutoplay(); startAutoplay(); }
 
-// Pause on hover/focus
-// Only pause on keyboard focus within the sheet (accessibility);
-// do not pause on hover over media in the project window.
-const pauseAreas = [slider, sheet];
-pauseAreas.forEach((el) => {
-  el.addEventListener("focusin", () => { sliderState.paused = true; try { syncSliderVideoPlayback(sliderState.i); } catch {}; try { updatePlayPauseUI(); } catch {} });
-  el.addEventListener("focusout", () => { sliderState.paused = false; try { syncSliderVideoPlayback(sliderState.i); } catch {}; try { updatePlayPauseUI(); } catch {} });
-});
+// Remove focus-based pausing so opening the sheet doesn't pause playback.
 
 // Pause when tab hidden
 document.addEventListener("visibilitychange", () => {
@@ -1202,24 +1215,8 @@ if (ppBtn) {
 
 // Layout the sheet's slider height to use space up to half the sheet while preserving 16:9
 function layoutSheetMedia() {
-  try {
-    if (!sheet || sheet.getAttribute('aria-hidden') !== 'false') return;
-    const body = sheetBody;
-    const meta = sheet.querySelector('.sheet-meta');
-    const sliderEl = slider;
-    if (!body || !sliderEl) return;
-    const bodyH = body.clientHeight || 0;
-    const cs = window.getComputedStyle(body);
-    const gap = parseFloat(cs.rowGap || '0') || 0;
-    const metaH = meta ? meta.getBoundingClientRect().height : 0;
-  // Reserve at least one-third of body for description
-  const minDesc = Math.max(0, Math.floor(bodyH / 3));
-  // Space available for slider within sheet-body (account two gaps between rows)
-  const available = Math.max(0, bodyH - minDesc - metaH - (gap * 2));
-  // Height-first sizing: use all available height; media box will shrink width to keep 16:9
-  const h = available;
-  sliderEl.style.height = h + 'px';
-  } catch {}
+  // CSS now enforces a fixed 70/30 split; clear any inline height
+  try { if (slider) slider.style.height = ''; } catch {}
 }
 
 // Recompute layout on resize/orientation or when modal visibility changes

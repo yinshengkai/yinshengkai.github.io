@@ -1234,8 +1234,6 @@ body {
   width: auto;
   max-width: 100%;
   aspect-ratio: 16 / 9;
-  display: grid;
-  place-items: center;
   margin: 0 auto;
 }
 .project-card .cover .media .preview-item .media-box > img,
@@ -1713,13 +1711,12 @@ body {
   min-height: 0;
   grid-template-areas:
     "slider"
-    "meta"
     "desc";
-  /* Slider row (auto), meta (auto), desc (fill) */
-  grid-template-rows: auto auto 1fr;
+  /* Enforce a persistent 70/30 split regardless of size */
+  grid-template-rows: 70% 30%;
 }
 
-/* Constrain description to at least half; slider height is computed in JS for best fit */
+/* Let JS compute slider height; description has no enforced min here */
 .sheet-body > .sheet-desc { min-height: 30%; }
 
 /* Mobile/full-bleed sheet: fill the entire viewport and ensure description is at least half height */
@@ -1740,10 +1737,10 @@ body {
   /* Percent-based limits already ensure 50/50 split on small screens */
 }
 
-.sheet-cta {
-  display: flex;
-  justify-content: flex-end;
-}
+.sheet-desc-wrap { grid-area: desc; display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow: auto; }
+.sheet-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sheet-cta { display: inline-flex; align-self: flex-end; margin-top: 4px; }
+.sheet-cta .btn { white-space: nowrap; }
 
 .sheet-meta {
   display: flex;
@@ -1820,7 +1817,7 @@ body {
 .slider {
   touch-action: pan-y;
   width: 100%;
-  height: auto;
+  height: 100%;
   margin: 0;
 }
 
@@ -1853,8 +1850,6 @@ body {
   width: auto;
   max-width: 100%;
   aspect-ratio: 16 / 9;
-  display: grid;
-  place-items: center;
   margin: 0 auto;
 }
 .slide .media-box > img,
