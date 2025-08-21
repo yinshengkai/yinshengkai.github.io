@@ -108,9 +108,9 @@ body {
   box-shadow: none;
 }
 
-/* Keep glass content visible; animate position and surface only */
+/* Allow glass containers to fade from fully transparent */
 .glass.reveal {
-  opacity: 1;
+  opacity: 0;
 }
 
 /* Fade the glass surface background in sync with content */
@@ -123,16 +123,22 @@ body {
   transition-delay: var(--reveal-delay, 0ms);
 }
 
-/* Do not animate entire sections (prevents glass descendants from inheriting opacity) */
+/* Sections also start fully transparent, only fade (no extra transform) */
 .section.reveal {
-  opacity: 1 !important;
+  opacity: 0 !important;
   transform: none !important;
 }
-
-/* Prevent backdrop-filter pop on timeline: animate the card, not its wrapper */
-.timeline-item.reveal {
+.section.reveal.in {
   opacity: 1 !important;
+}
+
+/* Timeline wrapper fades too; card keeps its own entrance */
+.timeline-item.reveal {
+  opacity: 0 !important;
   transform: none !important;
+}
+.timeline-item.reveal.in {
+  opacity: 1 !important;
 }
 
 .timeline-item.reveal>.timeline-card {
