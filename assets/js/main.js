@@ -414,7 +414,6 @@ async function renderLogos() {
     await Promise.all(imgs.map(normalizeLogo));
     // Switch to JS-driven RAF scroller for smoother performance
     const cycle = Math.max(1, Math.round(track.scrollWidth / 3));
-    track.classList.add('js-logos');
     let x = 0;
     let raf = 0;
     let last = performance.now();
