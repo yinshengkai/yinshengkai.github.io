@@ -112,7 +112,7 @@ body {
   /* dim overlay */
 }
 
-/* Removed mobile-specific background overrides to keep visuals consistent */
+ 
 
 /* Reveal on glass: let container fade/transform; we only toggle blur to avoid flicker */
 .glass.reveal:not(.in) {
@@ -165,7 +165,7 @@ body {
   transition-delay: var(--reveal-delay, 0ms);
 }
 
-/* Removed mobile-specific background attachment overrides */
+ 
 
 .container {
   max-width: 1100px;
@@ -257,16 +257,7 @@ body {
   }
 }
 
-.dots {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  opacity: 0.35;
-  mix-blend-mode: screen;
-  pointer-events: none;
-}
+/* removed unused .dots decoration */
 
 .noise {
   position: absolute;
@@ -369,7 +360,7 @@ body {
   padding-bottom: calc(var(--dev-banner-h, 36px) + var(--site-pad-y));
 }
 
-/* Debug reset UI removed; using external tool/bookmarklet */
+ 
 .shortcuts-wrap {
   max-width: none;
   width: 100%;
@@ -418,7 +409,7 @@ body {
 }
 
 /* Delay showing navbar after gate opens */
-/* Removed nav-hidden variant: always consistent behavior across breakpoints */
+ 
 
 .top-shortcuts .brand {
   opacity: 0.98;
@@ -566,7 +557,7 @@ body {
   scroll-margin-top: calc(var(--nav-offset, 96px) + 16px);
 }
 
-/* Removed narrow-screen headroom block; dynamic --nav-offset covers all sizes */
+ 
 
 .profile {
   display: grid;
@@ -670,20 +661,7 @@ body {
 .bio-box.glass { border-radius: 0; }
 .bio-box .bio { margin: 0; }
 
-/* Removed inline bio emphasis styles */
-
-.title {
-  margin: 2px 0 4px;
-  font-size: clamp(26px, 4.6vw, 36px);
-  font-weight: 700;
-}
-
-.subtitle {
-  margin: 0 0 8px;
-  color: var(--muted);
-}
-
-/* Removed older bio override to avoid conflicting styles */
+/* removed unused .subtitle styles */
 
 .profile-flair {
   margin: 8px 0 12px;
@@ -782,106 +760,11 @@ body {
 .chip.ongoing,
 .chip.ongoing:focus-visible,
 .tag,
-.tag:focus-visible,
-.ongoing-pill,
-.ongoing-pill:focus-visible {
+.tag:focus-visible {
   outline: none;
 }
 
-/* Education */
-.education {
-  margin-top: 16px;
-  display: grid;
-  gap: 10px;
-}
-
-.ed-title {
-  margin: 0;
-  font-size: 14px;
-  color: var(--muted);
-  letter-spacing: .2px;
-}
-
-.ed-list {
-  display: grid;
-  gap: 8px;
-}
-
-.ed-item {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: stretch;
-  gap: 10px;
-  padding: 6px 8px;
-}
-
-.ed-left {
-  display: grid;
-  gap: 4px;
-}
-
-.ed-school {
-  font-weight: 600;
-}
-
-.ed-degree,
-.ed-meta {
-  font-size: 12px;
-  color: #e6e6e6;
-  opacity: .95;
-}
-
-.ed-date {
-  display: grid;
-  align-content: center;
-  justify-items: end;
-  gap: 4px;
-  padding: 8px 0 8px 14px;
-  min-width: 120px;
-  color: #fff;
-  text-align: right;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  background: none;
-  border: 0;
-  position: relative;
-}
-
-/* Remove decorative vertical rule to avoid borders */
-.ed-date::before {
-  content: none;
-}
-
-.ed-date .date-inner,
-.timeline-date .date-inner {
-  display: grid;
-  gap: 2px;
-  align-content: center;
-  justify-items: end;
-}
-
-.ed-date .date-line,
-.timeline-date .date-line {
-  display: flex;
-  gap: 4px;
-  align-items: baseline;
-}
-
-.ed-date .m,
-.timeline-date .m {
-  font-variant: all-small-caps;
-  letter-spacing: 1px;
-  opacity: .95;
-}
-
-.ed-date .y,
-.timeline-date .y {
-  font-weight: 700;
-}
-
-.ed-date .date-dash,
-.timeline-date .date-dash {
-  opacity: .9;
-}
+/* (old .education list styles removed) */
 
 /* Align timeline date typography with project date style */
 .timeline-date .pd-text {
@@ -1064,7 +947,7 @@ body {
   }
 }
 
-/* Removed touch-specific hover adjustments */
+ 
 
 /* Ensure previous decorative project-card ring (if any) is disabled without affecting glass layer */
 /* Removed broad ::before reset so .glass::before background remains visible on project cards */
@@ -1303,19 +1186,7 @@ body {
   vertical-align: middle;
 }
 
-.ongoing-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  margin-left: 8px;
-  border-radius: 999px;
-  font-size: 12px;
-  color: var(--text);
-  background: var(--surface-2);
-  border: none;
-  box-shadow: none;
-}
+ 
 
 /* Keep consistent shadows for ongoing tiles as well */
 
@@ -1726,11 +1597,7 @@ body {
   opacity: 0.9;
 }
 
-/* Scroll indicator and back-to-top controls removed */
-
-/* Removed responsive narrow viewport overrides */
-
-/* Removed touch-specific tap target adjustments */
+ 
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
@@ -1807,13 +1674,7 @@ body {
   transition-delay: var(--reveal-delay, 0ms);
 }
 
-/* loader removed */
-
-.ed-school {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+ 
 
 /* Unified Interactive Highlight (applies consistently across controls)
    JS adds the `.hl` class to: .btn, .icon-link, .shortcut-link.icon, .project-card
@@ -1857,20 +1718,8 @@ body {
   }
 }
 
-.ed-icon {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  display: inline-grid;
-  place-items: center;
-  font-size: 10px;
-  font-weight: 800;
-  color: #061018;
-  background: linear-gradient(180deg, #9fd0ff, #7bb8ff);
-  border: none;
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.25), 0 6px 16px rgba(0, 0, 0, 0.25);
-}
+ 
 
 /* timeline progress handled via scaleY(--progressRatio) */
 
-/* Loader and dev warning overlay styles removed */
+ 

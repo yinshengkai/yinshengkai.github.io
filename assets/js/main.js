@@ -45,9 +45,7 @@ const observer = supportsIO ? new IntersectionObserver((entries) => {
 }, { root: null, rootMargin: '0px', threshold: [0, 0.1] }) : null;
 const reveal = (el) => { if (!el) return; if (observer) observer.observe(el); else el.classList.add('in'); };
 
-// Dev warning overlay removed
-
-// (Flags now use SVG as the primary method; no platform detection needed.)
+ 
 
 // Placeholder media generator (blank background; no text)
 function placeholderImage(bg = "#0b0f14") {
@@ -76,14 +74,12 @@ async function loadJSON(url) {
   return res.json();
 }
 
-// Removed footer year hookup (no #year element in DOM)
+ 
 
-// Typewriter animation for profile subtitle/bio (skip if reduced motion)
+// Typewriter animation for profile bio only (skip if reduced motion)
 (function typewriter() {
   if (prefersReducedMotion) return; // respect
-  // Only type subtitle and bio to avoid jumpy title
   const items = [
-    { sel: '.subtitle', speed: 12, start: 150 },
     { sel: '.bio', speed: 8, start: 500 },
   ];
   items.forEach(({ sel, speed, start }) => {
@@ -699,9 +695,7 @@ document.addEventListener("visibilitychange", () => {
 
 // Respect prefers-reduced-motion
 
-// Background parallax/dots removed (no corresponding DOM elements)
-
-// loader removed
+ 
 
 // Timeline progress effect (cache nodes to avoid repeated queries)
 const timelineEls = Array.from(document.querySelectorAll('.timeline'));
@@ -777,7 +771,7 @@ window.addEventListener('hashchange', () => {
   if (h && navMap.has(h)) startNavLock(h);
 });
 
-// Scroll indicator/back-to-top removed
+ 
 // Batch scroll/resize-driven updates with a single rAF per frame
 let _scrollRaf = 0, _resizeRaf = 0;
 function flushScroll() {
@@ -870,9 +864,7 @@ revealCheckAll();
   else window.addEventListener('DOMContentLoaded', init, { once: true });
 })();
 
-// Debug reset UI removed by request; use external tool/bookmarklet instead
-
-// LinkedIn avatar fetch removed (keeps local avatar image)
+ 
 
 // Utility: initials from org
 function initials(name = '') {
