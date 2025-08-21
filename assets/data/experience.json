@@ -1,7 +1,7 @@
 [
   {
     "role": "GenAI Software Engineer",
-    "org": "HCLTech — Full-time (Hybrid, Singapore)",
+    "org": "HCLTech — Full-time",
     "period": "Jul 2025 — Present",
     "details": "Applied GenAI to real-world workflows; building ML-powered product features.",
     "logo": {
@@ -12,7 +12,7 @@
   },
   {
     "role": "Software QA Engineer",
-    "org": "Razer Inc. — Internship (On-site, Singapore)",
+    "org": "Razer Inc. — Internship",
     "period": "Sep 2024 — Apr 2025",
     "details": "Automated hundreds of TestRail cases via Selenium + Robot Framework. Built an ML-based self-healing framework using NLP to repair broken locators from DOM changes, significantly reducing test maintenance.",
     "logo": {
