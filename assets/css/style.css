@@ -1230,11 +1230,12 @@ body {
   place-items: center;
 }
 .project-card .cover .media .preview-item .media-box {
+  /* Fill the cover area exactly to avoid overflow/rounding issues */
+  width: 100%;
   height: 100%;
-  width: auto;
   max-width: 100%;
-  aspect-ratio: 16 / 9;
-  margin: 0 auto;
+  /* The parent .cover already enforces 16:9; let content fit inside */
+  margin: 0;
 }
 .project-card .cover .media .preview-item .media-box > img,
 .project-card .cover .media .preview-item .media-box > video {
