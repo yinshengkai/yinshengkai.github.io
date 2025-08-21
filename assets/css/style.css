@@ -13,7 +13,7 @@
   --muted: #a8a8a8;
   /* Neutral accents */
   --accent: #4c00ff;
-  --accent-2: #ffb006;
+  --accent-2: #ff8800;
   --accent-rgb: 200, 200, 200;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.25), inset 0 1px rgba(255, 255, 255, 0.05);
   --radius: 16px;
@@ -1055,6 +1055,11 @@ body {
   font-size: clamp(14px, 1.6vw, 17px);
   font-weight: 400;
   max-width: 60ch;
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  transition: filter var(--speed);
+  will-change: filter;
 }
 
 /* Bio container to make the line stand out */
@@ -1071,6 +1076,25 @@ body {
 
 .bio-box .bio {
   margin: 0;
+}
+
+/* During typewriter animation, keep the text slightly blurred */
+/* Typewriter per-letter blur-in */
+.bio .bio-char {
+  display: inline;
+  animation: bioBlurIn 260ms ease forwards;
+  will-change: filter, opacity;
+}
+
+@keyframes bioBlurIn {
+  from {
+    filter: blur(3px);
+    opacity: 0.85;
+  }
+  to {
+    filter: blur(0);
+    opacity: 1;
+  }
 }
 
 
@@ -2102,4 +2126,3 @@ body {
 
 
 
-/* timeline progress handled via scaleY(--progressRatio) */

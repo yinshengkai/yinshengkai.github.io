@@ -84,13 +84,17 @@ async function loadJSON(url) {
 
 // Typewriter animation for profile bio only (skip if reduced motion)
 (function typewriter() {
+  try {
+    const mql = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (mql && mql.matches) return; // skip for reduced motion
+  } catch {}
   const items = [
     { sel: '.bio', speed: 8, start: 500 },
   ];
   items.forEach(({ sel, speed, start }) => {
     const el = document.querySelector(sel);
     if (!el) return;
-    const full = el.textContent;
+    const full = el.textContent || '';
     // Lock height to avoid layout jump
     const h = el.getBoundingClientRect().height;
     el.style.minHeight = h + 'px';
@@ -98,8 +102,15 @@ async function loadJSON(url) {
     setTimeout(() => {
       let i = 0;
       const id = setInterval(() => {
-        el.textContent = full.slice(0, ++i);
-        if (i >= full.length) { clearInterval(id); el.style.minHeight = ''; }
+        if (i >= full.length) {
+          clearInterval(id);
+          el.style.minHeight = '';
+          return;
+        }
+        const span = document.createElement('span');
+        span.className = 'bio-char';
+        span.textContent = full.charAt(i++);
+        el.appendChild(span);
       }, speed);
     }, start);
   });
@@ -471,7 +482,6 @@ let sliderState = {
   t0: 0,
   paused: false,
   media: [],
-  typeTimer: 0,
 };
 let savedScrollY = 0;
 
@@ -580,7 +590,6 @@ function openSheet(project) {
 
 function closeSheet() {
   stopAutoplay();
-  if (sliderState.typeTimer) { clearInterval(sliderState.typeTimer); sliderState.typeTimer = 0; }
   sheet.setAttribute("aria-hidden", "true");
   sliderTrack.innerHTML = ""; sliderDots.innerHTML = ""; sliderProgress.style.transform = `scaleX(0)`;
   activeProject = null;
@@ -756,7 +765,7 @@ sheet.addEventListener("keydown", (e) => {
 
 // Autoplay with progress bar
 function frame(ts) {
-  if (sliderState.paused) { sliderState.t0 = ts - (sliderState.tAcc || 0); requestAnimationFrame(frame); return; }
+  if (sliderState.paused) { sliderState.t0 = ts; requestAnimationFrame(frame); return; }
   if (!sliderState.t0) sliderState.t0 = ts;
   const elapsed = ts - sliderState.t0;
   const pct = Math.min(1, elapsed / sliderState.dur);
@@ -770,7 +779,7 @@ function frame(ts) {
 
 function startAutoplay() {
   stopAutoplay();
-  sliderState.t0 = 0; sliderState.paused = false; sliderState.tAcc = 0;
+  sliderState.t0 = 0; sliderState.paused = false;
   sliderState.raf = requestAnimationFrame(frame);
 }
 function stopAutoplay() {
@@ -797,7 +806,6 @@ document.addEventListener("visibilitychange", () => {
 
 
 
-// Note: no CSS uses --progressRatio; updater removed
 
 // Nav active section highlight
 const navMap = new Map([
@@ -957,7 +965,6 @@ revealCheckAll();
   if (!el) return;
   const hh = el.querySelector('.hh');
   const mm = el.querySelector('.mm');
-  const colon = el.querySelector('.colon');
   let fmt;
   try {
     fmt = new Intl.DateTimeFormat('en-SG', { timeZone: 'Asia/Singapore', hour12: false, hour: '2-digit', minute: '2-digit' });
