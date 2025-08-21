@@ -178,11 +178,6 @@
         </button>
       </header>
       <div class="sheet-body">
-        <div class="sheet-meta">
-          <span class="chip" id="sheet-range"></span>
-          <div id="sheet-tags" class="tags"></div>
-        </div>
-        <p id="sheet-desc" class="sheet-desc"></p>
         <div class="slider" id="sheet-slider">
           <div class="slider-rail">
             <div class="slider-track" id="slider-track"></div>
@@ -200,7 +195,14 @@
               <path fill="currentColor" d="M8.59 16.59 10 18l6-6-6-6-1.41 1.41L13.17 12z" />
             </svg>
           </button>
-
+        </div>
+        <div class="sheet-desc-wrap" id="sheet-desc-wrap">
+          <div class="sheet-meta">
+            <span class="chip" id="sheet-range"></span>
+            <div id="sheet-tags" class="tags"></div>
+          </div>
+          <p id="sheet-desc" class="sheet-desc"></p>
+          <!-- CTA inserted here by JS when present -->
         </div>
       </div>
     </div>

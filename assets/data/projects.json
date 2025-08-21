@@ -20,7 +20,7 @@
     "media": [
       {
         "filename": "data.png",
-        "description": "Data pipeline, KPIs, and timeline"
+        "description": "Data retrival and preprocessing"
       }
     ],
     "description": "skQuant is a config‑driven, end‑to‑end backtesting framework that runs your pipeline from data preparation and feature engineering to time‑aware validation and budgeted optimization, then produces an interactive report with reproducible artifacts. It enforces bias control with time‑aligned features and strict out‑of‑sample evaluation, accounts for transaction costs and slippage, and scales efficiently with parallel, hardware‑aware execution and smart caching."
@@ -44,15 +44,15 @@
     "media": [
       {
         "filename": "editor.mp4",
-        "description": "Reflection-driven editor UI"
+        "description": "Fully-featured reflection-driven editor UI"
       },
       {
         "filename": "tools.mp4",
-        "description": "Binary asset pipeline and tools browser"
+        "description": "Built-in CPU profiler and animation state machine editor"
       },
       {
         "filename": "gameplay.mp4",
-        "description": "In-editor playback and ECS inspector"
+        "description": "Sandboxing system with state controls"
       }
     ],
     "description": "Led a 10-programmer team building a modular engine with a reflection-driven editor for native and Mono scripts, a binary asset pipeline via Assimp, prefab overrides/propagation, hierarchical transforms with quaternions, and a performant sparse-set ECS."
