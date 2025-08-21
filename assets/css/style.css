@@ -67,9 +67,7 @@ body.modal-open {
   height: 100%;
 }
 
-/* Prevent background scroll while loading */
-
-
+ 
 body {
   margin: 0;
   color: var(--text);
@@ -241,11 +239,7 @@ body {
   letter-spacing: 0.2px;
 }
 
-.section-sub {
-  margin: 0;
-  color: var(--muted);
-  font-size: 14px;
-}
+
 
 /* Background animation */
 .bg {
@@ -443,9 +437,7 @@ body {
   flex-wrap: nowrap;
 }
 
-/* Navbar is now full-width and edge-flush on all screens */
-
-/* Subtle gradient ring to make the navbar stand out */
+ 
 .shortcuts-wrap::before {
   content: none;
 }
@@ -457,9 +449,7 @@ body {
   pointer-events: none;
 }
 
-/* Delay showing navbar after gate opens */
-
-
+ 
 .top-shortcuts .brand {
   opacity: 0.98;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);

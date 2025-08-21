@@ -1201,8 +1201,6 @@ function stopAutoplay() {
 }
 function restartAutoplay() { stopAutoplay(); startAutoplay(); }
 
-// Remove focus-based pausing so opening the sheet doesn't pause playback.
-
 // Pause when tab hidden
 document.addEventListener("visibilitychange", () => {
   sliderState.paused = document.hidden;
