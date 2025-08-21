@@ -606,12 +606,13 @@ async function renderLogos() {
     // Normalize each image: remove white BG and trim padding
     await Promise.all(imgs.map(normalizeLogo));
     // Switch to JS-driven RAF scroller for smoother performance
-    const cycle = Math.max(1, Math.round(track.scrollWidth / 3));
+    let cycle = Math.max(1, Math.round(track.scrollWidth / 3));
     track.classList.add('js-logos');
     let x = 0;
     let raf = 0;
     let last = performance.now();
     const speed = 40; // px per second
+    const roundPx = (val) => Math.round(val); // reduce subpixel jitter
     const frame = (now) => {
       const dt = Math.max(0, Math.min(100, now - last));
       last = now;
@@ -619,11 +620,25 @@ async function renderLogos() {
       const v = prefersReduced ? 0 : speed;
       x -= (v * dt) / 1000;
       if (x <= -cycle) x += cycle;
-      track.style.transform = `translate3d(${x}px,0,0)`;
+      const xr = roundPx(x);
+      track.style.transform = `translate3d(${xr}px,0,0)`;
       raf = requestAnimationFrame(frame);
     };
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(frame);
+    // Recompute cycle on resize to keep seam aligned and avoid jitter
+    const onResize = () => {
+      try {
+        const prev = cycle;
+        cycle = Math.max(1, Math.round(track.scrollWidth / 3));
+        // Keep x within new cycle range
+        if (cycle !== prev) {
+          x = ((x % cycle) + cycle) % cycle;
+        }
+      } catch {}
+    };
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
     document.addEventListener('visibilitychange', () => {
       try {
         if (document.hidden) { if (raf) cancelAnimationFrame(raf); }
