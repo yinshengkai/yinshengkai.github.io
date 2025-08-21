@@ -1161,7 +1161,8 @@ body {
 .projects-grid {
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  /* Use auto-fit so the last row expands to fill and avoids a squeezed right edge */
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
 .project-card {
@@ -1172,6 +1173,8 @@ body {
   gap: 10px;
   cursor: pointer;
   isolation: isolate;
+  /* Allow content to shrink within grid tracks; prevents right-edge overflow on some ratios */
+  min-width: 0;
 }
 
 .project-card:active {
