@@ -1180,12 +1180,18 @@ body {
 }
 
 .project-card .cover {
-  height: 160px;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
   border-radius: var(--radius-sm);
   border: none;
   overflow: hidden;
   position: relative;
+  contain: layout paint;
 }
+
+/* Fallback to padding-ratio for environments with buggy aspect-ratio handling */
+/* Remove padding hack to avoid double-sizing in modern browsers */
 
 .project-card .cover .media {
   position: absolute;
@@ -1196,8 +1202,8 @@ body {
   background-color: #000 !important;
   background-image: none !important;
   filter: none;
-  transform: scale(1.02);
-  transition: transform var(--speed);
+  transform: none;
+  transition: none;
 }
 
 /* Card preview scroller */
@@ -1206,6 +1212,7 @@ body {
   inset: 0;
   overflow: hidden;
 }
+/* (removed) preview pause/play indicator */
 .project-card .cover .media .preview-track {
   display: grid;
   grid-auto-flow: column;
@@ -1219,23 +1226,30 @@ body {
   width: 100%;
   height: 100%;
   background: #000;
+  display: grid;
+  place-items: center;
 }
-.project-card .cover .media .preview-item img,
-.project-card .cover .media .preview-item video {
+.project-card .cover .media .preview-item .media-box {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+}
+.project-card .cover .media .preview-item .media-box > img,
+.project-card .cover .media .preview-item .media-box > video {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
   border: 0;
   background: transparent;
 }
 
 /* Limit image zoom on hover to hover-capable devices */
-@media (hover: hover) and (pointer: fine) {
-  .project-card:hover .cover .media {
-    transform: scale(1.08);
-  }
-}
+/* No hover zoom to avoid any overflow on some browsers */
 
 /* Visual tap/click affordance in the corner */
 .project-card .tap-hint {
@@ -1401,6 +1415,7 @@ body {
   -webkit-line-clamp: 2;
   overflow: hidden;
   min-height: calc(2 * 1.5em);
+  max-height: calc(2 * 1.5em);
 }
 
 .project-meta {
@@ -1650,7 +1665,7 @@ body {
 
 .sheet-panel {
   width: min(980px, calc(100% - 24px));
-  max-height: min(88vh, 900px);
+  height: min(88vh, 900px);
   border-radius: var(--radius);
   transform: translateY(6px) scale(.98);
   opacity: 0;
@@ -1700,7 +1715,29 @@ body {
     "slider"
     "meta"
     "desc";
+  /* Slider row (auto), meta (auto), desc (fill) */
   grid-template-rows: auto auto 1fr;
+}
+
+/* Constrain description to at least half; slider height is computed in JS for best fit */
+.sheet-body > .sheet-desc { min-height: 30%; }
+
+/* Mobile/full-bleed sheet: fill the entire viewport and ensure description is at least half height */
+@media (max-width: 900px), (max-height: 700px) {
+  .sheet {
+    align-items: stretch;
+  }
+  .sheet-panel {
+    width: 100%;
+    max-width: 100%;
+    height: 100svh;
+    max-height: 100svh;
+    border-radius: 0;
+  }
+  .sheet-header {
+    min-height: 60px;
+  }
+  /* Percent-based limits already ensure 50/50 split on small screens */
 }
 
 .sheet-cta {
@@ -1782,39 +1819,75 @@ body {
 
 .slider {
   touch-action: pan-y;
+  width: 100%;
+  height: auto;
+  margin: 0;
 }
 
 .slider-rail {
   overflow: hidden;
   position: relative;
+  height: 100%;
 }
 
 .slider-track {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: 100%;
+  height: 100%;
   transition: transform 600ms ease;
   will-change: transform;
 }
 
 .slide {
   position: relative;
-  aspect-ratio: 16/9;
+  height: 100%;
   background: #0e1218;
   display: grid;
   place-items: center;
 }
 
-.slide img,
-.slide video {
+/* Inner 16:9 frame ensures visible media stays 16:9 while obeying row height */
+.slide .media-box {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+}
+.slide .media-box > img,
+.slide .media-box > video {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
   border: 0;
   outline: none;
   box-shadow: none;
   background: transparent;
+}
+
+/* Loading/buffering indicator over slides */
+.slide.loading::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 36px;
+  height: 36px;
+  margin-left: -18px;
+  margin-top: -18px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: var(--accent);
+  animation: spin 900ms linear infinite;
+  z-index: 3;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Slider caption: centered text with gradient + blur backdrop for contrast */
@@ -1878,6 +1951,27 @@ body {
   transform: scaleX(0);
   transition: transform 100ms linear;
 }
+
+/* Play/Pause button in sheet slider */
+.slider .pp-btn {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  z-index: 3;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+.slider.paused .pp-btn::after { content: '▶'; }
+.slider:not(.paused) .pp-btn::after { content: '❚❚'; }
 
 .slider .prev,
 .slider .next {

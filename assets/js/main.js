@@ -366,6 +366,8 @@ function buildCardPreview(container, mediaList) {
   list.forEach((m) => {
     const item = document.createElement('div');
     item.className = 'preview-item';
+    const frame = document.createElement('div');
+    frame.className = 'media-box';
     let el;
     if (m.type === 'video') {
       el = document.createElement('video');
@@ -383,7 +385,8 @@ function buildCardPreview(container, mediaList) {
     } else {
       el = document.createElement('img'); el.src = placeholderImage('#000000'); el.alt = '';
     }
-    item.append(el);
+    frame.append(el);
+    item.append(frame);
     slides.push(item);
   });
   // If only one, duplicate once to keep motion consistent
@@ -734,6 +737,9 @@ const sliderTrack = $("#slider-track");
 const sliderProgress = $("#slider-progress");
 const btnPrev = $("#slider-prev");
 const btnNext = $("#slider-next");
+// Ensure a play/pause button exists on the slider
+let ppBtn = slider && slider.querySelector('.pp-btn');
+if (!ppBtn && slider) { ppBtn = document.createElement('button'); ppBtn.type = 'button'; ppBtn.className = 'pp-btn'; slider.appendChild(ppBtn); }
 const sliderDots = $("#slider-dots");
 // Overlay caption element inside slider (not transformed with track)
 const sliderCap = $("#slider-cap");
@@ -835,6 +841,11 @@ function openSheet(project) {
       sheetBody.append(cta);
     }
   } catch { }
+  // After content builds, size the media area
+  try {
+    requestAnimationFrame(() => { layoutSheetMedia(); });
+    setTimeout(() => { layoutSheetMedia(); }, 50);
+  } catch {}
   // Robust scroll lock: capture scroll and fix body BEFORE applying classes to avoid jumps
   try {
     savedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
@@ -920,12 +931,15 @@ function buildSlider(media) {
   media.forEach((m, idx) => {
     const slide = document.createElement("div");
     slide.className = "slide";
+    const frame = document.createElement('div');
+    frame.className = 'media-box';
     let el;
     if (m.type === "video") {
       el = document.createElement("video");
       el.src = m.src;
       // Enforce silent, inline playback
       el.controls = false;
+      el.autoplay = true; try { el.setAttribute('autoplay', ''); } catch {}
       el.playsInline = true; el.setAttribute('playsinline', '');
       el.muted = true; el.defaultMuted = true; el.setAttribute('muted', '');
       try { el.volume = 0; } catch {}
@@ -933,12 +947,23 @@ function buildSlider(media) {
       el.preload = 'metadata';
       try { el.disablePictureInPicture = true; } catch {}
       try { el.setAttribute('controlsList', 'nodownload noplaybackrate noremoteplayback'); } catch {}
+      // Show loading indicator until the video can play
+      try { slide.classList.add('loading'); } catch {}
       // Update duration when metadata is loaded
       try {
         el.addEventListener('loadedmetadata', () => {
           const d = (isFinite(el.duration) && el.duration > 0) ? el.duration * 1000 : 8000;
           sliderState.durs[idx] = d;
+          try { layoutSheetMedia(); } catch {}
         });
+        const clearLoading = () => { try { slide.classList.remove('loading'); } catch {} };
+        el.addEventListener('canplay', clearLoading);
+        el.addEventListener('canplaythrough', clearLoading);
+        el.addEventListener('playing', clearLoading);
+        const setLoading = () => { try { slide.classList.add('loading'); } catch {} };
+        el.addEventListener('waiting', setLoading);
+        el.addEventListener('stalled', setLoading);
+        el.addEventListener('seeking', setLoading);
         // Advance to next when active video ends
         el.addEventListener('ended', () => {
           if (sliderState.i === idx) {
@@ -951,8 +976,10 @@ function buildSlider(media) {
       el = document.createElement("img");
       const src = (m.type === 'placeholder') ? placeholderImage('#000000') : m.src;
       el.src = src; el.alt = m.alt || m.caption || "";
+      try { el.addEventListener('load', () => { try { layoutSheetMedia(); } catch {} }); } catch {}
     }
-    slide.append(el);
+    frame.append(el);
+    slide.append(frame);
     sliderTrack.append(slide);
 
     const dot = document.createElement("div"); dot.className = "dot"; if (idx === 0) dot.classList.add("active");
@@ -962,6 +989,8 @@ function buildSlider(media) {
 
   updateTrack(true);
   if (sliderState.count > 1) startAutoplay();
+  // Ensure the slider uses available space while keeping desc >= 1/2
+  try { layoutSheetMedia(); } catch {}
 }
 
 function setActiveSlide(i) {
@@ -1029,8 +1058,12 @@ function syncSliderVideoPlayback(activeIndex) {
     v.muted = true; v.defaultMuted = true; v.setAttribute('muted', '');
     try { v.volume = 0; } catch {}
     v.playsInline = true; v.setAttribute('playsinline', '');
-    if (idx === activeIndex && !sliderState.paused) {
-      try { v.play().catch(() => {}); } catch {}
+    if (idx === activeIndex) {
+      if (!sliderState.paused) {
+        try { v.play().catch(() => {}); } catch {}
+      } else {
+        try { v.pause(); } catch {}
+      }
     } else {
       try { v.pause(); v.currentTime = 0; } catch {}
     }
@@ -1125,10 +1158,12 @@ function startAutoplay() {
   stopAutoplay();
   sliderState.t0 = 0; sliderState.paused = false;
   sliderState.raf = requestAnimationFrame(frame);
+  try { updatePlayPauseUI(); } catch {}
 }
 function stopAutoplay() {
   if (sliderState.raf) cancelAnimationFrame(sliderState.raf);
   sliderState.raf = 0; sliderProgress.style.transform = `scaleX(0)`;
+  try { updatePlayPauseUI(); } catch {}
 }
 function restartAutoplay() { stopAutoplay(); startAutoplay(); }
 
@@ -1137,15 +1172,60 @@ function restartAutoplay() { stopAutoplay(); startAutoplay(); }
 // do not pause on hover over media in the project window.
 const pauseAreas = [slider, sheet];
 pauseAreas.forEach((el) => {
-  el.addEventListener("focusin", () => { sliderState.paused = true; try { syncSliderVideoPlayback(sliderState.i); } catch {} });
-  el.addEventListener("focusout", () => { sliderState.paused = false; try { syncSliderVideoPlayback(sliderState.i); } catch {} });
+  el.addEventListener("focusin", () => { sliderState.paused = true; try { syncSliderVideoPlayback(sliderState.i); } catch {}; try { updatePlayPauseUI(); } catch {} });
+  el.addEventListener("focusout", () => { sliderState.paused = false; try { syncSliderVideoPlayback(sliderState.i); } catch {}; try { updatePlayPauseUI(); } catch {} });
 });
 
 // Pause when tab hidden
 document.addEventListener("visibilitychange", () => {
   sliderState.paused = document.hidden;
   try { syncSliderVideoPlayback(sliderState.i); } catch {}
+  try { updatePlayPauseUI(); } catch {}
 });
+
+function updatePlayPauseUI() {
+  try {
+    if (!slider) return;
+    slider.classList.toggle('paused', !!sliderState.paused);
+  } catch {}
+}
+
+if (ppBtn) {
+  ppBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sliderState.paused = !sliderState.paused;
+    // Do not stop/start autoplay loop; frame() handles paused state without resetting
+    try { syncSliderVideoPlayback(sliderState.i); } catch {}
+    updatePlayPauseUI();
+  });
+}
+
+// Layout the sheet's slider height to use space up to half the sheet while preserving 16:9
+function layoutSheetMedia() {
+  try {
+    if (!sheet || sheet.getAttribute('aria-hidden') !== 'false') return;
+    const body = sheetBody;
+    const meta = sheet.querySelector('.sheet-meta');
+    const sliderEl = slider;
+    if (!body || !sliderEl) return;
+    const bodyH = body.clientHeight || 0;
+    const cs = window.getComputedStyle(body);
+    const gap = parseFloat(cs.rowGap || '0') || 0;
+    const metaH = meta ? meta.getBoundingClientRect().height : 0;
+  // Reserve at least one-third of body for description
+  const minDesc = Math.max(0, Math.floor(bodyH / 3));
+  // Space available for slider within sheet-body (account two gaps between rows)
+  const available = Math.max(0, bodyH - minDesc - metaH - (gap * 2));
+  // Height-first sizing: use all available height; media box will shrink width to keep 16:9
+  const h = available;
+  sliderEl.style.height = h + 'px';
+  } catch {}
+}
+
+// Recompute layout on resize/orientation or when modal visibility changes
+window.addEventListener('resize', () => { try { layoutSheetMedia(); } catch {} });
+window.addEventListener('orientationchange', () => { try { layoutSheetMedia(); } catch {} });
+window.addEventListener('modal-change', () => { try { layoutSheetMedia(); } catch {} });
 
 
 
