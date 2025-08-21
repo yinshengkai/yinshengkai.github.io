@@ -1217,10 +1217,26 @@ if (ppBtn) {
   });
 }
 
-// Layout the sheet's slider height to use space up to half the sheet while preserving 16:9
+// Layout the sheet's slider height for non-desktop: max 50% of body height, keep 16:9
 function layoutSheetMedia() {
-  // CSS now enforces a fixed 70/30 split; clear any inline height
-  try { if (slider) slider.style.height = ''; } catch {}
+  if (!slider) return;
+  const panel = sheet && sheet.querySelector('.sheet-panel');
+  const body = sheet && sheet.querySelector('.sheet-body');
+  if (!panel || !body) { try { slider.style.height = ''; } catch {} return; }
+  const w = slider.clientWidth || body.clientWidth || panel.clientWidth || 0;
+  const isDesktop = (window.innerWidth >= 901) && (window.innerHeight >= 701);
+  const bodyH = body.clientHeight || 0;
+  if (!w || !bodyH) { try { slider.style.height = ''; } catch {} return; }
+  if (isDesktop) {
+    // Desktop uses CSS variable-driven split; avoid inline height
+    try { slider.style.height = ''; } catch {}
+    return;
+  }
+  const desiredMax = Math.floor(bodyH * 0.5);
+  const arH = Math.round((w * 9) / 16);
+  // Always cap by 16:9 based on available width to avoid horizontal overflow/cropping
+  const h = Math.max(0, Math.min(desiredMax, arH));
+  slider.style.height = h + 'px';
 }
 
 // Recompute layout on resize/orientation or when modal visibility changes

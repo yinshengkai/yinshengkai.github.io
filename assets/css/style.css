@@ -36,6 +36,8 @@
   /* Slide + scale for a punchier reveal */
   --reveal-shift: 24px;
   --reveal-scale: 0.98;
+  /* Desktop sheet media row height percentage */
+  --sheet-media-pct: 70%;
 }
 
 * {
@@ -1715,12 +1717,16 @@ body {
   grid-template-areas:
     "slider"
     "desc";
-  /* Enforce a persistent 70/30 split regardless of size */
-  grid-template-rows: 70% 30%;
+  /* Default: slider auto height (JS sets), description fills the rest */
+  grid-template-rows: auto 1fr;
 }
 
-/* Let JS compute slider height; description has no enforced min here */
-.sheet-body > .sheet-desc { min-height: 30%; }
+/* Desktop layout keeps a larger media area via configurable split */
+@media (min-width: 901px) and (min-height: 701px) {
+  .sheet-body {
+    grid-template-rows: var(--sheet-media-pct, 70%) calc(100% - var(--sheet-media-pct, 70%));
+  }
+}
 
 /* Mobile/full-bleed sheet: fill the entire viewport and ensure description is at least half height */
 @media (max-width: 900px), (max-height: 700px) {
@@ -1740,7 +1746,17 @@ body {
   /* Percent-based limits already ensure 50/50 split on small screens */
 }
 
-.sheet-desc-wrap { grid-area: desc; display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow: auto; }
+.sheet-desc-wrap {
+  grid-area: desc;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  overflow: auto;
+  /* Clear visual separation from media to avoid perceived overlap */
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 12px;
+}
 .sheet-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .sheet-cta { display: inline-flex; align-self: flex-end; margin-top: 4px; }
 .sheet-cta .btn { white-space: nowrap; }
