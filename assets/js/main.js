@@ -425,7 +425,7 @@ async function renderLogos() {
       const v = prefersReduced ? 0 : speed;
       x -= (v * dt) / 1000;
       if (x <= -cycle) x += cycle;
-      track.style.transform = `translateX(${x}px)`;
+      track.style.transform = `translate3d(${x}px,0,0)`;
       raf = requestAnimationFrame(frame);
     };
     cancelAnimationFrame(raf);
