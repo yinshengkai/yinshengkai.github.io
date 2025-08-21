@@ -6,13 +6,13 @@
 
 :root {
   --bg: #000000;
-  --surface: rgba(255, 255, 255, 0.06);
+  --surface: rgba(255, 255, 255, 0.05);
   --surface-2: rgba(255, 255, 255, 0.08);
   --border: rgba(255, 255, 255, 0.14);
   --text: #e8e8e8;
   --muted: #a8a8a8;
   /* Neutral accents */
-  --accent: #ff5e00;
+  --accent: #4c00ff;
   --accent-2: #ffb006;
   --accent-rgb: 200, 200, 200;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.25), inset 0 1px rgba(255, 255, 255, 0.05);
@@ -22,15 +22,20 @@
   --speed: 380ms;
   --speed-slow: 900ms;
   /* Unified highlight (neutral fallback) */
-  --hi: #ffb300;
+  --hi: #a953ff;
   --hi-profile: rgba(255, 255, 255, 0.32);
   --hi-profile-2: rgba(255, 255, 255, 0.16);
   /* Global vertical padding for top/bottom breathing room */
   --site-pad-y: 16px;
   /* Card surface background (uniform across sections) */
-  --card-bg: rgba(0, 0, 0, 0.5);
+  --card-bg: rgba(19, 15, 23, 0.4);
   /* Standard font size for profile sub-cells (links baseline) */
   --profile-sub-fz: 16px;
+  /* Soft-edge blur amount for reveal-in animation */
+  --reveal-blur: 24px;
+  /* Slide + scale for a punchier reveal */
+  --reveal-shift: 24px;
+  --reveal-scale: 0.98;
 }
 
 * {
@@ -659,6 +664,7 @@ body {
   overflow: hidden;
   align-self: stretch;
   height: 100%;
+  position: relative;
 }
 
 .tile-avatar-img {
@@ -667,6 +673,25 @@ body {
   object-fit: cover;
   display: block;
   /* Fill 16:9 container */
+  transform: scale(1);
+  transition: transform 450ms ease;
+}
+
+/* Subtle vignette overlay */
+.tile-avatar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0) 58%, rgba(0,0,0,0.45) 100%);
+  opacity: 0.85;
+  transition: opacity var(--speed);
+}
+
+/* Gentle zoom on hover (desktop) */
+@media (hover: hover) and (pointer: fine) {
+  .tile-avatar:hover .tile-avatar-img { transform: scale(1.06); }
+  .tile-avatar:hover::after { opacity: 1; }
 }
 
 .tile-companies {
@@ -1997,26 +2022,32 @@ body {
 
 .reveal {
   opacity: 0;
-  transform: translateY(20px) scale(0.985);
-  /* Put transition on base so removal (fly-out) animates too */
-  transition: transform 700ms cubic-bezier(.2, .8, .2, 1), opacity 600ms ease;
+  filter: blur(var(--reveal-blur, 14px));
+  transform: translateY(var(--reveal-shift, 24px)) scale(var(--reveal-scale, 0.98));
+  transition:
+    filter 650ms ease,
+    opacity 550ms ease,
+    transform 650ms cubic-bezier(.18, .9, .22, 1);
+  will-change: filter, opacity, transform;
 }
 
 .reveal.in {
   opacity: 1;
+  filter: blur(0);
   transform: translateY(0) scale(1);
   transition-delay: var(--reveal-delay, 0ms);
 }
 
-/* Stronger pop-in for project cards */
+/* Apply same blur + fade + slide for project cards */
 .project-card.reveal {
-  /* Avoid opacity animation on glass surfaces to prevent rare content non-paints */
-  opacity: 1;
-  transform: translateY(16px) scale(0.96);
+  opacity: 0;
+  filter: blur(var(--reveal-blur, 14px));
+  transform: translateY(var(--reveal-shift, 24px)) scale(var(--reveal-scale, 0.98));
 }
 
 .project-card.reveal.in {
   opacity: 1;
+  filter: blur(0);
   transform: translateY(0) scale(1);
   transition-delay: var(--reveal-delay, 0ms);
 }
