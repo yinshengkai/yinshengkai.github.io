@@ -571,7 +571,11 @@ body {
   /* create stacking context for safe negative layer */
   overflow: hidden;
   /* clip background to rounded corners */
-  background: transparent;
+  /*
+    Use a near-transparent background to ensure backdrop-filter reliably renders
+    across browsers while still relying on ::before for the visible surface.
+  */
+  background: rgba(19, 15, 23, 0.001);
   border: none;
   border-radius: var(--radius);
   backdrop-filter: blur(var(--blur)) saturate(120%);
@@ -637,6 +641,21 @@ body {
 #profile-card .tile-langs.glass::before,
 #profile-card .tile-links.glass::before,
 #profile-card .tile-clock.glass::before {
+  opacity: 1;
+  background: var(--card-bg);
+}
+
+/* Ensure project and education cards use the same glass blur/background as profile tiles */
+.projects-grid .project-card.glass,
+.timeline .timeline-card.glass {
+  backdrop-filter: blur(var(--blur)) saturate(120%) !important;
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(120%) !important;
+  box-shadow: var(--shadow);
+  border: none;
+}
+
+.projects-grid .project-card.glass::before,
+.timeline .timeline-card.glass::before {
   opacity: 1;
   background: var(--card-bg);
 }
@@ -1246,6 +1265,8 @@ body {
   gap: 14px;
   /* Use auto-fit so the last row expands to fill and avoids a squeezed right edge */
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  /* Prevent items from stretching to tallest in the row (can distort middles) */
+  align-items: start;
 }
 
 /* Portrait layout: keep Languages, Clock, Links on one row below profile */
@@ -1276,7 +1297,13 @@ body {
   isolation: isolate;
   /* Allow content to shrink within grid tracks; prevents right-edge overflow on some ratios */
   min-width: 0;
+  /* Keep internal rows sized by content to avoid odd compression in some viewports */
+  grid-auto-rows: max-content;
+  align-content: start;
 }
+
+/* Ensure inner blocks can shrink without forcing the card width */
+.project-card > * { min-width: 0; }
 
 .project-card:active {
   transform: none;
