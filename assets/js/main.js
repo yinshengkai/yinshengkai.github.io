@@ -230,31 +230,109 @@ function renderProjects(projects = []) {
   });
 }
 
-// Render experience timeline
-const expEl = $("#experience-timeline");
-function renderExperience(experience = []) {
-  experience.forEach((e) => {
-    const item = document.createElement("div");
-    item.className = "timeline-item reveal";
-    const card = document.createElement("div");
-    card.className = "timeline-card glass";
-    const logo = document.createElement("div"); logo.className = "logo-badge"; logo.textContent = (e.logo && e.logo.text) || initials(e.org);
-    if (e.logo && e.logo.bg) logo.style.background = e.logo.bg;
-    if (e.logo && e.logo.color) card.style.setProperty('--logo-color', e.logo.color);
-    const wrap = document.createElement("div");
-    const role = document.createElement("p"); role.className = "timeline-role"; role.textContent = `${e.role}`;
-    const org = document.createElement("p"); org.className = "timeline-org"; org.textContent = `${e.org}`;
-    const note = document.createElement("p"); note.className = "timeline-note"; note.textContent = `${e.details}`;
-    // ongoing highlight
-    if (/present/i.test(e.period)) {
-      card.classList.add('ongoing');
-      const pill = document.createElement('span'); pill.className = 'chip ongoing'; pill.textContent = 'Ongoing';
-      role.appendChild(pill);
-    }
-    wrap.append(role, org, note);
-    const date = createDateBadge(e.period, (e.logo && e.logo.color));
-    card.append(logo, wrap, date); item.append(card); expEl.append(item);
-    reveal(item);
+// Logos scroller: load image filenames from assets/logos/manifest.json and build infinite track
+// Remove near-white background and trim transparent padding; returns when done
+function normalizeLogo(img) {
+  return new Promise((resolve) => {
+    try {
+      const w = img.naturalWidth || img.width || 0;
+      const h = img.naturalHeight || img.height || 0;
+      if (!w || !h) { resolve(); return; }
+      const max = 800;
+      const scale = Math.min(1, max / Math.max(w, h));
+      const cw = Math.max(1, Math.round(w * scale));
+      const ch = Math.max(1, Math.round(h * scale));
+      const c = document.createElement('canvas'); c.width = cw; c.height = ch;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0, cw, ch);
+      let data = ctx.getImageData(0, 0, cw, ch);
+      const a = data.data;
+      const idx = (x, y) => (y * cw + x) * 4;
+      const corners = [idx(0,0), idx(cw-1,0), idx(0,ch-1), idx(cw-1,ch-1)];
+      const whiteish = (i) => a[i] > 240 && a[i+1] > 240 && a[i+2] > 240 && a[i+3] > 200;
+      const hasWhiteBG = corners.some(i => whiteish(i));
+      if (hasWhiteBG) {
+        for (let i = 0; i < a.length; i += 4) {
+          if (a[i] > 240 && a[i+1] > 240 && a[i+2] > 240) a[i+3] = 0; // make white transparent
+        }
+      }
+      // Find tight bounds of non-transparent pixels
+      let minX = cw, minY = ch, maxX = 0, maxY = 0;
+      for (let y = 0; y < ch; y++) {
+        for (let x = 0; x < cw; x++) {
+          const alpha = a[idx(x,y) + 3];
+          if (alpha > 10) {
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
+        }
+      }
+      if (minX <= maxX && minY <= maxY) {
+        const w2 = maxX - minX + 1, h2 = maxY - minY + 1;
+        const c2 = document.createElement('canvas'); c2.width = w2; c2.height = h2;
+        const ctx2 = c2.getContext('2d');
+        // put updated data back then crop-draw
+        ctx.putImageData(data, 0, 0);
+        ctx2.drawImage(c, minX, minY, w2, h2, 0, 0, w2, h2);
+        img.src = c2.toDataURL('image/png');
+      }
+    } catch {}
+    resolve();
+  });
+}
+
+async function renderLogos() {
+  const track = document.getElementById('logos-track');
+  if (!track) return;
+  let files = [];
+  try {
+    // Expecting an array like: ["company1.svg", "company2.png", ...]
+    const res = await fetch('assets/logos/manifest.json');
+    if (!res.ok) throw new Error('No logos manifest');
+    files = await res.json();
+  } catch {
+    // If no manifest present, quietly skip
+    return;
+  }
+  const makeImgs = () => files.map(fn => {
+    const wrap = document.createElement('div');
+    wrap.className = 'logo';
+    const img = document.createElement('img');
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.src = `assets/logos/${fn}`;
+    const base = String(fn).split('/').pop() || '';
+    img.alt = base.replace(/[-_]/g, ' ').replace(/\.[a-zA-Z0-9]+$/, '').trim() || 'Company logo';
+    wrap.appendChild(img);
+    return wrap;
+  });
+  // Two copies for seamless loop
+  const seqA = makeImgs();
+  const seqB = makeImgs();
+  seqA.forEach(el => track.appendChild(el));
+  seqB.forEach(el => track.appendChild(el));
+  // Compute half-width and set animation distance/duration after images are ready
+  const imgs = Array.from(track.querySelectorAll('img'));
+  const whenReady = Promise.all(imgs.map(img => {
+    if (img.decode) return img.decode().catch(() => {});
+    return new Promise(res => { if (img.complete) res(); else img.onload = () => res(); });
+  }));
+  whenReady.then(async () => {
+    // Normalize each image: remove white BG and trim padding
+    await Promise.all(imgs.map(normalizeLogo));
+    // Total width is two sequences; half is one sequence length
+    const half = Math.max(1, Math.round(track.scrollWidth / 2));
+    track.style.setProperty('--logos-w', half + 'px');
+    // Duration roughly proportional to distance for consistent speed
+    const pxPerSec = 60; // adjust for desired speed
+    const dur = Math.max(18, Math.round(half / pxPerSec));
+    track.style.setProperty('--logos-dur', dur + 's');
+    // Nudge to kick off hardware acceleration
+    track.style.transform = 'translate3d(0,0,0)';
+  }).finally(() => {
+    reveal(track.closest('.reveal'));
   });
 }
 
@@ -282,14 +360,13 @@ function renderEducation(education = []) {
 // Kick off loading and rendering of modular data
 (async function initData() {
   try {
-    const [projects, experience, education] = await Promise.all([
+    const [projects, education] = await Promise.all([
       loadJSON('assets/data/projects.json'),
-      loadJSON('assets/data/experience.json'),
       loadJSON('assets/data/education.json'),
     ]);
     renderProjects(projects);
-    renderExperience(experience);
     renderEducation(education);
+    renderLogos();
   } catch (err) {
     console.error('Failed to load data files:', err);
   }
@@ -707,14 +784,13 @@ document.addEventListener("visibilitychange", () => {
 // Nav active section highlight
 const navMap = new Map([
   ['#profile-card', document.querySelector('.shortcut-link[href="#profile-card"]')],
-  ['#experience', document.querySelector('.shortcut-link[href="#experience"]')],
   ['#projects', document.querySelector('.shortcut-link[href="#projects"]')],
   ['#education', document.querySelector('.shortcut-link[href="#education"]')],
 ]);
 function setActiveNav(sel) {
   navMap.forEach((link, key) => { if (link) link.classList.toggle('active', key === sel); });
 }
-const navSections = ['#profile-card', '#experience', '#projects', '#education'];
+const navSections = ['#profile-card', '#projects', '#education'];
 // IntersectionObserver-based scrollspy with click lock until scroll idle
 let navLockActive = false;
 let navIdleTimer = 0;
@@ -856,6 +932,31 @@ revealCheckAll();
 })();
 
  
+
+// Singapore clock tile
+(function initSGClock() {
+  const el = document.getElementById('sg-clock');
+  if (!el) return;
+  const hh = el.querySelector('.hh');
+  const mm = el.querySelector('.mm');
+  const colon = el.querySelector('.colon');
+  let fmt;
+  try {
+    fmt = new Intl.DateTimeFormat('en-SG', { timeZone: 'Asia/Singapore', hour12: false, hour: '2-digit', minute: '2-digit' });
+  } catch { return; }
+  const tick = () => {
+    try {
+      const parts = fmt.formatToParts(new Date());
+      const h = parts.find(p => p.type === 'hour')?.value || '--';
+      const m = parts.find(p => p.type === 'minute')?.value || '--';
+      if (hh) hh.textContent = h;
+      if (mm) mm.textContent = m;
+      // Blinking handled via CSS; no JS opacity changes
+    } catch {}
+  };
+  tick();
+  setInterval(tick, 1000);
+})();
 
 // Utility: initials from org
 function initials(name = '') {

@@ -33,11 +33,6 @@
               d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5m0 2c-4.36 0-8 2.24-8 5v1h16v-1c0-2.76-3.64-5-8-5" />
           </svg>
         </a>
-        <a class="shortcut-link icon" href="#experience" aria-label="Experience" title="Experience">
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-            <path fill="currentColor" d="M14 6V4h-4v2H3v14h18V6zm-6 0h8v2H8zm-3 4h14v8H5z" />
-          </svg>
-        </a>
         <a class="shortcut-link icon" href="#projects" aria-label="Projects" title="Projects">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
             <path fill="currentColor" d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 8v-8h8v8z" />
@@ -55,32 +50,34 @@
   <div class="bg-image" aria-hidden="true"></div>
 
   <header class="site-header container">
-    <div class="profile glass reveal" id="profile-card">
-      <div class="avatar">
-        <img class="avatar-img" src="assets/images/avatar.jpg" alt="Profile avatar" />
-        <div class="avatar-name" id="site-title">Yin Shengkai</div>
+    <section id="profile-card" class="profile-grid">
+      <!-- Top row: greeting tile (left) and avatar (right) -->
+      <div class="tile tile-hero glass reveal">
+        <h1 class="hi">Hi, my name is Shengkai</h1>
+        <p class="bio">I design fast, scalable AI and simulation solutions with a strong focus on UI/UX.</p>
       </div>
-      <div class="profile-body" id="profile">
-        <div class="bio-box glass micro">
-          <p class="bio">I design fast, scalable AI and simulation solutions with a strong focus on UI/UX.</p>
-        </div>
-        <div class="profile-flair" aria-label="Languages">
-          <span class="chip flair" aria-label="Languages: English and Mandarin Chinese">
+      <div class="tile tile-avatar glass reveal">
+        <img class="tile-avatar-img" src="assets/images/avatar.jpg" alt="Portrait of Yin Shengkai" />
+      </div>
+
+      <!-- Removed companies grid; logos scroller added below header -->
+
+      <!-- Languages tile -->
+      <div class="tile tile-langs glass reveal" aria-label="Languages I speak">
+        <div class="langs">
+          <span class="chip flair" aria-label="English">
             <svg class="flag-svg gb" viewBox="0 0 28 20" width="18" height="13" aria-hidden="true" focusable="false">
               <rect width="28" height="20" fill="#012169" />
-              <!-- White diagonals -->
               <path d="M-2,-1 L30,21 M30,-1 L-2,21" stroke="#FFFFFF" stroke-width="6" />
-              <!-- Red diagonals -->
               <path d="M-2,-1 L30,21 M30,-1 L-2,21" stroke="#C8102E" stroke-width="3" />
-              <!-- White cross -->
               <rect x="12" y="0" width="4" height="20" fill="#FFFFFF" />
               <rect x="0" y="8" width="28" height="4" fill="#FFFFFF" />
-              <!-- Red cross -->
               <rect x="13" y="0" width="2" height="20" fill="#C8102E" />
               <rect x="0" y="9" width="28" height="2" fill="#C8102E" />
             </svg>
             English
-            <span class="sep">•</span>
+          </span>
+          <span class="chip flair" aria-label="Mandarin Chinese">
             <svg class="flag-svg cn" viewBox="0 0 28 20" width="18" height="13" aria-hidden="true" focusable="false">
               <rect width="28" height="20" fill="#DE2910" />
               <g transform="translate(6,5) scale(1.2)">
@@ -105,37 +102,51 @@
             中文
           </span>
         </div>
+      </div>
+
+      <!-- Clock tile -->
+      <div class="tile tile-clock glass reveal" aria-live="polite">
+        <div class="clock" id="sg-clock" aria-label="Current time in Singapore">
+          <div class="clock-time"><span class="hh">--</span><span class="colon">:</span><span class="mm">--</span></div>
+          <div class="clock-tz">GMT +8:00</div>
+        </div>
+      </div>
+
+      <!-- Links tile -->
+      <div class="tile tile-links glass reveal">
         <div class="links">
-          <a class="icon-link" aria-label="Email" href="mailto:yinshengkai98@gmail.com" title="Email">
+          <a class="icon-link wide" aria-label="Email" href="mailto:yinshengkai98@gmail.com" title="Email">
             <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-              <path fill="currentColor"
-                d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 4-8 5L4 8V6l8 5 8-5z" />
+              <path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 4-8 5L4 8V6l8 5 8-5z" />
             </svg>
+            <span class="label">Email</span>
           </a>
-          <a class="icon-link" aria-label="GitHub" href="https://github.com/yinshengkai" title="GitHub">
+          <a class="icon-link wide" aria-label="GitHub" href="https://github.com/yinshengkai" title="GitHub">
             <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-              <path fill="currentColor"
-                d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.17-3.37-1.17-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.52 1.02 1.52 1.02.9 1.52 2.36 1.08 2.94.83.09-.66.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.02-2.67-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.63.69 1.02 1.58 1.02 2.67 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.86v2.76c0 .27.18.58.69.48A10 10 0 0 0 12 2" />
+              <path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.17-3.37-1.17-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.52 1.02 1.52 1.02.9 1.52 2.36 1.08 2.94.83.09-.66.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.02-2.67-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.63.69 1.02 1.58 1.02 2.67 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.86v2.76c0 .27.18.58.69.48A10 10 0 0 0 12 2" />
             </svg>
+            <span class="label">GitHub</span>
           </a>
-          <a class="icon-link" aria-label="LinkedIn" href="https://www.linkedin.com/in/yinshengkai/" title="LinkedIn">
+          <a class="icon-link wide" aria-label="LinkedIn" href="https://www.linkedin.com/in/yinshengkai/" title="LinkedIn">
             <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-              <path fill="currentColor"
-                d="M19 3a2.94 2.94 0 0 1 3 3v12a2.94 2.94 0 0 1-3 3H5a2.94 2.94 0 0 1-3-3V6a2.94 2.94 0 0 1 3-3h14M8.34 18.34v-8H5.67v8h2.67m-1.33-9.09c.88 0 1.6-.73 1.6-1.61s-.72-1.61-1.6-1.61-1.6.73-1.6 1.61.72 1.61 1.6 1.61m12 9.09v-4.31c0-2.23-1.19-3.27-2.78-3.27-1.28 0-1.85.71-2.18 1.21v-1.04h-2.66c.04.69 0 8 0 8h2.66v-4.47c0-.24.02-.48.09-.65.19-.48.63-.98 1.37-.98.97 0 1.36.74 1.36 1.83v4.27z" />
+              <path fill="currentColor" d="M19 3a2.94 2.94 0 0 1 3 3v12a2.94 2.94 0 0 1-3 3H5a2.94 2.94 0 0 1-3-3V6a2.94 2.94 0 0 1 3-3h14M8.34 18.34v-8H5.67v8h2.67m-1.33-9.09c.88 0 1.6-.73 1.6-1.61s-.72-1.61-1.6-1.61-1.6.73-1.6 1.61.72 1.61 1.6 1.61m12 9.09v-4.31c0-2.23-1.19-3.27-2.78-3.27-1.28 0-1.85.71-2.18 1.21v-1.04h-2.66c.04.69 0 8 0 8h2.66v-4.47c0-.24.02-.48.09-.65.19-.48.63-.98 1.37-.98.97 0 1.36.74 1.36 1.83v4.27z" />
             </svg>
+            <span class="label">LinkedIn</span>
           </a>
         </div>
       </div>
-    </div>
+    </section>
   </header>
 
+  <!-- Infinite logos scroller (outside profile grid to keep it two-row) -->
+  <section class="container reveal" id="logos-section" aria-label="Companies I've worked with">
+    <div class="logos-scroller">
+      <div class="logos-track" id="logos-track" aria-live="polite"></div>
+    </div>
+  </section>
+
   <main>
-    <section id="experience" class="container section reveal">
-      <div class="section-head reveal">
-        <h2 class="section-title">Experience</h2>
-      </div>
-      <div class="timeline" id="experience-timeline" aria-live="polite"></div>
-    </section>
+    <!-- Experience merged into profile grid above -->
 
     <section id="projects" class="container section reveal">
       <div class="section-head reveal">
