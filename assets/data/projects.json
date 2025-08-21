@@ -27,7 +27,7 @@
     "description": "skQuant is a config‑driven, end‑to‑end backtesting framework that runs your pipeline from data preparation and feature engineering to time‑aware validation and budgeted optimization, then produces an interactive report with reproducible artifacts. It enforces bias control with time‑aligned features and strict out‑of‑sample evaluation, accounts for transaction costs and slippage, and scales efficiently with parallel, hardware‑aware execution and smart caching."
   },
   {
-    "id": "vulkan-engine",
+    "id": "hehe-engine",
     "title": "heheEngine 3D",
     "period": {
       "start": "2023-09",
