@@ -1107,6 +1107,11 @@ body {
   color: #fff;
   opacity: 0.98;
   font-size: clamp(14px, 1.6vw, 17px);
+  /* Coder-style monospaced stack with common fallbacks */
+  font-family: ui-monospace, "JetBrains Mono", "Fira Code", "SFMono-Regular", Menlo, Monaco, Consolas, "Source Code Pro", "Liberation Mono", "Courier New", monospace;
+  /* Enable stylistic ligatures if the font supports them */
+  font-variant-ligatures: contextual common-ligatures discretionary-ligatures;
+  letter-spacing: 0.1px;
   font-weight: 400;
   max-width: 60ch;
   text-align: justify;
