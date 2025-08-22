@@ -93,22 +93,202 @@ async function loadJSON(url) {
   items.forEach(({ sel, speed, start }) => {
     const el = document.querySelector(sel);
     if (!el) return;
-    const full = el.textContent || '';
-    // Lock height to avoid layout jump
-    const h = el.getBoundingClientRect().height;
+    // Preserve author-inserted <br> as newlines for the ticker
+    const html = el.innerHTML || '';
+    const full = html
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<[^>]*>/g, '') // strip any other tags just in case
+      ;
+    // Determine where to inject the Singapore flag (immediately after the word "Singapore")
+    const word = 'Singapore';
+    const sgIdx = full.indexOf(word);
+    const insertAfter = sgIdx >= 0 ? sgIdx + word.length : -1;
+    // Pre-measure final height by constructing the exact typed DOM (per-character spans + flag)
+    const makeFlagSVG = () => {
+      const ns = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(ns, 'svg');
+      svg.setAttribute('class', 'flag-svg sg');
+      svg.setAttribute('viewBox', '0 0 28 20');
+      svg.setAttribute('width', '18');
+      svg.setAttribute('height', '13');
+      svg.setAttribute('aria-hidden', 'true');
+      svg.setAttribute('focusable', 'false');
+      const top = document.createElementNS(ns, 'rect');
+      top.setAttribute('width', '28');
+      top.setAttribute('height', '10');
+      top.setAttribute('fill', '#EF3340');
+      const bottom = document.createElementNS(ns, 'rect');
+      bottom.setAttribute('y', '10');
+      bottom.setAttribute('width', '28');
+      bottom.setAttribute('height', '10');
+      bottom.setAttribute('fill', '#FFFFFF');
+      const crescentOuter = document.createElementNS(ns, 'circle');
+      crescentOuter.setAttribute('cx', '7.5');
+      crescentOuter.setAttribute('cy', '5');
+      crescentOuter.setAttribute('r', '4');
+      crescentOuter.setAttribute('fill', '#FFFFFF');
+      const crescentInner = document.createElementNS(ns, 'circle');
+      crescentInner.setAttribute('cx', '9');
+      crescentInner.setAttribute('cy', '5');
+      crescentInner.setAttribute('r', '3');
+      crescentInner.setAttribute('fill', '#EF3340');
+      const starGroup = document.createElementNS(ns, 'g');
+      starGroup.setAttribute('fill', '#FFFFFF');
+      const starPoints = '0,-2 0.59,-0.59 2,-0.59 0.95,0.36 1.4,2 0,1.1 -1.4,2 -0.95,0.36 -2,-0.59 -0.59,-0.59';
+      const starPositions = [
+        [11.5, 3.2, 0.7],
+        [13.6, 4.7, 0.7],
+        [13.0, 2.0, 0.7],
+        [11.5, 6.0, 0.7],
+        [10.2, 4.0, 0.7],
+      ];
+      starPositions.forEach(([tx, ty, s]) => {
+        const g = document.createElementNS(ns, 'g');
+        g.setAttribute('transform', `translate(${tx},${ty}) scale(${s})`);
+        const poly = document.createElementNS(ns, 'polygon');
+        poly.setAttribute('points', starPoints);
+        g.appendChild(poly);
+        starGroup.appendChild(g);
+      });
+      svg.appendChild(top);
+      svg.appendChild(bottom);
+      svg.appendChild(crescentOuter);
+      svg.appendChild(crescentInner);
+      svg.appendChild(starGroup);
+      return svg;
+    };
+
+    const clone = el.cloneNode(false);
+    clone.removeAttribute('id');
+    const rect = el.getBoundingClientRect();
+    // Wrap in a context that applies .tile-hero .bio font-size rules
+    const ctx = document.createElement('div');
+    ctx.className = 'tile-hero';
+    // Ensure isolation and accurate width for line wrapping
+    ctx.style.position = 'absolute';
+    ctx.style.visibility = 'hidden';
+    ctx.style.pointerEvents = 'none';
+    ctx.style.width = rect.width + 'px';
+    // Also copy computed font size/line-height to avoid specificity pitfalls
+    try {
+      const cs = getComputedStyle(el);
+      clone.style.fontSize = cs.fontSize;
+      clone.style.lineHeight = cs.lineHeight;
+      clone.style.letterSpacing = cs.letterSpacing;
+    } catch {}
+    // Build the same structure as the final typed content
+    const frag = document.createDocumentFragment();
+    let idx = 0;
+    while (idx < full.length) {
+      if (insertAfter >= 0 && idx === insertAfter) {
+        const space = document.createElement('span');
+        space.className = 'bio-char';
+        space.textContent = ' ';
+        frag.appendChild(space);
+        frag.appendChild(makeFlagSVG());
+      }
+      const ch = full.charAt(idx++);
+      if (ch === '\n') {
+        frag.appendChild(document.createElement('br'));
+      } else {
+        const span = document.createElement('span');
+        span.className = 'bio-char';
+        span.textContent = ch;
+        frag.appendChild(span);
+      }
+    }
+    clone.appendChild(frag);
+    ctx.appendChild(clone);
+    document.body.appendChild(ctx);
+    const h = clone.getBoundingClientRect().height;
+    document.body.removeChild(ctx);
+    // Lock height to avoid layout jump; hold exact height during typing
     el.style.minHeight = h + 'px';
+    el.style.height = h + 'px';
     el.textContent = '';
     setTimeout(() => {
       let i = 0;
       const id = setInterval(() => {
         if (i >= full.length) {
           clearInterval(id);
-          el.style.minHeight = '';
+          // Release explicit height after finishing; minHeight keeps stability
+          el.style.height = '';
+          return;
+        }
+
+        // Inject space + flag right after the word 'Singapore' (before the following comma)
+        if (insertAfter >= 0 && i === insertAfter) {
+          // Insert a typed space to separate the word and the flag visually
+          const space = document.createElement('span');
+          space.className = 'bio-char';
+          space.textContent = ' ';
+          el.appendChild(space);
+
+          // Create a compact Singapore flag SVG with the same base styling
+          const ns = 'http://www.w3.org/2000/svg';
+          const svg = document.createElementNS(ns, 'svg');
+          svg.setAttribute('class', 'flag-svg sg');
+          svg.setAttribute('viewBox', '0 0 28 20');
+          svg.setAttribute('width', '18');
+          svg.setAttribute('height', '13');
+          svg.setAttribute('aria-hidden', 'true');
+          svg.setAttribute('focusable', 'false');
+          // Background halves: red (top), white (bottom)
+          const top = document.createElementNS(ns, 'rect');
+          top.setAttribute('width', '28');
+          top.setAttribute('height', '10');
+          top.setAttribute('fill', '#EF3340');
+          const bottom = document.createElementNS(ns, 'rect');
+          bottom.setAttribute('y', '10');
+          bottom.setAttribute('width', '28');
+          bottom.setAttribute('height', '10');
+          bottom.setAttribute('fill', '#FFFFFF');
+          // Crescent
+          const crescentOuter = document.createElementNS(ns, 'circle');
+          crescentOuter.setAttribute('cx', '7.5');
+          crescentOuter.setAttribute('cy', '5');
+          crescentOuter.setAttribute('r', '4');
+          crescentOuter.setAttribute('fill', '#FFFFFF');
+          const crescentInner = document.createElementNS(ns, 'circle');
+          crescentInner.setAttribute('cx', '9');
+          crescentInner.setAttribute('cy', '5');
+          crescentInner.setAttribute('r', '3');
+          crescentInner.setAttribute('fill', '#EF3340');
+          // Five stars (small 5-pointed)
+          const starGroup = document.createElementNS(ns, 'g');
+          starGroup.setAttribute('fill', '#FFFFFF');
+          const starPoints = '0,-2 0.59,-0.59 2, -0.59 0.95,0.36 1.4,2 0,1.1 -1.4,2 -0.95,0.36 -2,-0.59 -0.59,-0.59';
+          const starPositions = [
+            [11.5, 3.2, 0.7],
+            [13.6, 4.7, 0.7],
+            [13.0, 2.0, 0.7],
+            [11.5, 6.0, 0.7],
+            [10.2, 4.0, 0.7],
+          ];
+          starPositions.forEach(([tx, ty, s]) => {
+            const g = document.createElementNS(ns, 'g');
+            g.setAttribute('transform', `translate(${tx},${ty}) scale(${s})`);
+            const poly = document.createElementNS(ns, 'polygon');
+            poly.setAttribute('points', starPoints);
+            g.appendChild(poly);
+            starGroup.appendChild(g);
+          });
+          svg.appendChild(top);
+          svg.appendChild(bottom);
+          svg.appendChild(crescentOuter);
+          svg.appendChild(crescentInner);
+          svg.appendChild(starGroup);
+          el.appendChild(svg);
+        }
+
+        const ch = full.charAt(i++);
+        if (ch === '\n') {
+          el.appendChild(document.createElement('br'));
           return;
         }
         const span = document.createElement('span');
         span.className = 'bio-char';
-        span.textContent = full.charAt(i++);
+        span.textContent = ch;
         el.appendChild(span);
       }, speed);
     }, start);

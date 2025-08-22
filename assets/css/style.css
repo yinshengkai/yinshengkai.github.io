@@ -1114,11 +1114,18 @@ body {
   letter-spacing: 0.1px;
   font-weight: 400;
   max-width: 60ch;
-  text-align: justify;
-  text-justify: inter-word;
-  hyphens: auto;
+  text-align: left;
   transition: filter var(--speed);
   will-change: filter;
+}
+
+/* Thin divider below greeting */
+.tile-hero .hi-sep {
+  height: 1px;
+  background: var(--border);
+  opacity: 0.55;
+  margin: 6px 0 10px;
+  border-radius: 1px;
 }
 
 /* removed unused bio-box styles */
